@@ -26,7 +26,7 @@
                 x:Name="PickFile"
                 Text="Pick File"
                 SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="OnCounterClicked"
+                Clicked="PickFileClicked"
                 HorizontalOptions="Center" />
 
             <Button
@@ -74,11 +74,17 @@
                 Text="Assets Maturing Soon"
                 SemanticProperties.Hint="Counts the number of times you click"
                 Clicked="AssetsMaturingSoon_Clicked"
-                HorizontalOptions="Center" />
+                HorizontalOptions="Center"
+                IsVisible="false" /> <!-- button is hidden -->
+
+            <Label Text="Matured/Maturing Soon" 
+             TextColor="Blue" 
+             FontAttributes="Bold" 
+             FontSize="25"/>    
 
             <CollectionView ItemsSource="{Binding AssetDetails}">
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:Assets">
+                    <DataTemplate x:DataType="models:MaturingAssets">
                         <SwipeView>
                             <SwipeView.LeftItems>
                                 <SwipeItems>
@@ -103,11 +109,13 @@
                             </SwipeView.LeftItems>
                             <Frame Margin="10" Padding="10">
                                 <VerticalStackLayout>
-                                    <HorizontalStackLayout Spacing="10">
+                                    <!--<HorizontalStackLayout Spacing="10">
                                         <Label Text="{Binding InvestmentEntity}" FontSize="18" FontAttributes="Bold" />
                                         <Label Text="{Binding MaturityDate}" FontSize="18" FontAttributes="Bold" />
-                                    </HorizontalStackLayout>
-                                    <Label Text="{Binding Amount}" />
+                                    </HorizontalStackLayout>-->
+                                    <Label Text="{Binding InvestmentEntity}" FontSize="18" FontAttributes="Bold" />
+                                    <Label Text="{Binding MaturityDate,StringFormat='{0:MMMM dd, yyyy}'}" FontSize="18" FontAttributes="Bold" />
+                                    <Label Text="{Binding Amount}" FontSize="15" />
                                 </VerticalStackLayout>
                                 <!--<Frame.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type viewModels:StudentListPageViewModel}},Path=DisplayActionCommand}"

@@ -1,4 +1,5 @@
 ﻿using AssetManagement.Models;
+using AssetManagement.ViewModels;
 using CommunityToolkit.Mvvm.Input;
 using ExcelDataReader;
 using Plugin.LocalNotification;
@@ -10,13 +11,22 @@ namespace AssetManagement;
 
 public partial class MainPage : ContentPage
 {
+    private AssetListPageViewModel _viewModel;
     private SQLiteAsyncConnection _dbConnection;
     public ObservableCollection<Assets> Assets { get; set; } = new ObservableCollection<Assets>();
 
-    public MainPage()
+    public MainPage(AssetListPageViewModel viewModel)
 	{
 		InitializeComponent();
-	}
+        _viewModel = viewModel;
+        this.BindingContext = _viewModel;
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        _viewModel.GetAssetsList();
+    }
 
     private async Task SetUpDb()
     {

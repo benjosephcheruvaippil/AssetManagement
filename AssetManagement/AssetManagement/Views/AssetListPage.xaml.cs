@@ -4,6 +4,7 @@ using ExcelDataReader;
 using Plugin.LocalNotification;
 using SQLite;
 using System.Data;
+using System.Globalization;
 
 namespace AssetManagement.Views;
 
@@ -34,8 +35,10 @@ public partial class AssetListPage : ContentPage
         }
     }
 
-    private async void OnCounterClicked(object sender, EventArgs e)
+    private async void PickFileClicked(object sender, EventArgs e)
     {
+        //PickFileClicked
+        //OnCounterClicked
         try
         {
             var result = await FilePicker.PickAsync(new PickOptions
@@ -105,6 +108,7 @@ public partial class AssetListPage : ContentPage
                 }
             }
             await DisplayAlert("Info", "File Processed Successfully", "OK");
+            _viewModel.GetAssetsList();
             //throw new NotImplementedException();
         }
         catch (Exception ex)
@@ -119,16 +123,16 @@ public partial class AssetListPage : ContentPage
         await SetUpDb();
         List<Assets> records = await _dbConnection.Table<Assets>().ToListAsync();
         decimal NetAssetValue = records.Sum(s => s.Amount);
-        string result = "Net Asset Value: Rs." + NetAssetValue;
+        string result = "Net Asset Value: Rs." + NetAssetValue.ToString("#,#.##", new CultureInfo(0x0439));
         lblNetAssetValue.Text = result;
 
         decimal BankAssets = records.Where(b => b.Type == "Bank").Sum(s => s.Amount);
         decimal NCDAssets = records.Where(b => b.Type == "NCD").Sum(s => s.Amount);
         decimal MLDAssets = records.Where(b => b.Type == "MLD").Sum(s => s.Amount);
 
-        lblBank.Text = "Bank Assets Value: Rs." + BankAssets;
-        lblNCD.Text = "NCD Assets Value: Rs." + NCDAssets;
-        lblMLD.Text = "MLD Assets Value: Rs." + MLDAssets;
+        lblBank.Text = "Bank Assets Value: Rs." + BankAssets.ToString("#,#.##", new CultureInfo(0x0439));
+        lblNCD.Text = "NCD Assets Value: Rs." + NCDAssets.ToString("#,#.##", new CultureInfo(0x0439));
+        lblMLD.Text = "MLD Assets Value: Rs." + MLDAssets.ToString("#,#.##", new CultureInfo(0x0439));
 
         decimal projectedAmount = 0;
         foreach (var item in records)
@@ -139,7 +143,7 @@ public partial class AssetListPage : ContentPage
 
             projectedAmount = projectedAmount + finalAmount;
         }
-        lblProjectedAssetValue.Text = "Projected Asset Value: Rs." + Math.Round(projectedAmount, 2);
+        lblProjectedAssetValue.Text = "Projected Asset Value: Rs." + Math.Round(projectedAmount, 2).ToString("#,#.##", new CultureInfo(0x0439)); ;
 
 
     }
