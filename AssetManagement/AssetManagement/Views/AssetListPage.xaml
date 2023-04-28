@@ -34,7 +34,8 @@
                 Text="Show Details"
                 SemanticProperties.Hint="Counts the number of times you click"
                 Clicked="ShowRecords_Clicked"
-                HorizontalOptions="Center" />
+                HorizontalOptions="Center" 
+                IsVisible="false" />
 
 
             <Label

@@ -23,6 +23,7 @@ public partial class AssetListPage : ContentPage
     {
         base.OnAppearing();
         _viewModel.GetAssetsList();
+        ShowPrimaryAssetDetails();
     }
 
     private async Task SetUpDb()
@@ -120,32 +121,8 @@ public partial class AssetListPage : ContentPage
 
     private async void ShowRecords_Clicked(object sender, EventArgs e)
     {
-        await SetUpDb();
-        List<Assets> records = await _dbConnection.Table<Assets>().ToListAsync();
-        decimal NetAssetValue = records.Sum(s => s.Amount);
-        string result = "Net Asset Value: Rs." + NetAssetValue.ToString("#,#.##", new CultureInfo(0x0439));
-        lblNetAssetValue.Text = result;
 
-        decimal BankAssets = records.Where(b => b.Type == "Bank").Sum(s => s.Amount);
-        decimal NCDAssets = records.Where(b => b.Type == "NCD").Sum(s => s.Amount);
-        decimal MLDAssets = records.Where(b => b.Type == "MLD").Sum(s => s.Amount);
-
-        lblBank.Text = "Bank Assets Value: Rs." + BankAssets.ToString("#,#.##", new CultureInfo(0x0439));
-        lblNCD.Text = "NCD Assets Value: Rs." + NCDAssets.ToString("#,#.##", new CultureInfo(0x0439));
-        lblMLD.Text = "MLD Assets Value: Rs." + MLDAssets.ToString("#,#.##", new CultureInfo(0x0439));
-
-        decimal projectedAmount = 0;
-        foreach (var item in records)
-        {
-            int daysTillMaturity = (item.MaturityDate - item.StartDate).Days;
-            decimal totalInterest = (item.Amount * daysTillMaturity * item.InterestRate) / (365 * 100); //(P × d × R)/ (365 ×100)
-            decimal finalAmount = item.Amount + totalInterest;
-
-            projectedAmount = projectedAmount + finalAmount;
-        }
-        lblProjectedAssetValue.Text = "Projected Asset Value: Rs." + Math.Round(projectedAmount, 2).ToString("#,#.##", new CultureInfo(0x0439)); ;
-
-
+        await ShowPrimaryAssetDetails();
     }
 
     private async void AssetsMaturingSoon_Clicked(object sender, EventArgs e)
@@ -179,5 +156,34 @@ public partial class AssetListPage : ContentPage
         }
 
         //GetAssetsList();
+    }
+
+    public async Task ShowPrimaryAssetDetails()
+    {
+        await SetUpDb();
+        List<Assets> records = await _dbConnection.Table<Assets>().ToListAsync();
+        decimal NetAssetValue = records.Sum(s => s.Amount);
+        string result = "Net Asset Value: Rs." + NetAssetValue.ToString("#,#.##", new CultureInfo(0x0439));
+        lblNetAssetValue.Text = result;
+
+        decimal BankAssets = records.Where(b => b.Type == "Bank").Sum(s => s.Amount);
+        decimal NCDAssets = records.Where(b => b.Type == "NCD").Sum(s => s.Amount);
+        decimal MLDAssets = records.Where(b => b.Type == "MLD").Sum(s => s.Amount);
+
+        lblBank.Text = "Bank Assets Value: Rs." + BankAssets.ToString("#,#.##", new CultureInfo(0x0439));
+        lblNCD.Text = "NCD Assets Value: Rs." + NCDAssets.ToString("#,#.##", new CultureInfo(0x0439));
+        lblMLD.Text = "MLD Assets Value: Rs." + MLDAssets.ToString("#,#.##", new CultureInfo(0x0439));
+
+        decimal projectedAmount = 0;
+        foreach (var item in records)
+        {
+            int daysTillMaturity = (item.MaturityDate - item.StartDate).Days;
+            decimal totalInterest = (item.Amount * daysTillMaturity * item.InterestRate) / (365 * 100); //(P × d × R)/ (365 ×100)
+            decimal finalAmount = item.Amount + totalInterest;
+
+            projectedAmount = projectedAmount + finalAmount;
+        }
+        lblProjectedAssetValue.Text = "Projected Asset Value: Rs." + Math.Round(projectedAmount, 2).ToString("#,#.##", new CultureInfo(0x0439)); ;
+
     }
 }
