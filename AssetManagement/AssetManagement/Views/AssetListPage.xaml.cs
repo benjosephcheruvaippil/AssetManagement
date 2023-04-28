@@ -19,11 +19,11 @@ public partial class AssetListPage : ContentPage
 		this.BindingContext= _viewModel;
 	}
 
-    protected override void OnAppearing()
+    protected async override void OnAppearing()
     {
         base.OnAppearing();
         _viewModel.GetAssetsList();
-        ShowPrimaryAssetDetails();
+        await ShowPrimaryAssetDetails();
     }
 
     private async Task SetUpDb()

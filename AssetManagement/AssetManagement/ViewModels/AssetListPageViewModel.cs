@@ -37,19 +37,14 @@ namespace AssetManagement.ViewModels
                                                        Amount = Convert.ToString(rec.Amount),
                                                        MaturityDate = rec.MaturityDate
                                                    }).OrderBy(o => o.MaturityDate).ToList();
-            //var studentList = await _studentService.GetStudentList();
             if (assetsMaturingIn10Days?.Count > 0)
             {
-                //assetsMaturingIn10Days = assetsMaturingIn10Days.OrderBy(f => f.FullName).ToList();
                 foreach (var asset in assetsMaturingIn10Days)
                 {
-                    //asset.Amount("#,#.##", new CultureInfo(0x0439));
                     decimal amount = Convert.ToDecimal(asset.Amount);
                     asset.Amount=amount.ToString("#,#.##", new CultureInfo(0x0439));
                     AssetDetails.Add(asset);
                 }
-                //StudentsListForSearch.Clear();
-                //StudentsListForSearch.AddRange(studentList);
             }
         }
     }
