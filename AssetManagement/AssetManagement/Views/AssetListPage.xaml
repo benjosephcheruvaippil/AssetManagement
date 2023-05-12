@@ -58,6 +58,41 @@
                 HorizontalOptions="Center" />
 
             <Label
+                x:Name="lblInsuranceMF"
+                Text=""
+                SemanticProperties.HeadingLevel="Level1"
+                FontSize="16"
+                HorizontalOptions="Center" />
+
+            <Label
+                x:Name="lblPPF"
+                Text=""
+                SemanticProperties.HeadingLevel="Level1"
+                FontSize="16"
+                HorizontalOptions="Center" />
+
+            <Label
+                x:Name="lblEPF"
+                Text=""
+                SemanticProperties.HeadingLevel="Level1"
+                FontSize="16"
+                HorizontalOptions="Center" />
+            
+            <Label
+                x:Name="lblMF"
+                Text=""
+                SemanticProperties.HeadingLevel="Level1"
+                FontSize="16"
+                HorizontalOptions="Center" />
+
+            <Label
+                x:Name="lblStocks"
+                Text=""
+                SemanticProperties.HeadingLevel="Level1"
+                FontSize="16"
+                HorizontalOptions="Center" />
+
+            <Label
                 x:Name="lblNetAssetValue"
                 Text=""
                 SemanticProperties.HeadingLevel="Level1"

@@ -73,10 +73,11 @@ public partial class AssetListPage : ContentPage
                     string Holder = Convert.ToString(dtStudentRecords.Rows[i][6]);
                     DateTime StartDate;
                     DateTime MaturityDate;
+                    DateTime AsOfDate;
                     if (dtStudentRecords.Rows[i][7] is DBNull)
                     {
                         //set as current date
-                        StartDate = DateTime.MinValue;
+                        StartDate = Convert.ToDateTime("01-01-0001");
                     }
                     else
                     {
@@ -91,6 +92,15 @@ public partial class AssetListPage : ContentPage
                         MaturityDate = Convert.ToDateTime(dtStudentRecords.Rows[i][8]);
                     }
                     string Remarks = Convert.ToString(dtStudentRecords.Rows[i][9]);
+
+                    if (dtStudentRecords.Rows[i][10] is DBNull)
+                    {
+                        AsOfDate = Convert.ToDateTime("01-01-0001");
+                    }
+                    else
+                    {
+                        AsOfDate = Convert.ToDateTime(dtStudentRecords.Rows[i][10]);
+                    }
 
                     var assets = new Assets
                     {
@@ -110,6 +120,7 @@ public partial class AssetListPage : ContentPage
             }
             await DisplayAlert("Info", "File Processed Successfully", "OK");
             _viewModel.GetAssetsList();
+            await ShowPrimaryAssetDetails();
             //throw new NotImplementedException();
         }
         catch (Exception ex)
@@ -127,33 +138,33 @@ public partial class AssetListPage : ContentPage
 
     private async void AssetsMaturingSoon_Clicked(object sender, EventArgs e)
     {
-        await SetUpDb();
-        List<Assets> records = await _dbConnection.Table<Assets>().ToListAsync();
-        List<Assets> assetsMaturingIn10Days = (from rec in records
-                                               where (rec.MaturityDate < DateTime.Now.AddDays(60))
-                                               select new Assets
-                                               {
-                                                   InvestmentEntity = rec.InvestmentEntity,
-                                                   Amount = rec.Amount,
-                                                   MaturityDate = rec.MaturityDate
-                                               }).ToList();
-        foreach (var asset in assetsMaturingIn10Days)
-        {
-            var request = new NotificationRequest
-            {
-                NotificationId = 1000,
-                Title = asset.InvestmentEntity,
-                Subtitle = Convert.ToString(asset.MaturityDate),
-                Description = Convert.ToString(asset.Amount),
-                BadgeNumber = 42,
-                Schedule = new NotificationRequestSchedule
-                {
-                    NotifyTime = DateTime.Now.AddSeconds(5),
-                    NotifyRepeatInterval = TimeSpan.FromDays(1)
-                }
-            };
-            await LocalNotificationCenter.Current.Show(request);
-        }
+        //await SetUpDb();
+        //List<Assets> records = await _dbConnection.Table<Assets>().ToListAsync();
+        //List<Assets> assetsMaturingIn10Days = (from rec in records
+        //                                       where (rec.MaturityDate < DateTime.Now.AddDays(60))
+        //                                       select new Assets
+        //                                       {
+        //                                           InvestmentEntity = rec.InvestmentEntity,
+        //                                           Amount = rec.Amount,
+        //                                           MaturityDate = rec.MaturityDate
+        //                                       }).ToList();
+        //foreach (var asset in assetsMaturingIn10Days)
+        //{
+        //    var request = new NotificationRequest
+        //    {
+        //        NotificationId = 1000,
+        //        Title = asset.InvestmentEntity,
+        //        Subtitle = Convert.ToString(asset.MaturityDate),
+        //        Description = Convert.ToString(asset.Amount),
+        //        BadgeNumber = 42,
+        //        Schedule = new NotificationRequestSchedule
+        //        {
+        //            NotifyTime = DateTime.Now.AddSeconds(5),
+        //            NotifyRepeatInterval = TimeSpan.FromDays(1)
+        //        }
+        //    };
+        //    await LocalNotificationCenter.Current.Show(request);
+        //}
 
         //GetAssetsList();
     }
@@ -170,18 +181,37 @@ public partial class AssetListPage : ContentPage
         decimal NCDAssets = records.Where(b => b.Type == "NCD").Sum(s => s.Amount);
         decimal MLDAssets = records.Where(b => b.Type == "MLD").Sum(s => s.Amount);
 
+        decimal Insurance_MF = records.Where(b => b.Type == "Insurance_MF").Sum(s => s.Amount);
+        decimal PPF = records.Where(b => b.Type == "PPF").Sum(s => s.Amount);
+        decimal EPF = records.Where(b => b.Type == "EPF").Sum(s => s.Amount);
+        decimal MutualFunds = records.Where(b => b.Type == "MF").Sum(s => s.Amount);
+        decimal Stocks = records.Where(b => b.Type == "Stocks").Sum(s => s.Amount);
+
         lblBank.Text = "Bank Assets Value: Rs." + BankAssets.ToString("#,#.##", new CultureInfo(0x0439));
-        lblNCD.Text = "NCD Assets Value: Rs." + NCDAssets.ToString("#,#.##", new CultureInfo(0x0439));
-        lblMLD.Text = "MLD Assets Value: Rs." + MLDAssets.ToString("#,#.##", new CultureInfo(0x0439));
+        lblNCD.Text = "Non Convertible Debentures: Rs." + NCDAssets.ToString("#,#.##", new CultureInfo(0x0439));
+        lblMLD.Text = "Market Linked Debentures: Rs." + MLDAssets.ToString("#,#.##", new CultureInfo(0x0439));
+
+        lblInsuranceMF.Text = "Insurance/MF: Rs." + Insurance_MF.ToString("#,#.##", new CultureInfo(0x0439));
+        lblPPF.Text = "Public Provident Fund: Rs." + PPF.ToString("#,#.##", new CultureInfo(0x0439));
+        lblEPF.Text = "Employee Provident Fund: Rs." + EPF.ToString("#,#.##", new CultureInfo(0x0439));
+        lblMF.Text = "Mutual Funds: Rs." + MutualFunds.ToString("#,#.##", new CultureInfo(0x0439));
+        lblStocks.Text = "Stocks: Rs." + Stocks.ToString("#,#.##", new CultureInfo(0x0439));
 
         decimal projectedAmount = 0;
         foreach (var item in records)
         {
-            int daysTillMaturity = (item.MaturityDate - item.StartDate).Days;
-            decimal totalInterest = (item.Amount * daysTillMaturity * item.InterestRate) / (365 * 100); //(P × d × R)/ (365 ×100)
-            decimal finalAmount = item.Amount + totalInterest;
+            if (item.MaturityDate.ToShortDateString() != "01-01-0001") //debt instruments which have a maturity
+            {
+                int daysTillMaturity = (item.MaturityDate - item.StartDate).Days;
+                decimal totalInterest = (item.Amount * daysTillMaturity * item.InterestRate) / (365 * 100); //(P × d × R)/ (365 ×100)
+                decimal finalAmount = item.Amount + totalInterest;
 
-            projectedAmount = projectedAmount + finalAmount;
+                projectedAmount = projectedAmount + finalAmount;
+            }
+            else // assets that dont have maturity like stocks,mutual funds,gold etc
+            {
+                projectedAmount = projectedAmount + item.Amount;
+            }
         }
         lblProjectedAssetValue.Text = "Projected Asset Value: Rs." + Math.Round(projectedAmount, 2).ToString("#,#.##", new CultureInfo(0x0439)); ;
 

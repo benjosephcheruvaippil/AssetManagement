@@ -41,9 +41,12 @@ namespace AssetManagement.ViewModels
             {
                 foreach (var asset in assetsMaturingIn10Days)
                 {
-                    decimal amount = Convert.ToDecimal(asset.Amount);
-                    asset.Amount=amount.ToString("#,#.##", new CultureInfo(0x0439));
-                    AssetDetails.Add(asset);
+                    if (asset.MaturityDate.ToString("dd-MM-yyyy") != "01-01-0001")
+                    {
+                        decimal amount = Convert.ToDecimal(asset.Amount);
+                        asset.Amount = amount.ToString("#,#.##", new CultureInfo(0x0439));
+                        AssetDetails.Add(asset);
+                    }
                 }
             }
         }

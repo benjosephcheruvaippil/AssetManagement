@@ -20,5 +20,6 @@ namespace AssetManagement.Models
         public DateTime StartDate { get; set; }
         public DateTime MaturityDate { get; set; }
         public string Remarks { get; set; }
+        public DateTime AsOfDate { get; set; }
     }
 }
