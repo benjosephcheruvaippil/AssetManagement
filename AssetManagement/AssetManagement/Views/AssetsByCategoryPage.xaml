@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mopups:PopupPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:AssetManagement.Models"
+             xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
+             x:Class="AssetManagement.Views.AssetsByCategoryPage"
+             Title="AssetsByCategoryPage" BackgroundColor="#80000000" CloseWhenBackgroundIsClicked="True">
+    <ScrollView HorizontalOptions="Center" VerticalOptions="Center">
+        <Border WidthRequest="300" HeightRequest="450"
+                BackgroundColor="White"
+                HorizontalOptions="Center">
+            <VerticalStackLayout>
+                <!--<CollectionView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <SwipeView>
+                                <Frame>
+                                    <VerticalStackLayout>
+                                        --><!--<Label Text="{Binding InvestmentEntity}" FontSize="18" FontAttributes="Bold" />
+                                        <Label Text="{Binding MaturityDate,StringFormat='{0:MMMM dd, yyyy}'}" FontSize="18" FontAttributes="Bold" />
+                                        <Label Text="{Binding Amount}" FontSize="15" />--><!--
+                                        <Label Text="EntityName" FontSize="10" FontAttributes="Bold" />
+                                        <Label Text="TotalAmount" FontSize="10" FontAttributes="Bold" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </SwipeView>
+
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>-->
+                <!--<Entry
+                    x:Name="UsernameEntry"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Placeholder="Username" />
+
+                <Entry
+                    x:Name="PasswordEntry"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    IsPassword="True"
+                    Placeholder="Password" />-->
+
+                <!--<Button
+                    x:Name="LoginButton"
+                    Margin="10,5"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="EndAndExpand"
+                    Text="Login"
+                    Clicked="LoginButton_Clicked">
+                </Button>-->
+                <Label x:Name="lblFrom" Text="" FontSize="18" FontAttributes="Bold" />
+            </VerticalStackLayout>
+        </Border>
+
+    </ScrollView>
+</mopups:PopupPage>

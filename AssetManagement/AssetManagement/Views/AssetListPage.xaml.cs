@@ -1,6 +1,8 @@
 using AssetManagement.Models;
+using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using ExcelDataReader;
+using Mopups.Interfaces;
 using Plugin.LocalNotification;
 using SQLite;
 using System.Data;
@@ -12,12 +14,24 @@ public partial class AssetListPage : ContentPage
 {
     private AssetListPageViewModel _viewModel;
     private SQLiteAsyncConnection _dbConnection;
-    public AssetListPage(AssetListPageViewModel viewModel)
+    private IPopupNavigation _popupNavigation;
+    private readonly IAssetService _assetService;
+    public AssetListPage(AssetListPageViewModel viewModel, IPopupNavigation popupNavigation, IAssetService assetService)
 	{
 		InitializeComponent();
 		_viewModel = viewModel;
 		this.BindingContext= _viewModel;
-	}
+        _popupNavigation = popupNavigation;
+        _assetService = assetService;
+
+        //tap gesture added for different labels
+        var labelBank = new TapGestureRecognizer();
+        labelBank.Tapped += (s, e) =>
+        {
+            _popupNavigation.PushAsync(new AssetsByCategoryPage("from bank assets", _assetService));
+        };
+        lblBank.GestureRecognizers.Add(labelBank);
+    }
 
     protected async override void OnAppearing()
     {
@@ -215,5 +229,10 @@ public partial class AssetListPage : ContentPage
         }
         lblProjectedAssetValue.Text = "Projected Asset Value: Rs." + Math.Round(projectedAmount, 2).ToString("#,#.##", new CultureInfo(0x0439)); ;
 
+    }
+
+    private void Popup_Clicked(object sender, EventArgs e)
+    {
+        //_popupNavigation.PushAsync(new AssetsByCategoryPage(""));
     }
 }
