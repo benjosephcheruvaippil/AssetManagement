@@ -1,6 +1,9 @@
 using AssetManagement.Models;
 using AssetManagement.Services;
+using Microsoft.Maui.Controls.Shapes;
 using SQLite;
+using System.Drawing;
+using System.Globalization;
 
 namespace AssetManagement.Views;
 
@@ -39,14 +42,33 @@ public partial class AssetsByCategoryPage
 	{
         List<Assets> records = await _assetService.GetAssetsList();
         //var result = records.Select(s=>s.InvestmentEntity).Where(i => i.Type == "Bank").GroupBy(g=>g.InvestmentEntity).Sum(s => s.Amount);
-        var res = records
-            .Where(w => w.Type == "Bank")
+        
+        var investmentEntity = records
+            .Where(w => w.Type == _from)
             .GroupBy(g => g.InvestmentEntity)
             .Select(entity => new EntitywiseModel
             {
                 InvestmentEntity = entity.First().InvestmentEntity,
-                TotalAmount = entity.Sum(s => s.Amount).ToString()
+                TotalAmount = entity.Sum(s => s.Amount).ToString("#,#.##", new CultureInfo(0x0439))
             }).ToList();
-        lblFrom.Text = "Bank of India: " + res[0].TotalAmount;
+
+        foreach(var item in investmentEntity)
+        {
+            Label name = new Label();
+            name.Text = item.InvestmentEntity + " = Rs " + item.TotalAmount;
+            name.FontSize = 18;
+            name.FontAttributes = FontAttributes.Bold;
+            Line objLine = new Line
+            {
+                X1 = 1,
+                Y1 = 1,
+                X2 = 180,
+                Y2 = 1,
+                StrokeThickness = 3,
+                Stroke = SolidColorBrush.Red
+            };
+            stackLayout.Children.Add(name);
+            stackLayout.Children.Add(objLine);
+        }
     }
 }

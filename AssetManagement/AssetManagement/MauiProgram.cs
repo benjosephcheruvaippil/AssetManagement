@@ -26,6 +26,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IPopupNavigation>(MopupService.Instance);
 
         builder.Services.AddSingleton<AssetListPage>();
+        builder.Services.AddSingleton<AssetsByCategoryPage>();
 
         builder.Services.AddSingleton<AssetListPageViewModel>();
 

@@ -28,9 +28,30 @@ public partial class AssetListPage : ContentPage
         var labelBank = new TapGestureRecognizer();
         labelBank.Tapped += (s, e) =>
         {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("from bank assets", _assetService));
+            _popupNavigation.PushAsync(new AssetsByCategoryPage("Bank", _assetService));
         };
         lblBank.GestureRecognizers.Add(labelBank);
+
+        var labelNCD = new TapGestureRecognizer();
+        labelNCD.Tapped += (s, e) =>
+        {
+            _popupNavigation.PushAsync(new AssetsByCategoryPage("NCD", _assetService));
+        };
+        lblNCD.GestureRecognizers.Add(labelNCD);
+
+        var labelMLD = new TapGestureRecognizer();
+        labelMLD.Tapped += (s, e) =>
+        {
+            _popupNavigation.PushAsync(new AssetsByCategoryPage("MLD", _assetService));
+        };
+        lblMLD.GestureRecognizers.Add(labelMLD);
+
+        var labelInsurance_MF = new TapGestureRecognizer();
+        labelInsurance_MF.Tapped += (s, e) =>
+        {
+            _popupNavigation.PushAsync(new AssetsByCategoryPage("Insurance_MF", _assetService));
+        };
+        lblInsuranceMF.GestureRecognizers.Add(labelInsurance_MF);
     }
 
     protected async override void OnAppearing()

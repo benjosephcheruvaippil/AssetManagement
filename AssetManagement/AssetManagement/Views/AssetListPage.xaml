@@ -113,13 +113,6 @@
                 HorizontalOptions="Center"
                 IsVisible="false" /> <!-- button is hidden -->
 
-            <Button
-                x:Name="Popup"
-                Text="Popup"
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="Popup_Clicked"
-                HorizontalOptions="Center" />
-
             <Label Text="Matured/Maturing Soon" 
              TextColor="Blue" 
              FontAttributes="Bold" 
