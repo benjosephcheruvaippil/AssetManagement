@@ -173,35 +173,7 @@ public partial class AssetListPage : ContentPage
 
     private async void AssetsMaturingSoon_Clicked(object sender, EventArgs e)
     {
-        //await SetUpDb();
-        //List<Assets> records = await _dbConnection.Table<Assets>().ToListAsync();
-        //List<Assets> assetsMaturingIn10Days = (from rec in records
-        //                                       where (rec.MaturityDate < DateTime.Now.AddDays(60))
-        //                                       select new Assets
-        //                                       {
-        //                                           InvestmentEntity = rec.InvestmentEntity,
-        //                                           Amount = rec.Amount,
-        //                                           MaturityDate = rec.MaturityDate
-        //                                       }).ToList();
-        //foreach (var asset in assetsMaturingIn10Days)
-        //{
-        //    var request = new NotificationRequest
-        //    {
-        //        NotificationId = 1000,
-        //        Title = asset.InvestmentEntity,
-        //        Subtitle = Convert.ToString(asset.MaturityDate),
-        //        Description = Convert.ToString(asset.Amount),
-        //        BadgeNumber = 42,
-        //        Schedule = new NotificationRequestSchedule
-        //        {
-        //            NotifyTime = DateTime.Now.AddSeconds(5),
-        //            NotifyRepeatInterval = TimeSpan.FromDays(1)
-        //        }
-        //    };
-        //    await LocalNotificationCenter.Current.Show(request);
-        //}
-
-        //GetAssetsList();
+        
     }
 
     public async Task ShowPrimaryAssetDetails()
@@ -252,8 +224,13 @@ public partial class AssetListPage : ContentPage
 
     }
 
-    private void Popup_Clicked(object sender, EventArgs e)
+    private void entryDays_TextChanged(object sender, TextChangedEventArgs e)
     {
-        //_popupNavigation.PushAsync(new AssetsByCategoryPage(""));
+        string daysLeft = entryDays.Text;
+        if (string.IsNullOrEmpty(entryDays.Text))
+        {
+            daysLeft = "0";
+        }
+        _viewModel.GetMaturingAssetsListByDaysLeft(Convert.ToInt32(daysLeft));
     }
 }

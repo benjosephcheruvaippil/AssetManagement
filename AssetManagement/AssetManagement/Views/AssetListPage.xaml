@@ -116,7 +116,12 @@
             <Label Text="Matured/Maturing Soon" 
              TextColor="Blue" 
              FontAttributes="Bold" 
-             FontSize="25"/>    
+             FontSize="25"/>
+
+            <Entry x:Name="entryDays"
+               Placeholder="Enter days left"
+               Keyboard="Numeric"
+               TextChanged="entryDays_TextChanged" />
 
             <CollectionView ItemsSource="{Binding AssetDetails}">
                 <CollectionView.ItemTemplate>

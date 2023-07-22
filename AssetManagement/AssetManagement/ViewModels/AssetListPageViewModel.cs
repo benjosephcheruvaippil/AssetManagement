@@ -50,5 +50,31 @@ namespace AssetManagement.ViewModels
                 }
             }
         }
+
+        public async void GetMaturingAssetsListByDaysLeft(int daysLeft)
+        {
+            AssetDetails.Clear();
+            List<Assets> records = await _assetService.GetAssetsList();
+            List<MaturingAssets> assetsMaturingIn10Days = (from rec in records
+                                                           where (rec.MaturityDate < DateTime.Now.AddDays(daysLeft) || rec.MaturityDate < DateTime.Now)
+                                                           select new MaturingAssets
+                                                           {
+                                                               InvestmentEntity = rec.InvestmentEntity,
+                                                               Amount = Convert.ToString(rec.Amount),
+                                                               MaturityDate = rec.MaturityDate
+                                                           }).OrderBy(o => o.MaturityDate).ToList();
+            if (assetsMaturingIn10Days?.Count > 0)
+            {
+                foreach (var asset in assetsMaturingIn10Days)
+                {
+                    if (asset.MaturityDate.ToString("dd-MM-yyyy") != "01-01-0001")
+                    {
+                        decimal amount = Convert.ToDecimal(asset.Amount);
+                        asset.Amount = amount.ToString("#,#.##", new CultureInfo(0x0439));
+                        AssetDetails.Add(asset);
+                    }
+                }
+            }
+        }
     }
 }
