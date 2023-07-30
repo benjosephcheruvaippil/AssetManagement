@@ -2,15 +2,18 @@ using AssetManagement.Models;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using ExcelDataReader;
+using Microsoft.Maui.Graphics;
 using Mopups.Interfaces;
 using Plugin.LocalNotification;
 using SQLite;
 using System.Data;
 using System.Globalization;
+using System.Reflection;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace AssetManagement.Views;
 
-public partial class AssetListPage : ContentPage
+public partial class AssetListPage : TabbedPage
 {
     private AssetListPageViewModel _viewModel;
     private SQLiteAsyncConnection _dbConnection;
@@ -68,6 +71,7 @@ public partial class AssetListPage : ContentPage
             string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
             _dbConnection = new SQLiteAsyncConnection(dbPath);
             await _dbConnection.CreateTableAsync<Assets>();
+            await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
         }
     }
 
@@ -233,4 +237,54 @@ public partial class AssetListPage : ContentPage
         }
         _viewModel.GetMaturingAssetsListByDaysLeft(Convert.ToInt32(daysLeft));
     }
+
+    private async void btnSaveExpense_Clicked(object sender, EventArgs e)
+    {
+        IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
+        {
+            Amount = Convert.ToDecimal(entryExpenseAmount.Text),
+            TransactionType = "Expense",
+            Date = DateTime.Now,
+            CategoryName = Convert.ToString(pickerExpenseCategory.SelectedItem)
+        };
+        await SetUpDb();
+        int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpense);
+        entryExpenseAmount.Text = "";
+        if (rowsAffected > 0)
+        {
+            await DisplayAlert("Message", "Saved", "OK");
+
+            List<IncomeExpenseModel> expenses = await _dbConnection.Table<IncomeExpenseModel>().ToListAsync();
+            expenses = expenses.Where(e => e.TransactionType == "Expense").OrderByDescending(e => e.Date).Take(5).ToList();
+
+            foreach(var item in expenses)
+            {
+                TextCell objCell = new TextCell();
+                objCell.Text = item.CategoryName +"|"+ item.Date.ToString() + "|" + item.TransactionId;
+                objCell.Detail = "Rs."+Convert.ToString(item.Amount);
+                tblscExpenses.Add(objCell);
+
+                objCell.Tapped += ObjCell_Tapped;
+            }
+        }
+        else
+        {
+            await DisplayAlert("Error", "Something went wrong", "OK");
+        }
+        //List<IncomeExpenseModel> records = await _dbConnection.Table<IncomeExpenseModel>().ToListAsync();
+    }
+
+    private void ObjCell_Tapped(object sender, EventArgs e)
+    {
+        var tappedViewCell = (TextCell)sender;
+        pickerExpenseCategory.SelectedItem = tappedViewCell.Text.ToString().Split("|")[0].Trim();
+        entryExpenseAmount.Text = tappedViewCell.Detail;
+    }
+
+
+
+    //private string GetCategory(string value)
+    //{
+    //    return value.Split("|")[0].Trim();
+    //}
 }
