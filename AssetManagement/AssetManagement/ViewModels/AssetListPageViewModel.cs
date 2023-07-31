@@ -17,6 +17,7 @@ namespace AssetManagement.ViewModels
     {
         private SQLiteAsyncConnection _dbConnection;
         public ObservableCollection<MaturingAssets> AssetDetails { get; set; } = new ObservableCollection<MaturingAssets>();
+        //public List<MaturingAssets> AssetDetails { get; set; }
         private readonly IAssetService _assetService;
         public AssetListPageViewModel(IAssetService assetService)
         {

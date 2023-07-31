@@ -27,6 +27,8 @@ public partial class AssetListPage : TabbedPage
         _popupNavigation = popupNavigation;
         _assetService = assetService;
 
+        CurrentPageChanged += AssetListPage_CurrentPageChanged;
+
         //tap gesture added for different labels
         var labelBank = new TapGestureRecognizer();
         labelBank.Tapped += (s, e) =>
@@ -57,9 +59,32 @@ public partial class AssetListPage : TabbedPage
         lblInsuranceMF.GestureRecognizers.Add(labelInsurance_MF);
     }
 
+    private async void AssetListPage_CurrentPageChanged(object sender, EventArgs e)
+    {
+        var selectedTab = CurrentPage;
+
+        // You can now perform any actions based on the selected tab
+        if (selectedTab.Title == "Expense")
+        {
+            LoadExpensesInPage();// show expenses in the expense tab
+        }
+        else if (selectedTab.Title == "Income")
+        {
+            //await DisplayAlert("Message", "Income Page Clicked", "OK");
+        }
+        else if (selectedTab.Title == "Asset Details")
+        {
+            //base.OnAppearing();
+            _viewModel.GetAssetsList();
+            await ShowPrimaryAssetDetails();                  
+        }
+    }
+
     protected async override void OnAppearing()
     {
         base.OnAppearing();
+        
+        LoadExpensesInPage();// show expenses in the expense tab
         _viewModel.GetAssetsList();
         await ShowPrimaryAssetDetails();
     }
@@ -169,11 +194,11 @@ public partial class AssetListPage : TabbedPage
         }
     }
 
-    private async void ShowRecords_Clicked(object sender, EventArgs e)
-    {
+    //private async void ShowRecords_Clicked(object sender, EventArgs e)
+    //{
 
-        await ShowPrimaryAssetDetails();
-    }
+    //    await ShowPrimaryAssetDetails();
+    //}
 
     private async void AssetsMaturingSoon_Clicked(object sender, EventArgs e)
     {
@@ -240,51 +265,115 @@ public partial class AssetListPage : TabbedPage
 
     private async void btnSaveExpense_Clicked(object sender, EventArgs e)
     {
-        IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
+        if (string.IsNullOrEmpty(txtTransactionId.Text))//insert
         {
-            Amount = Convert.ToDecimal(entryExpenseAmount.Text),
-            TransactionType = "Expense",
-            Date = DateTime.Now,
-            CategoryName = Convert.ToString(pickerExpenseCategory.SelectedItem)
-        };
-        await SetUpDb();
-        int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpense);
-        entryExpenseAmount.Text = "";
-        if (rowsAffected > 0)
-        {
-            await DisplayAlert("Message", "Saved", "OK");
-
-            List<IncomeExpenseModel> expenses = await _dbConnection.Table<IncomeExpenseModel>().ToListAsync();
-            expenses = expenses.Where(e => e.TransactionType == "Expense").OrderByDescending(e => e.Date).Take(5).ToList();
-
-            foreach(var item in expenses)
+            IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
             {
-                TextCell objCell = new TextCell();
-                objCell.Text = item.CategoryName +"|"+ item.Date.ToString() + "|" + item.TransactionId;
-                objCell.Detail = "Rs."+Convert.ToString(item.Amount);
-                tblscExpenses.Add(objCell);
+                Amount = Convert.ToDecimal(entryExpenseAmount.Text),
+                TransactionType = "Expense",
+                Date = DateTime.Now,
+                CategoryName = Convert.ToString(pickerExpenseCategory.SelectedItem),
+                Remarks=entryExpenseRemarks.Text
+            };
+            await SetUpDb();
+            int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpense);
+            entryExpenseAmount.Text = "";
+            entryExpenseRemarks.Text = "";
+            if (rowsAffected > 0)
+            {
+                //await DisplayAlert("Message", "Saved", "OK");
 
-                objCell.Tapped += ObjCell_Tapped;
+                LoadExpensesInPage();
+            }
+            else
+            {
+                await DisplayAlert("Error", "Something went wrong", "OK");
             }
         }
-        else
+        else //update
         {
-            await DisplayAlert("Error", "Something went wrong", "OK");
+            IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
+            {
+                TransactionId = Convert.ToInt32(txtTransactionId.Text),
+                Amount = Convert.ToDecimal(entryExpenseAmount.Text),
+                TransactionType = "Expense",
+                Date = DateTime.Now,
+                CategoryName = Convert.ToString(pickerExpenseCategory.SelectedItem),
+                Remarks = entryExpenseRemarks.Text
+            };
+            await SetUpDb();
+            int rowsAffected = await _dbConnection.UpdateAsync(objIncomeExpense);
+            entryExpenseAmount.Text = "";
+            entryExpenseRemarks.Text = "";
+            txtTransactionId.Text = "";
+
+            if (rowsAffected > 0)
+            {
+                //await DisplayAlert("Message", "Saved", "OK");
+
+                LoadExpensesInPage();
+            }
+            else
+            {
+                await DisplayAlert("Error", "Something went wrong", "OK");
+            }
         }
         //List<IncomeExpenseModel> records = await _dbConnection.Table<IncomeExpenseModel>().ToListAsync();
     }
 
     private void ObjCell_Tapped(object sender, EventArgs e)
     {
+
         var tappedViewCell = (TextCell)sender;
         pickerExpenseCategory.SelectedItem = tappedViewCell.Text.ToString().Split("|")[0].Trim();
-        entryExpenseAmount.Text = tappedViewCell.Detail;
+        
+        if (tappedViewCell.Detail.Contains("-"))
+        {
+            entryExpenseAmount.Text = tappedViewCell.Detail.Split("-")[0].Trim();
+            entryExpenseRemarks.Text = tappedViewCell.Detail.Split("-")[1].Trim();
+        }
+        else
+        {
+            entryExpenseAmount.Text = tappedViewCell.Detail;
+            entryExpenseRemarks.Text = "";
+        }
+
+        txtTransactionId.Text = tappedViewCell.Text.ToString().Split("|")[2].Trim();
     }
 
+    private async void LoadExpensesInPage()
+    {
+        tblscExpenses.Clear();
+        await SetUpDb();
+        List<IncomeExpenseModel> expenses = await _dbConnection.Table<IncomeExpenseModel>().ToListAsync();
+        expenses = expenses.Where(e => e.TransactionType == "Expense").OrderByDescending(e => e.Date).Take(5).ToList();
 
+        foreach (var item in expenses)
+        {
+            TextCell objCell = new TextCell();
+            objCell.Text = item.CategoryName + "|" + item.Date.ToString() + "|" + item.TransactionId;
 
-    //private string GetCategory(string value)
-    //{
-    //    return value.Split("|")[0].Trim();
-    //}
+            if (!string.IsNullOrEmpty(item.Remarks))
+            {
+                objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
+            }
+            else
+            {
+                objCell.Detail = Convert.ToString(item.Amount);
+            }
+
+            tblscExpenses.Add(objCell);
+
+            objCell.Tapped += ObjCell_Tapped;
+        }
+    }
+
+    private void btnClearExpense_Clicked(object sender, EventArgs e)
+    {      
+        txtTransactionId.Text = "";
+        entryExpenseAmount.Text = "";
+        pickerExpenseCategory.SelectedIndex = -1;
+        entryExpenseRemarks.Text = "";      
+    }
+
 }

@@ -15,5 +15,6 @@ namespace AssetManagement.Models
         public string TransactionType { get; set; }
         public DateTime Date { get; set; }
         public string CategoryName { get; set; }
+        public string Remarks { get; set; }
     }
 }
