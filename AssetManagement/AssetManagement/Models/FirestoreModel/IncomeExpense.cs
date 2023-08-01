@@ -1,21 +1,26 @@
 ﻿using Google.Cloud.Firestore;
-using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AssetManagement.Models
+namespace AssetManagement.Models.FirestoreModel
 {
-    public class IncomeExpenseModel
+    [FirestoreData]
+    public class IncomeExpense
     {
-        [PrimaryKey, AutoIncrement]
+        [FirestoreProperty]
         public int TransactionId { get; set; }
+        [FirestoreProperty]
         public double Amount { get; set; }
+        [FirestoreProperty]
         public string TransactionType { get; set; }
-        public DateTime Date { get; set; }
+        [FirestoreProperty]
+        public string Date { get; set; }
+        [FirestoreProperty]
         public string CategoryName { get; set; }
+        [FirestoreProperty]
         public string Remarks { get; set; }
     }
 }

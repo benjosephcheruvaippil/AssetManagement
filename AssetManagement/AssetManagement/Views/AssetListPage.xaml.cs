@@ -1,9 +1,13 @@
 using AssetManagement.Models;
+using AssetManagement.Models.FirestoreModel;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
+using Bumptech.Glide.Load.Engine.Cache;
 using ExcelDataReader;
+using Google.Cloud.Firestore;
 using Microsoft.Maui.Graphics;
 using Mopups.Interfaces;
+using Newtonsoft.Json;
 using Plugin.LocalNotification;
 using SQLite;
 using System.Data;
@@ -269,7 +273,7 @@ public partial class AssetListPage : TabbedPage
         {
             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
             {
-                Amount = Convert.ToDecimal(entryExpenseAmount.Text),
+                Amount = Convert.ToDouble(entryExpenseAmount.Text),
                 TransactionType = "Expense",
                 Date = DateTime.Now,
                 CategoryName = Convert.ToString(pickerExpenseCategory.SelectedItem),
@@ -295,7 +299,7 @@ public partial class AssetListPage : TabbedPage
             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
             {
                 TransactionId = Convert.ToInt32(txtTransactionId.Text),
-                Amount = Convert.ToDecimal(entryExpenseAmount.Text),
+                Amount = Convert.ToDouble(entryExpenseAmount.Text),
                 TransactionType = "Expense",
                 Date = DateTime.Now,
                 CategoryName = Convert.ToString(pickerExpenseCategory.SelectedItem),
@@ -351,7 +355,7 @@ public partial class AssetListPage : TabbedPage
         foreach (var item in expenses)
         {
             TextCell objCell = new TextCell();
-            objCell.Text = item.CategoryName + "|" + item.Date.ToString() + "|" + item.TransactionId;
+            objCell.Text = item.CategoryName + "|" + item.Date + "|" + item.TransactionId;
 
             if (!string.IsNullOrEmpty(item.Remarks))
             {
@@ -374,6 +378,147 @@ public partial class AssetListPage : TabbedPage
         entryExpenseAmount.Text = "";
         pickerExpenseCategory.SelectedIndex = -1;
         entryExpenseRemarks.Text = "";      
+    }
+
+    private async void btnUploadData_Clicked(object sender, EventArgs e)
+    {
+        var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+
+        using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+        using var dest = File.Create(localPath);
+        await json.CopyToAsync(dest);
+
+        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
+        dest.Close();
+        string projectId = "firestoredemo-d2bdc";
+        var _fireStoreDb = FirestoreDb.Create(projectId);
+
+        await DeleteAllDocumentsInCollection("IncomeExpense");
+        //deleted all records in firestore
+
+
+        await SetUpDb();
+        List<IncomeExpenseModel> transactions = await _dbConnection.Table<IncomeExpenseModel>().ToListAsync();
+        int writeFlag = 0;
+
+        
+
+        CollectionReference collectionReference = _fireStoreDb.Collection("IncomeExpense");
+
+        foreach (var trans in transactions)
+        {
+            IncomeExpense incomeExpense = new IncomeExpense();
+            incomeExpense.TransactionId = trans.TransactionId;
+            incomeExpense.Amount = trans.Amount;
+            incomeExpense.TransactionType = trans.TransactionType;
+            incomeExpense.Date = Convert.ToString(trans.Date);
+            incomeExpense.CategoryName = trans.CategoryName;
+            incomeExpense.Remarks = trans.Remarks;
+
+            var result = await collectionReference.AddAsync(incomeExpense);
+            writeFlag++;
+        }
+
+        if (writeFlag == transactions.Count) 
+        {
+            //_memoryCache.se
+            await DisplayAlert("Message", "Data Upload Successful", "OK");
+        }
+        else
+        {
+            await DisplayAlert("Error", "Something went wrong", "OK");
+        }
+    }
+
+    private async void btnDownloadData_Clicked(object sender, EventArgs e)
+    {
+        await SetUpDb();
+        var existingRecords = await _dbConnection.Table<IncomeExpenseModel>().Take(1).ToListAsync();
+        if (existingRecords.Count > 0)
+        {
+            await DisplayAlert("Error", "There are existing records in the local database.Hence, cannot download data.", "OK");
+        }
+        else
+        {
+            var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+
+            using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+            using var dest = File.Create(localPath);
+            await json.CopyToAsync(dest);
+
+            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
+            dest.Close();
+            string projectId = "firestoredemo-d2bdc";
+            var _fireStoreDb = FirestoreDb.Create(projectId);
+
+            try
+            {
+                Query orderQuery = _fireStoreDb.Collection("IncomeExpense");
+                QuerySnapshot orderQuerySnapshot = await orderQuery.GetSnapshotAsync();
+                List<IncomeExpense> incomeExpObj = new List<IncomeExpense>();
+                foreach (DocumentSnapshot documentSnapshot in orderQuerySnapshot.Documents)
+                {
+                    if (documentSnapshot.Exists)
+                    {
+                        Dictionary<string, object> dictionary = documentSnapshot.ToDictionary();
+                        string jsonObj = JsonConvert.SerializeObject(dictionary);
+                        IncomeExpense newIncExp = JsonConvert.DeserializeObject<IncomeExpense>(jsonObj);
+                        //newIncExp.TransactionId = documentSnapshot.Id;
+                        incomeExpObj.Add(newIncExp);
+                    }
+                }
+
+                int rowsAffected = 0;
+                foreach (var item in incomeExpObj)
+                {
+                    IncomeExpenseModel model = new IncomeExpenseModel();
+                    model.TransactionId = item.TransactionId;
+                    model.Amount = item.Amount;
+                    model.TransactionType = item.TransactionType;
+                    model.Date = Convert.ToDateTime(item.Date);
+                    model.CategoryName = item.CategoryName;
+                    model.Remarks = item.Remarks;
+                    rowsAffected = rowsAffected + await _dbConnection.InsertAsync(model);
+                }
+
+                if (rowsAffected == incomeExpObj.Count)
+                {
+                    await DisplayAlert("Message", "Success", "OK");
+                }
+                else
+                {
+                    await DisplayAlert("Error", "Something went wrong", "OK");
+                }
+                //return employees;
+            }
+            catch (Exception) { throw; }
+        }
+
+    }
+
+    public async Task DeleteAllDocumentsInCollection(string collectionPath)
+    {
+        var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+
+        using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+        using var dest = File.Create(localPath);
+        await json.CopyToAsync(dest);
+
+        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
+        dest.Close();
+        string projectId = "firestoredemo-d2bdc";
+        var _fireStoreDb = FirestoreDb.Create(projectId);
+
+        CollectionReference collectionRef = _fireStoreDb.Collection(collectionPath);
+
+        // Get all documents in the collection
+        QuerySnapshot snapshot = await collectionRef.GetSnapshotAsync();
+
+        // Delete each document
+        foreach (DocumentSnapshot document in snapshot.Documents)
+        {
+            await document.Reference.DeleteAsync();
+        }
     }
 
 }

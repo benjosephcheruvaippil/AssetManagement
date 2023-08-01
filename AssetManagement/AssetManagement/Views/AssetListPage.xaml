@@ -43,7 +43,9 @@
                     Text="Clear"
                     Margin="5,0,0,0"
                     Clicked="btnClearExpense_Clicked"/>
+
                     
+
                 </StackLayout>
 
                 
@@ -54,6 +56,22 @@
                         </TableSection>
                     </TableRoot>
                 </TableView>
+
+                <BoxView HeightRequest="90" Color="Transparent"/>
+                <Label x:Name="lblLastUploaded" Text="Last Uploaded: " HorizontalOptions="CenterAndExpand"></Label>
+                <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="End">
+                    <Button
+                    x:Name="btnUploadData"
+                    Text="Upload Data"
+                    Margin="0,0,5,0"
+                    Clicked="btnUploadData_Clicked"/>
+                    
+                    <Button
+                    x:Name="btnDownloadData"
+                    Text="Download Data"
+                    Margin="5,0,0,0"
+                    Clicked="btnDownloadData_Clicked"/>
+                </StackLayout>
 
             </VerticalStackLayout>
         </ScrollView>
