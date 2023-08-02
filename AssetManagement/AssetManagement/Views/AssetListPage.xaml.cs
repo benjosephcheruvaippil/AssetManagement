@@ -1,4 +1,5 @@
 using AssetManagement.Models;
+using AssetManagement.Models.Constants;
 using AssetManagement.Models.FirestoreModel;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
@@ -70,10 +71,12 @@ public partial class AssetListPage : TabbedPage
         if (selectedTab.Title == "Expense")
         {
             LoadExpensesInPage();// show expenses in the expense tab
+            await ShowCurrentMonthExpenses();
         }
         else if (selectedTab.Title == "Income")
         {
-            //await DisplayAlert("Message", "Income Page Clicked", "OK");
+            await ShowCurrentMonthIncome();
+            LoadIncomeInPage();
         }
         else if (selectedTab.Title == "Asset Details")
         {
@@ -88,8 +91,9 @@ public partial class AssetListPage : TabbedPage
         base.OnAppearing();
         
         LoadExpensesInPage();// show expenses in the expense tab
-        _viewModel.GetAssetsList();
-        await ShowPrimaryAssetDetails();
+        await ShowCurrentMonthExpenses();
+        //_viewModel.GetAssetsList();
+        //await ShowPrimaryAssetDetails();
     }
 
     private async Task SetUpDb()
@@ -101,6 +105,32 @@ public partial class AssetListPage : TabbedPage
             await _dbConnection.CreateTableAsync<Assets>();
             await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
         }
+    }
+
+    public async Task ShowCurrentMonthExpenses()
+    {
+        DateTime currentDate = DateTime.Now;
+        string currentMonth = currentDate.ToString("MMMM");
+        DateTime startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+        DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+
+        await SetUpDb();
+        var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType=="Expense" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
+        var totalExpense = query.Sum(s => s.Amount);
+        lblCurrentMonthExpenses.Text = currentMonth + ": Rs. " + totalExpense;
+    }
+
+    public async Task ShowCurrentMonthIncome()
+    {
+        DateTime currentDate = DateTime.Now;
+        string currentMonth = currentDate.ToString("MMMM");
+        DateTime startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+        DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+
+        await SetUpDb();
+        var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Income" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
+        var totalIncome = query.Sum(s => s.Amount);
+        lblCurrentMonthIncome.Text = currentMonth + ": Rs. " + totalIncome;
     }
 
     private async void PickFileClicked(object sender, EventArgs e)
@@ -195,17 +225,6 @@ public partial class AssetListPage : TabbedPage
             //await DisplayAlert("Alert - Message", ex.Message.ToString(), "OK");
             await DisplayAlert("Alert - StackTrace", ex.StackTrace.ToString(), "OK");
         }
-    }
-
-    //private async void ShowRecords_Clicked(object sender, EventArgs e)
-    //{
-
-    //    await ShowPrimaryAssetDetails();
-    //}
-
-    private async void AssetsMaturingSoon_Clicked(object sender, EventArgs e)
-    {
-        
     }
 
     public async Task ShowPrimaryAssetDetails()
@@ -321,7 +340,6 @@ public partial class AssetListPage : TabbedPage
                 await DisplayAlert("Error", "Something went wrong", "OK");
             }
         }
-        //List<IncomeExpenseModel> records = await _dbConnection.Table<IncomeExpenseModel>().ToListAsync();
     }
 
     private void ObjCell_Tapped(object sender, EventArgs e)
@@ -371,6 +389,52 @@ public partial class AssetListPage : TabbedPage
         }
     }
 
+    private async void LoadIncomeInPage()
+    {
+        tblscIncome.Clear();
+        await SetUpDb();
+        List<IncomeExpenseModel> income = await _dbConnection.Table<IncomeExpenseModel>().ToListAsync();
+        income = income.Where(e => e.TransactionType == "Income").OrderByDescending(e => e.Date).Take(5).ToList();
+
+        foreach (var item in income)
+        {
+            TextCell objCell = new TextCell();
+            objCell.Text = item.CategoryName + "|" + item.Date + "|" + item.TransactionId;
+
+            if (!string.IsNullOrEmpty(item.Remarks))
+            {
+                objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
+            }
+            else
+            {
+                objCell.Detail = Convert.ToString(item.Amount);
+            }
+
+            tblscIncome.Add(objCell);
+
+            objCell.Tapped += ObjCell_IncomeTapped; ;
+        }
+    }
+
+    private void ObjCell_IncomeTapped(object sender, EventArgs e)
+    {
+        var tappedViewCell = (TextCell)sender;
+        pickerIncomeCategory.SelectedItem = tappedViewCell.Text.ToString().Split("|")[0].Trim();
+
+        if (tappedViewCell.Detail.Contains("-"))
+        {
+            entryIncomeAmount.Text = tappedViewCell.Detail.Split("-")[0].Trim();
+            entryIncomeRemarks.Text = tappedViewCell.Detail.Split("-")[1].Trim();
+        }
+        else
+        {
+            entryIncomeAmount.Text = tappedViewCell.Detail;
+            entryIncomeRemarks.Text = "";
+        }
+
+        txtIncomeTransactionId.Text = tappedViewCell.Text.ToString().Split("|")[2].Trim();
+    }
+
     private void btnClearExpense_Clicked(object sender, EventArgs e)
     {      
         txtTransactionId.Text = "";
@@ -392,7 +456,7 @@ public partial class AssetListPage : TabbedPage
         string projectId = "firestoredemo-d2bdc";
         var _fireStoreDb = FirestoreDb.Create(projectId);
 
-        await DeleteAllDocumentsInCollection("IncomeExpense");
+        await DeleteAllDocumentsInCollection(Constants.IncomeExpenseFirestoreCollection);
         //deleted all records in firestore
 
 
@@ -402,7 +466,7 @@ public partial class AssetListPage : TabbedPage
 
         
 
-        CollectionReference collectionReference = _fireStoreDb.Collection("IncomeExpense");
+        CollectionReference collectionReference = _fireStoreDb.Collection(Constants.IncomeExpenseFirestoreCollection);
 
         foreach (var trans in transactions)
         {
@@ -435,62 +499,16 @@ public partial class AssetListPage : TabbedPage
         var existingRecords = await _dbConnection.Table<IncomeExpenseModel>().Take(1).ToListAsync();
         if (existingRecords.Count > 0)
         {
-            await DisplayAlert("Error", "There are existing records in the local database.Hence, cannot download data.", "OK");
+            bool userResponse = await DisplayAlert("Message", "There are existing records in the local database.Do you want to overwrite them?", "Yes", "No");
+            if (userResponse)
+            {
+                await _dbConnection.ExecuteAsync("Delete from IncomeExpenseModel"); //delete all present records in sqlite db
+                await DownloadData();
+            }
         }
         else
         {
-            var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
-
-            using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
-            using var dest = File.Create(localPath);
-            await json.CopyToAsync(dest);
-
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
-            dest.Close();
-            string projectId = "firestoredemo-d2bdc";
-            var _fireStoreDb = FirestoreDb.Create(projectId);
-
-            try
-            {
-                Query orderQuery = _fireStoreDb.Collection("IncomeExpense");
-                QuerySnapshot orderQuerySnapshot = await orderQuery.GetSnapshotAsync();
-                List<IncomeExpense> incomeExpObj = new List<IncomeExpense>();
-                foreach (DocumentSnapshot documentSnapshot in orderQuerySnapshot.Documents)
-                {
-                    if (documentSnapshot.Exists)
-                    {
-                        Dictionary<string, object> dictionary = documentSnapshot.ToDictionary();
-                        string jsonObj = JsonConvert.SerializeObject(dictionary);
-                        IncomeExpense newIncExp = JsonConvert.DeserializeObject<IncomeExpense>(jsonObj);
-                        //newIncExp.TransactionId = documentSnapshot.Id;
-                        incomeExpObj.Add(newIncExp);
-                    }
-                }
-
-                int rowsAffected = 0;
-                foreach (var item in incomeExpObj)
-                {
-                    IncomeExpenseModel model = new IncomeExpenseModel();
-                    model.TransactionId = item.TransactionId;
-                    model.Amount = item.Amount;
-                    model.TransactionType = item.TransactionType;
-                    model.Date = Convert.ToDateTime(item.Date);
-                    model.CategoryName = item.CategoryName;
-                    model.Remarks = item.Remarks;
-                    rowsAffected = rowsAffected + await _dbConnection.InsertAsync(model);
-                }
-
-                if (rowsAffected == incomeExpObj.Count)
-                {
-                    await DisplayAlert("Message", "Success", "OK");
-                }
-                else
-                {
-                    await DisplayAlert("Error", "Something went wrong", "OK");
-                }
-                //return employees;
-            }
-            catch (Exception) { throw; }
+            await DownloadData();
         }
 
     }
@@ -520,4 +538,120 @@ public partial class AssetListPage : TabbedPage
         }
     }
 
+    public async Task DownloadData()
+    {
+        var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+
+        using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+        using var dest = File.Create(localPath);
+        await json.CopyToAsync(dest);
+
+        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
+        dest.Close();
+        string projectId = "firestoredemo-d2bdc";
+        var _fireStoreDb = FirestoreDb.Create(projectId);
+
+        try
+        {
+            Query orderQuery = _fireStoreDb.Collection(Constants.IncomeExpenseFirestoreCollection);
+            QuerySnapshot orderQuerySnapshot = await orderQuery.GetSnapshotAsync();
+            List<IncomeExpense> incomeExpObj = new List<IncomeExpense>();
+            foreach (DocumentSnapshot documentSnapshot in orderQuerySnapshot.Documents)
+            {
+                if (documentSnapshot.Exists)
+                {
+                    Dictionary<string, object> dictionary = documentSnapshot.ToDictionary();
+                    string jsonObj = JsonConvert.SerializeObject(dictionary);
+                    IncomeExpense newIncExp = JsonConvert.DeserializeObject<IncomeExpense>(jsonObj);
+                    //newIncExp.TransactionId = documentSnapshot.Id;
+                    incomeExpObj.Add(newIncExp);
+                }
+            }
+
+            int rowsAffected = 0;
+            foreach (var item in incomeExpObj)
+            {
+                IncomeExpenseModel model = new IncomeExpenseModel();
+                model.TransactionId = item.TransactionId;
+                model.Amount = item.Amount;
+                model.TransactionType = item.TransactionType;
+                model.Date = Convert.ToDateTime(item.Date);
+                model.CategoryName = item.CategoryName;
+                model.Remarks = item.Remarks;
+                rowsAffected = rowsAffected + await _dbConnection.InsertAsync(model);
+            }
+
+            if (rowsAffected == incomeExpObj.Count)
+            {
+                await DisplayAlert("Message", "Success", "OK");
+            }
+            else
+            {
+                await DisplayAlert("Error", "Something went wrong", "OK");
+            }
+            //return employees;
+        }
+        catch (Exception) { throw; }
+    }
+
+    private async void btnSaveIncome_Clicked(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(txtIncomeTransactionId.Text))//insert
+        {
+            IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
+            {
+                Amount = Convert.ToDouble(entryIncomeAmount.Text),
+                TransactionType = "Income",
+                Date = DateTime.Now,
+                CategoryName = Convert.ToString(pickerIncomeCategory.SelectedItem),
+                Remarks = entryIncomeRemarks.Text
+            };
+            await SetUpDb();
+            int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpense);
+            entryIncomeAmount.Text = "";
+            entryExpenseRemarks.Text = "";
+            if (rowsAffected > 0)
+            {
+                LoadIncomeInPage();
+            }
+            else
+            {
+                await DisplayAlert("Error", "Something went wrong", "OK");
+            }
+        }
+        else //update
+        {
+            IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
+            {
+                TransactionId = Convert.ToInt32(txtIncomeTransactionId.Text),
+                Amount = Convert.ToDouble(entryIncomeAmount.Text),
+                TransactionType = "Income",
+                Date = DateTime.Now,
+                CategoryName = Convert.ToString(pickerIncomeCategory.SelectedItem),
+                Remarks = entryIncomeRemarks.Text
+            };
+            await SetUpDb();
+            int rowsAffected = await _dbConnection.UpdateAsync(objIncomeExpense);
+            entryIncomeAmount.Text = "";
+            entryIncomeRemarks.Text = "";
+            txtIncomeTransactionId.Text = "";
+
+            if (rowsAffected > 0)
+            {
+                LoadIncomeInPage();
+            }
+            else
+            {
+                await DisplayAlert("Error", "Something went wrong", "OK");
+            }
+        }
+    }
+
+    private void btnClearIncome_Clicked(object sender, EventArgs e)
+    {
+        txtIncomeTransactionId.Text = "";
+        entryIncomeAmount.Text = "";
+        pickerIncomeCategory.SelectedIndex = -1;
+        entryIncomeRemarks.Text = "";
+    }
 }

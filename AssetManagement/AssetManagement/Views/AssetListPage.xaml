@@ -38,26 +38,21 @@
                     Margin="0,0,5,0"
                     Clicked="btnSaveExpense_Clicked"/>
 
-                        <Button
+                    <Button
                     x:Name="btnClearExpense"
                     Text="Clear"
                     Margin="5,0,0,0"
                     Clicked="btnClearExpense_Clicked"/>
-
-                    
-
                 </StackLayout>
-
-                
-
                 <TableView x:Name="tblviewExpenses" Intent="Menu">
                     <TableRoot>
-                        <TableSection x:Name="tblscExpenses" Title="Expenses">
+                        <TableSection x:Name="tblscExpenses" Title="Last 5 Transactions">
                         </TableSection>
                     </TableRoot>
                 </TableView>
-
-                <BoxView HeightRequest="90" Color="Transparent"/>
+                <BoxView HeightRequest="50" Color="Transparent"/>
+                <Label x:Name="lblCurrentMonthExpenses" FontSize="Large" Text="" HorizontalOptions="CenterAndExpand"></Label>
+                <BoxView HeightRequest="50" Color="Transparent"/>
                 <Label x:Name="lblLastUploaded" Text="Last Uploaded: " HorizontalOptions="CenterAndExpand"></Label>
                 <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="End">
                     <Button
@@ -79,6 +74,9 @@
     <ContentPage Title="Income">
         <ScrollView>
             <VerticalStackLayout>
+                <Entry x:Name="txtIncomeTransactionId"
+               IsVisible="false" />
+
                 <Entry x:Name="entryIncomeAmount"
                Placeholder="Enter amount"
                Keyboard="Numeric" />
@@ -92,11 +90,31 @@
                         </x:Array>
                     </Picker.ItemsSource>
                 </Picker>
-                
-                <Button
-                x:Name="btnSaveIncome"
-                Text="Save Income"
-                HorizontalOptions="Center" />
+
+                <Entry x:Name="entryIncomeRemarks"
+               Placeholder="Enter remarks" />
+
+                <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                    <Button
+                    x:Name="btnSaveIncome"
+                    Text="Save Income"
+                    Margin="0,0,5,0"
+                    Clicked="btnSaveIncome_Clicked"/>
+
+                    <Button
+                    x:Name="btnClearIncome"
+                    Text="Clear"
+                    Margin="5,0,0,0"
+                    Clicked="btnClearIncome_Clicked"/>
+                </StackLayout>
+                <TableView x:Name="tblviewIncome" Intent="Menu">
+                    <TableRoot>
+                        <TableSection x:Name="tblscIncome" Title="Last 5 Transactions">
+                        </TableSection>
+                    </TableRoot>
+                </TableView>
+                <BoxView HeightRequest="50" Color="Transparent"/>
+                <Label x:Name="lblCurrentMonthIncome" FontSize="Large" Text="" HorizontalOptions="CenterAndExpand"></Label>
             </VerticalStackLayout>
         </ScrollView>
     </ContentPage>
@@ -107,29 +125,12 @@
             Padding="30,0"
             VerticalOptions="Center">
 
-
-                <Label
-                Text="Asset Management"
-                SemanticProperties.HeadingLevel="Level1"
-                FontSize="18"
-                HorizontalOptions="Center" />
-
-
-
                 <Button
                 x:Name="PickFile"
                 Text="Pick File"
                 SemanticProperties.Hint="Counts the number of times you click"
                 Clicked="PickFileClicked"
                 HorizontalOptions="Center" />
-
-                <!--<Button
-                x:Name="ShowRecords"
-                Text="Show Details"
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="ShowRecords_Clicked"
-                HorizontalOptions="Center" 
-                IsVisible="false" />-->
 
 
                 <Label
@@ -198,15 +199,6 @@
                 SemanticProperties.HeadingLevel="Level1"
                 FontSize="20"
                 HorizontalOptions="Center" />
-
-                <Button
-                x:Name="AssetsMaturingSoon"
-                Text="Assets Maturing Soon"
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="AssetsMaturingSoon_Clicked"
-                HorizontalOptions="Center"
-                IsVisible="false" />
-                <!-- button is hidden -->
 
                 <Label Text="Matured/Maturing Soon" 
              TextColor="Blue" 
