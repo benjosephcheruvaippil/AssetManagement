@@ -2,7 +2,6 @@ using AssetManagement.Models;
 using AssetManagement.Models.FirestoreModel;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
-using Bumptech.Glide.Load.Engine.Cache;
 using ExcelDataReader;
 using Google.Cloud.Firestore;
 using Microsoft.Maui.Graphics;
