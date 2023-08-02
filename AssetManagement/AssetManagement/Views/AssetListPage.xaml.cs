@@ -445,6 +445,7 @@ public partial class AssetListPage : TabbedPage
 
     private async void btnUploadData_Clicked(object sender, EventArgs e)
     {
+        activityIndicator.IsRunning = true;
         var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
 
         using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
@@ -484,17 +485,20 @@ public partial class AssetListPage : TabbedPage
 
         if (writeFlag == transactions.Count) 
         {
-            //_memoryCache.se
+            activityIndicator.IsRunning = false;
             await DisplayAlert("Message", "Data Upload Successful", "OK");
+            
         }
         else
         {
+            activityIndicator.IsRunning = false;
             await DisplayAlert("Error", "Something went wrong", "OK");
         }
     }
 
     private async void btnDownloadData_Clicked(object sender, EventArgs e)
     {
+        activityIndicator.IsRunning = true;
         await SetUpDb();
         var existingRecords = await _dbConnection.Table<IncomeExpenseModel>().Take(1).ToListAsync();
         if (existingRecords.Count > 0)
@@ -505,6 +509,7 @@ public partial class AssetListPage : TabbedPage
                 await _dbConnection.ExecuteAsync("Delete from IncomeExpenseModel"); //delete all present records in sqlite db
                 await DownloadData();
             }
+            activityIndicator.IsRunning = false;
         }
         else
         {
@@ -583,10 +588,12 @@ public partial class AssetListPage : TabbedPage
 
             if (rowsAffected == incomeExpObj.Count)
             {
+                activityIndicator.IsRunning = false;
                 await DisplayAlert("Message", "Success", "OK");
             }
             else
             {
+                activityIndicator.IsRunning = false;
                 await DisplayAlert("Error", "Something went wrong", "OK");
             }
             //return employees;
@@ -653,5 +660,10 @@ public partial class AssetListPage : TabbedPage
         entryIncomeAmount.Text = "";
         pickerIncomeCategory.SelectedIndex = -1;
         entryIncomeRemarks.Text = "";
+    }
+
+    private async void btnGoToReports_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new ReportsPage(_dbConnection));
     }
 }

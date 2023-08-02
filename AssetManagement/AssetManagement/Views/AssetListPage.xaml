@@ -52,7 +52,8 @@
                 </TableView>
                 <BoxView HeightRequest="50" Color="Transparent"/>
                 <Label x:Name="lblCurrentMonthExpenses" FontSize="Large" Text="" HorizontalOptions="CenterAndExpand"></Label>
-                <BoxView HeightRequest="50" Color="Transparent"/>
+                <ActivityIndicator x:Name="activityIndicator" IsRunning="False" Color="Blue"/>
+                <!--<BoxView HeightRequest="50" Color="Transparent"/>-->
                 <Label x:Name="lblLastUploaded" Text="Last Uploaded: " HorizontalOptions="CenterAndExpand"></Label>
                 <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="End">
                     <Button
@@ -125,13 +126,21 @@
             Padding="30,0"
             VerticalOptions="Center">
 
-                <Button
-                x:Name="PickFile"
-                Text="Pick File"
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="PickFileClicked"
-                HorizontalOptions="Center" />
+                <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                    <Button
+                    x:Name="PickFile"
+                    Text="Pick File"
+                    Margin="0,0,5,0"
+                    Clicked="PickFileClicked"
+                    HorizontalOptions="Center" />
 
+                    <Button
+                    x:Name="btnGoToReports"
+                    Text="Go To Reports"
+                    Margin="5,0,0,0"
+                    Clicked="btnGoToReports_Clicked"
+                    HorizontalOptions="Center" />
+                </StackLayout>
 
                 <Label
                 x:Name="lblBank"
