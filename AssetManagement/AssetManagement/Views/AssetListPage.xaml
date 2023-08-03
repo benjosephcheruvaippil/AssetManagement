@@ -39,6 +39,12 @@
                     Clicked="btnSaveExpense_Clicked"/>
 
                     <Button
+                    x:Name="btnDeleteExpense"
+                    Text="Delete Expense"
+                    Margin="0,0,5,0"
+                    Clicked="btnDeleteExpense_Clicked"/>
+
+                    <Button
                     x:Name="btnClearExpense"
                     Text="Clear"
                     Margin="5,0,0,0"
@@ -54,7 +60,7 @@
                 <Label x:Name="lblCurrentMonthExpenses" FontSize="Large" Text="" HorizontalOptions="CenterAndExpand"></Label>
                 <ActivityIndicator x:Name="activityIndicator" IsRunning="False" Color="Blue"/>
                 <!--<BoxView HeightRequest="50" Color="Transparent"/>-->
-                <Label x:Name="lblLastUploaded" Text="Last Uploaded: " HorizontalOptions="CenterAndExpand"></Label>
+                <Label x:Name="lblLastUploaded" Text="" HorizontalOptions="CenterAndExpand"></Label>
                 <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="End">
                     <Button
                     x:Name="btnUploadData"
@@ -101,6 +107,12 @@
                     Text="Save Income"
                     Margin="0,0,5,0"
                     Clicked="btnSaveIncome_Clicked"/>
+
+                    <Button
+                    x:Name="btnDeleteIncome"
+                    Text="Delete Income"
+                    Margin="0,0,5,0"
+                    Clicked="btnDeleteIncome_Clicked"/>
 
                     <Button
                     x:Name="btnClearIncome"

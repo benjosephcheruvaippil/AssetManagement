@@ -5,6 +5,7 @@ using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using ExcelDataReader;
 using Google.Cloud.Firestore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Maui.Graphics;
 using Mopups.Interfaces;
 using Newtonsoft.Json;
@@ -23,6 +24,7 @@ public partial class AssetListPage : TabbedPage
     private SQLiteAsyncConnection _dbConnection;
     private IPopupNavigation _popupNavigation;
     private readonly IAssetService _assetService;
+    MemoryCache cache = new MemoryCache(new MemoryCacheOptions());
     public AssetListPage(AssetListPageViewModel viewModel, IPopupNavigation popupNavigation, IAssetService assetService)
 	{
 		InitializeComponent();
@@ -72,6 +74,7 @@ public partial class AssetListPage : TabbedPage
         {
             LoadExpensesInPage();// show expenses in the expense tab
             await ShowCurrentMonthExpenses();
+            SetLastUploadedDate();
         }
         else if (selectedTab.Title == "Income")
         {
@@ -105,6 +108,15 @@ public partial class AssetListPage : TabbedPage
             await _dbConnection.CreateTableAsync<Assets>();
             await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
         }
+    }
+
+    public void SetLastUploadedDate()
+    {
+        if (cache.TryGetValue("lastuploaded", out DateTime cachedDate))
+        {
+            lblLastUploaded.Text = "Last Uploaded: " + cachedDate.ToString("dd-MM-yyyy hh:mm tt");
+        }
+        //lastuploaded
     }
 
     public async Task ShowCurrentMonthExpenses()
@@ -286,7 +298,12 @@ public partial class AssetListPage : TabbedPage
     }
 
     private async void btnSaveExpense_Clicked(object sender, EventArgs e)
-    {
+    {       
+        if (string.IsNullOrEmpty(entryExpenseAmount.Text))
+        {
+            await DisplayAlert("Message", "Please input required values", "OK");
+            return;
+        }
         if (string.IsNullOrEmpty(txtTransactionId.Text))//insert
         {
             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
@@ -372,7 +389,7 @@ public partial class AssetListPage : TabbedPage
         foreach (var item in expenses)
         {
             TextCell objCell = new TextCell();
-            objCell.Text = item.CategoryName + "|" + item.Date + "|" + item.TransactionId;
+            objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
 
             if (!string.IsNullOrEmpty(item.Remarks))
             {
@@ -399,7 +416,7 @@ public partial class AssetListPage : TabbedPage
         foreach (var item in income)
         {
             TextCell objCell = new TextCell();
-            objCell.Text = item.CategoryName + "|" + item.Date + "|" + item.TransactionId;
+            objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
 
             if (!string.IsNullOrEmpty(item.Remarks))
             {
@@ -436,11 +453,16 @@ public partial class AssetListPage : TabbedPage
     }
 
     private void btnClearExpense_Clicked(object sender, EventArgs e)
-    {      
+    {
+        ClearExpense();
+    }
+
+    public void ClearExpense()
+    {
         txtTransactionId.Text = "";
         entryExpenseAmount.Text = "";
         pickerExpenseCategory.SelectedIndex = -1;
-        entryExpenseRemarks.Text = "";      
+        entryExpenseRemarks.Text = "";
     }
 
     private async void btnUploadData_Clicked(object sender, EventArgs e)
@@ -485,6 +507,11 @@ public partial class AssetListPage : TabbedPage
 
         if (writeFlag == transactions.Count) 
         {
+            //cache
+            DateTime date = DateTime.Now;
+            cache.Set("lastuploaded", date);
+            lblLastUploaded.Text = "Last Uploaded: " + date.ToString("dd-MM-yyyy hh:mm tt");
+            //cache
             activityIndicator.IsRunning = false;
             await DisplayAlert("Message", "Data Upload Successful", "OK");
             
@@ -656,6 +683,11 @@ public partial class AssetListPage : TabbedPage
 
     private void btnClearIncome_Clicked(object sender, EventArgs e)
     {
+        ClearIncome();
+    }
+
+    public void ClearIncome()
+    {
         txtIncomeTransactionId.Text = "";
         entryIncomeAmount.Text = "";
         pickerIncomeCategory.SelectedIndex = -1;
@@ -665,5 +697,45 @@ public partial class AssetListPage : TabbedPage
     private async void btnGoToReports_Clicked(object sender, EventArgs e)
     {
         await Navigation.PushAsync(new ReportsPage(_dbConnection));
+    }
+
+    private async void btnDeleteExpense_Clicked(object sender, EventArgs e)
+    {
+        if (!string.IsNullOrEmpty(txtTransactionId.Text))
+        {
+            bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
+            if (userResponse)
+            {
+                IncomeExpenseModel objExpense = new IncomeExpenseModel()
+                {
+                    TransactionId = Convert.ToInt32(txtTransactionId.Text)
+                };
+
+                await SetUpDb();
+                int rowsAffected = await _dbConnection.DeleteAsync(objExpense);
+                ClearExpense();
+                LoadExpensesInPage();
+            }           
+        }
+    }
+
+    private async void btnDeleteIncome_Clicked(object sender, EventArgs e)
+    {
+        if (!string.IsNullOrEmpty(txtIncomeTransactionId.Text))
+        {
+            bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
+            if (userResponse)
+            {
+                IncomeExpenseModel objIncome = new IncomeExpenseModel()
+                {
+                    TransactionId = Convert.ToInt32(txtIncomeTransactionId.Text)
+                };
+
+                await SetUpDb();
+                int rowsAffected = await _dbConnection.DeleteAsync(objIncome);
+                ClearIncome();
+                LoadIncomeInPage();
+            }
+        }
     }
 }
