@@ -8,7 +8,7 @@ namespace AssetManagement.Models.Constants
 {
     public class Constants
     {
-        public const string IncomeExpenseFirestoreCollection = "IncomeExpenseTest";
+        public const string IncomeExpenseFirestoreCollection = "IncomeExpenseFirestoreData";
         //IncomeExpenseTest - this is testing collection
         //IncomeExpenseFirestoreData - this is production collection
     } 

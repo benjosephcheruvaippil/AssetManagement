@@ -29,6 +29,7 @@ public partial class ReportsPage : ContentPage
     {
         tblscIncomeExpenseReport.Clear();  
         await SetUpDb();
+
         List<IncomeExpenseReport> objReportList = new List<IncomeExpenseReport>();
         DateTime currentDate = DateTime.Now;
         tblscIncomeExpenseReport.Title = "Income & Expense - Year " + currentDate.Year;
@@ -36,8 +37,9 @@ public partial class ReportsPage : ContentPage
         for (int i = 1; i <= currentDate.Month; i++)
         {
             string currentMonth = DateTimeFormatInfo.CurrentInfo.GetMonthName(i);
-            DateTime startOfMonth = new DateTime(currentDate.Year, i, 1);
+            DateTime startOfMonth = new DateTime(currentDate.Year, i, 1, 0, 0, 0); //24 hour format
             DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+            endOfMonth = new DateTime(endOfMonth.Year, endOfMonth.Month, endOfMonth.Day, 23, 59, 59); //24 hour format
 
             IncomeExpenseReport objReport = new IncomeExpenseReport();
 

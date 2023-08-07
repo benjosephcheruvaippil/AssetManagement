@@ -5,7 +5,6 @@ using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using ExcelDataReader;
 using Google.Cloud.Firestore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Maui.Graphics;
 using Mopups.Interfaces;
 using Newtonsoft.Json;
@@ -13,6 +12,7 @@ using Plugin.LocalNotification;
 using SQLite;
 using System.Data;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -24,7 +24,6 @@ public partial class AssetListPage : TabbedPage
     private SQLiteAsyncConnection _dbConnection;
     private IPopupNavigation _popupNavigation;
     private readonly IAssetService _assetService;
-    MemoryCache cache = new MemoryCache(new MemoryCacheOptions());
     public AssetListPage(AssetListPageViewModel viewModel, IPopupNavigation popupNavigation, IAssetService assetService)
 	{
 		InitializeComponent();
@@ -72,14 +71,14 @@ public partial class AssetListPage : TabbedPage
         // You can now perform any actions based on the selected tab
         if (selectedTab.Title == "Expense")
         {
-            LoadExpensesInPage();// show expenses in the expense tab
-            await ShowCurrentMonthExpenses();
+            //LoadExpensesInPage();// show expenses in the expense tab
+            //await ShowCurrentMonthExpenses();
             SetLastUploadedDate();
         }
         else if (selectedTab.Title == "Income")
         {
-            await ShowCurrentMonthIncome();
-            LoadIncomeInPage();
+            //await ShowCurrentMonthIncome();
+            //LoadIncomeInPage();
         }
         else if (selectedTab.Title == "Asset Details")
         {
@@ -92,11 +91,15 @@ public partial class AssetListPage : TabbedPage
     protected async override void OnAppearing()
     {
         base.OnAppearing();
-        
+
         LoadExpensesInPage();// show expenses in the expense tab
         await ShowCurrentMonthExpenses();
-        //_viewModel.GetAssetsList();
-        //await ShowPrimaryAssetDetails();
+
+        LoadIncomeInPage();
+        await ShowCurrentMonthIncome();
+
+        _viewModel.GetAssetsList();
+        await ShowPrimaryAssetDetails();
     }
 
     private async Task SetUpDb()
@@ -104,19 +107,21 @@ public partial class AssetListPage : TabbedPage
         if (_dbConnection == null)
         {
             string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
-            _dbConnection = new SQLiteAsyncConnection(dbPath);
+            _dbConnection = new SQLiteAsyncConnection(dbPath);           
             await _dbConnection.CreateTableAsync<Assets>();
             await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
+            await _dbConnection.CreateTableAsync<DataSyncAudit>();
         }
     }
 
-    public void SetLastUploadedDate()
+    public async void SetLastUploadedDate()
     {
-        if (cache.TryGetValue("lastuploaded", out DateTime cachedDate))
+        await SetUpDb();
+        var lastUploadedDate = await _dbConnection.Table<DataSyncAudit>().OrderByDescending(d => d.Date).Take(1).ToListAsync();
+        if (lastUploadedDate.Count > 0)
         {
-            lblLastUploaded.Text = "Last Uploaded: " + cachedDate.ToString("dd-MM-yyyy hh:mm tt");
+            lblLastUploaded.Text = "Last Uploaded: " + lastUploadedDate[0].Date.ToString("dd-MM-yyyy hh:mm tt");
         }
-        //lastuploaded
     }
 
     public async Task ShowCurrentMonthExpenses()
@@ -410,8 +415,8 @@ public partial class AssetListPage : TabbedPage
     {
         tblscIncome.Clear();
         await SetUpDb();
-        List<IncomeExpenseModel> income = await _dbConnection.Table<IncomeExpenseModel>().ToListAsync();
-        income = income.Where(e => e.TransactionType == "Income").OrderByDescending(e => e.Date).Take(5).ToList();
+        List<IncomeExpenseModel> income = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Income").OrderByDescending(e => e.Date).Take(5).ToListAsync();
+        //income = income.Where(e => e.TransactionType == "Income").OrderByDescending(e => e.Date).Take(5).ToList();
 
         foreach (var item in income)
         {
@@ -507,11 +512,13 @@ public partial class AssetListPage : TabbedPage
 
         if (writeFlag == transactions.Count) 
         {
-            //cache
-            DateTime date = DateTime.Now;
-            cache.Set("lastuploaded", date);
-            lblLastUploaded.Text = "Last Uploaded: " + date.ToString("dd-MM-yyyy hh:mm tt");
-            //cache
+            DataSyncAudit objSync = new DataSyncAudit
+            {
+                Date = DateTime.Now,
+                Action = "Upload"
+            };
+            await _dbConnection.InsertAsync(objSync);
+            lblLastUploaded.Text = "Last Uploaded: " + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt");
             activityIndicator.IsRunning = false;
             await DisplayAlert("Message", "Data Upload Successful", "OK");
             
@@ -533,7 +540,7 @@ public partial class AssetListPage : TabbedPage
             bool userResponse = await DisplayAlert("Message", "There are existing records in the local database.Do you want to overwrite them?", "Yes", "No");
             if (userResponse)
             {
-                await _dbConnection.ExecuteAsync("Delete from IncomeExpenseModel"); //delete all present records in sqlite db
+                int recordsDeleted = await _dbConnection.ExecuteAsync("Delete from IncomeExpenseModel"); //delete all present records in sqlite db
                 await DownloadData();
             }
             activityIndicator.IsRunning = false;
@@ -542,7 +549,6 @@ public partial class AssetListPage : TabbedPage
         {
             await DownloadData();
         }
-
     }
 
     public async Task DeleteAllDocumentsInCollection(string collectionPath)
@@ -583,11 +589,13 @@ public partial class AssetListPage : TabbedPage
         string projectId = "firestoredemo-d2bdc";
         var _fireStoreDb = FirestoreDb.Create(projectId);
 
+        int rowsAffected = 0;
         try
         {
             Query orderQuery = _fireStoreDb.Collection(Constants.IncomeExpenseFirestoreCollection);
             QuerySnapshot orderQuerySnapshot = await orderQuery.GetSnapshotAsync();
             List<IncomeExpense> incomeExpObj = new List<IncomeExpense>();
+            
             foreach (DocumentSnapshot documentSnapshot in orderQuerySnapshot.Documents)
             {
                 if (documentSnapshot.Exists)
@@ -595,23 +603,30 @@ public partial class AssetListPage : TabbedPage
                     Dictionary<string, object> dictionary = documentSnapshot.ToDictionary();
                     string jsonObj = JsonConvert.SerializeObject(dictionary);
                     IncomeExpense newIncExp = JsonConvert.DeserializeObject<IncomeExpense>(jsonObj);
-                    //newIncExp.TransactionId = documentSnapshot.Id;
                     incomeExpObj.Add(newIncExp);
                 }
             }
 
-            int rowsAffected = 0;
             foreach (var item in incomeExpObj)
             {
                 IncomeExpenseModel model = new IncomeExpenseModel();
-                model.TransactionId = item.TransactionId;
                 model.Amount = item.Amount;
                 model.TransactionType = item.TransactionType;
-                model.Date = Convert.ToDateTime(item.Date);
+                if (DateTime.TryParse(item.Date,out DateTime result))
+                {
+                    model.Date = Convert.ToDateTime(item.Date);
+                }
+                else
+                {
+                    model.Date = DateTime.Now;
+                }
+                
                 model.CategoryName = item.CategoryName;
                 model.Remarks = item.Remarks;
+                
                 rowsAffected = rowsAffected + await _dbConnection.InsertAsync(model);
             }
+
 
             if (rowsAffected == incomeExpObj.Count)
             {
@@ -623,13 +638,17 @@ public partial class AssetListPage : TabbedPage
                 activityIndicator.IsRunning = false;
                 await DisplayAlert("Error", "Something went wrong", "OK");
             }
-            //return employees;
         }
         catch (Exception) { throw; }
     }
 
     private async void btnSaveIncome_Clicked(object sender, EventArgs e)
     {
+        if (string.IsNullOrEmpty(entryIncomeAmount.Text))
+        {
+            await DisplayAlert("Message", "Please input required values", "OK");
+            return;
+        }
         if (string.IsNullOrEmpty(txtIncomeTransactionId.Text))//insert
         {
             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
