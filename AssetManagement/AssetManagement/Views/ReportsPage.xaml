@@ -4,11 +4,37 @@
              x:Class="AssetManagement.Views.ReportsPage"
              Title="Reports">
     <VerticalStackLayout>
+        <Picker x:Name="yearPicker" Title="Select year" SelectedIndexChanged="yearPicker_SelectedIndexChanged">
+            <Picker.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>2021</x:String>
+                    <x:String>2022</x:String>
+                    <x:String>2023</x:String>
+                    <x:String>2024</x:String>
+                    <x:String>2025</x:String>
+                    <x:String>2026</x:String>
+                    <x:String>2027</x:String>
+                    <x:String>2028</x:String>
+                    <x:String>2029</x:String>
+                    <x:String>2030</x:String>
+                </x:Array>
+            </Picker.ItemsSource>
+        </Picker>
+        
         <TableView x:Name="tblviewIncomeExpenseReport" Intent="Menu">
             <TableRoot>
                 <TableSection x:Name="tblscIncomeExpenseReport">
                 </TableSection>
             </TableRoot>
         </TableView>
+
+        <TableView x:Name="tblviewCategoryWiseReport" Intent="Menu">
+            <TableRoot>
+                <TableSection x:Name="tblscCategoryWiseReport">
+                </TableSection>
+            </TableRoot>
+        </TableView>
+
     </VerticalStackLayout>
+    
 </ContentPage>

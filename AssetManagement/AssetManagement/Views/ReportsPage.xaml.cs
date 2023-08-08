@@ -2,6 +2,7 @@ using AssetManagement.Models;
 using AssetManagement.Models.Reports;
 using SQLite;
 using System.Globalization;
+//using static Android.Content.ClipData;
 
 namespace AssetManagement.Views;
 
@@ -12,7 +13,7 @@ public partial class ReportsPage : ContentPage
 	{
 		InitializeComponent();
         _dbConnection = dbConnection;
-        LoadIncomeExpenseReport();
+        LoadIncomeExpenseReport(DateTime.Now.Year.ToString());
 
     }
 
@@ -25,19 +26,27 @@ public partial class ReportsPage : ContentPage
         }
     }
 
-    private async void LoadIncomeExpenseReport()
+    private async void LoadIncomeExpenseReport(string selectedYear)
     {
         tblscIncomeExpenseReport.Clear();  
         await SetUpDb();
 
-        List<IncomeExpenseReport> objReportList = new List<IncomeExpenseReport>();
-        DateTime currentDate = DateTime.Now;
-        tblscIncomeExpenseReport.Title = "Income & Expense - Year " + currentDate.Year;
+        PopulateTableSection(selectedYear);
+        SummaryByCategory(selectedYear);
+    }
 
-        for (int i = 1; i <= currentDate.Month; i++)
+    public async void PopulateTableSection(string selectedYear)
+    {
+        List<IncomeExpenseReport> objReportList = new List<IncomeExpenseReport>();
+
+        tblscIncomeExpenseReport.Title = "Income & Expense - Year " + selectedYear;
+
+        decimal yearlyIncome = 0, yearlyExpense = 0, yearlyBalance = 0;
+
+        for (int i = 1; i <= 12; i++)
         {
             string currentMonth = DateTimeFormatInfo.CurrentInfo.GetMonthName(i);
-            DateTime startOfMonth = new DateTime(currentDate.Year, i, 1, 0, 0, 0); //24 hour format
+            DateTime startOfMonth = new DateTime(Convert.ToInt32(selectedYear), i, 1, 0, 0, 0); //24 hour format
             DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
             endOfMonth = new DateTime(endOfMonth.Year, endOfMonth.Month, endOfMonth.Day, 23, 59, 59); //24 hour format
 
@@ -54,6 +63,10 @@ public partial class ReportsPage : ContentPage
             decimal incomeAmount = (decimal)income.Sum(s => s.Amount);
 
             decimal balance = incomeAmount - expenseAmount;
+            yearlyIncome = yearlyIncome + incomeAmount;
+            yearlyExpense = yearlyExpense + expenseAmount;
+            yearlyBalance = yearlyBalance + balance;
+
             objReport.Month = currentMonth;
             objReport.ExpenseAmount = expenseAmount;
             objReport.IncomeAmount = incomeAmount;
@@ -69,5 +82,26 @@ public partial class ReportsPage : ContentPage
             objCell.Height = 40;
             tblscIncomeExpenseReport.Add(objCell);
         }
+
+        TextCell objCellYearly = new TextCell();
+        objCellYearly.Text = selectedYear;
+        objCellYearly.TextColor = Colors.Brown;
+        objCellYearly.Detail = "Expense: " + yearlyExpense + " | " + "Income: " + yearlyIncome + " | " + "Balance: " + yearlyBalance;
+        objCellYearly.Height = 40;
+        tblscIncomeExpenseReport.Add(objCellYearly);
+    }
+
+    private async void yearPicker_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        string selectedYear = yearPicker.SelectedItem.ToString();
+        LoadIncomeExpenseReport(selectedYear);
+        SummaryByCategory(selectedYear);
+    }
+
+    public async void SummaryByCategory(string selectedYear)
+    {
+        await SetUpDb();
+        string query = "select CategoryName,Sum(Amount) as Amount from IncomeExpenseModel Group by CategoryName where strftime('%Y',CAST(Date As TEXT))=" + "'" + selectedYear + "'";
+        var categories = await _dbConnection.QueryAsync<IncomeExpenseModel>(query);
     }
 }
