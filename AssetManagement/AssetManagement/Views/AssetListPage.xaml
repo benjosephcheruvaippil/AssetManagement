@@ -73,6 +73,13 @@
                     Text="Download Data"
                     Margin="5,0,0,0"
                     Clicked="btnDownloadData_Clicked"/>
+
+                    <Button
+                    x:Name="btnGoToReports"
+                    Text="Go To Reports"
+                    Margin="5,0,0,0"
+                    Clicked="btnGoToReports_Clicked"
+                    HorizontalOptions="Center" />
                 </StackLayout>
 
             </VerticalStackLayout>
@@ -147,10 +154,10 @@
                     HorizontalOptions="Center" />
 
                     <Button
-                    x:Name="btnGoToReports"
+                    x:Name="btnAssetReport"
                     Text="Go To Reports"
                     Margin="5,0,0,0"
-                    Clicked="btnGoToReports_Clicked"
+                    Clicked="btnAssetReport_Clicked"
                     HorizontalOptions="Center" />
                 </StackLayout>
 

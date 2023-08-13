@@ -2,6 +2,7 @@ using AssetManagement.Models;
 using AssetManagement.Models.Reports;
 using SQLite;
 using System.Globalization;
+using System.Linq;
 //using static Android.Content.ClipData;
 
 namespace AssetManagement.Views;
@@ -28,7 +29,8 @@ public partial class ReportsPage : ContentPage
 
     private async void LoadIncomeExpenseReport(string selectedYear)
     {
-        tblscIncomeExpenseReport.Clear();  
+        tblscIncomeExpenseReport.Clear();
+        tblscCategoryWiseReport.Clear();
         await SetUpDb();
 
         PopulateTableSection(selectedYear);
@@ -68,9 +70,9 @@ public partial class ReportsPage : ContentPage
             yearlyBalance = yearlyBalance + balance;
 
             objReport.Month = currentMonth;
-            objReport.ExpenseAmount = expenseAmount;
-            objReport.IncomeAmount = incomeAmount;
-            objReport.BalanceAmount = balance;
+            objReport.ExpenseAmount = expenseAmount.ToString("#,#.##", new CultureInfo(0x0439));
+            objReport.IncomeAmount = incomeAmount.ToString("#,#.##", new CultureInfo(0x0439));
+            objReport.BalanceAmount = balance.ToString("#,#.##", new CultureInfo(0x0439));
             objReportList.Add(objReport);
         }
 
@@ -84,9 +86,9 @@ public partial class ReportsPage : ContentPage
         }
 
         TextCell objCellYearly = new TextCell();
-        objCellYearly.Text = selectedYear;
+        objCellYearly.Text = "Summary - " + selectedYear;
         objCellYearly.TextColor = Colors.Brown;
-        objCellYearly.Detail = "Expense: " + yearlyExpense + " | " + "Income: " + yearlyIncome + " | " + "Balance: " + yearlyBalance;
+        objCellYearly.Detail = "Expense: " + yearlyExpense.ToString("#,#.##", new CultureInfo(0x0439)) + " | " + "Income: " + yearlyIncome.ToString("#,#.##", new CultureInfo(0x0439)) + " | " + "Balance: " + yearlyBalance.ToString("#,#.##", new CultureInfo(0x0439));
         objCellYearly.Height = 40;
         tblscIncomeExpenseReport.Add(objCellYearly);
     }
@@ -95,13 +97,40 @@ public partial class ReportsPage : ContentPage
     {
         string selectedYear = yearPicker.SelectedItem.ToString();
         LoadIncomeExpenseReport(selectedYear);
-        SummaryByCategory(selectedYear);
     }
 
     public async void SummaryByCategory(string selectedYear)
-    {
-        await SetUpDb();
-        string query = "select CategoryName,Sum(Amount) as Amount from IncomeExpenseModel Group by CategoryName where strftime('%Y',CAST(Date As TEXT))=" + "'" + selectedYear + "'";
-        var categories = await _dbConnection.QueryAsync<IncomeExpenseModel>(query);
+    {       
+        DateTime yearBegin = new DateTime(Convert.ToInt32(selectedYear), 1, 1, 0, 0, 0);
+        DateTime yearEnd = new DateTime(Convert.ToInt32(selectedYear), 12, 31, 23, 59, 59);
+        var categories = await _dbConnection.QueryAsync<IncomeExpenseModel>("select CategoryName from IncomeExpenseModel Group By CategoryName");
+        var records = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.Date >= yearBegin && d.Date <= yearEnd).ToListAsync();
+
+        double total = 0;
+        foreach (var category in categories)
+        {
+            if (!string.IsNullOrEmpty(category.CategoryName))
+            {
+                total = 0;
+                foreach (var item in records)
+                {
+                    if (item.CategoryName == category.CategoryName)
+                    {
+                        total = total + item.Amount;
+                    }
+                   
+                }
+                TextCell objCategory = new TextCell();
+                objCategory.Text = category.CategoryName;
+                objCategory.TextColor = Colors.DarkBlue;
+                objCategory.Detail = "Rs. " + total.ToString("#,#.##", new CultureInfo(0x0439));
+                objCategory.Height = 40;
+                tblscCategoryWiseReport.Add(objCategory);
+            }         
+        }
+
+        tblscCategoryWiseReport.Title = "Category Wise Report " + selectedYear;
+
+
     }
 }

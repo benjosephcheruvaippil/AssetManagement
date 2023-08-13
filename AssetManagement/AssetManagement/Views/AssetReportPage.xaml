@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AssetManagement.Views.AssetReportPage"
+             Title="Asset Reports">
+    <VerticalStackLayout>
+        
+        <TableView x:Name="tblviewHolderWiseReport" MaximumHeightRequest="500" Intent="Menu">
+            <TableRoot>
+                <TableSection x:Name="tblscHolderWiseReport" Title="Holder Wise Report" TextColor="Red">
+                </TableSection>
+            </TableRoot>
+        </TableView>
+
+    </VerticalStackLayout>
+</ContentPage>

@@ -21,16 +21,16 @@
             </Picker.ItemsSource>
         </Picker>
         
-        <TableView x:Name="tblviewIncomeExpenseReport" Intent="Menu">
+        <TableView x:Name="tblviewIncomeExpenseReport" MaximumHeightRequest="320" Intent="Menu">
             <TableRoot>
-                <TableSection x:Name="tblscIncomeExpenseReport">
+                <TableSection x:Name="tblscIncomeExpenseReport" TextColor="Red">
                 </TableSection>
             </TableRoot>
         </TableView>
 
         <TableView x:Name="tblviewCategoryWiseReport" Intent="Menu">
             <TableRoot>
-                <TableSection x:Name="tblscCategoryWiseReport">
+                <TableSection x:Name="tblscCategoryWiseReport" TextColor="Red">
                 </TableSection>
             </TableRoot>
         </TableView>

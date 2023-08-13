@@ -9,8 +9,8 @@ namespace AssetManagement.Models.Reports
     public class IncomeExpenseReport
     {
         public string Month { get; set; }
-        public decimal ExpenseAmount { get; set; }
-        public decimal IncomeAmount { get; set; }
-        public decimal BalanceAmount { get; set; }
+        public string ExpenseAmount { get; set; }
+        public string IncomeAmount { get; set; }
+        public string BalanceAmount { get; set; }
     }
 }
