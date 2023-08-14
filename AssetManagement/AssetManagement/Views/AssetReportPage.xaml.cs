@@ -53,7 +53,7 @@ public partial class AssetReportPage : ContentPage
             TextCell objHolder = new TextCell();
             objHolder.Text = holder.Holder;
             objHolder.TextColor = Colors.DarkBlue;
-            objHolder.Detail = "Rs. " + holder.Amount.ToString("#,#.##", new CultureInfo(0x0439));
+            objHolder.Detail = string.Format(new CultureInfo("en-IN"), "{0:C0}", holder.Amount);
             objHolder.Height = 40;
             tblscHolderWiseReport.Add(objHolder);
         }

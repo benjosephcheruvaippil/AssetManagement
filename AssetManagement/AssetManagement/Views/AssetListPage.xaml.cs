@@ -134,7 +134,7 @@ public partial class AssetListPage : TabbedPage
         await SetUpDb();
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Expense" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
         var totalExpense = query.Sum(s => s.Amount);
-        lblCurrentMonthExpenses.Text = currentMonth + ": Rs. " + totalExpense.ToString("#,#.##", new CultureInfo(0x0439));
+        lblCurrentMonthExpenses.Text = currentMonth + ": Rs. " + string.Format(new CultureInfo("en-IN"), "{0:C0}", totalExpense);
     }
 
     public async Task ShowCurrentMonthIncome()
@@ -147,7 +147,7 @@ public partial class AssetListPage : TabbedPage
         await SetUpDb();
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Income" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
         var totalIncome = query.Sum(s => s.Amount);
-        lblCurrentMonthIncome.Text = currentMonth + ": Rs. " + totalIncome.ToString("#,#.##", new CultureInfo(0x0439));
+        lblCurrentMonthIncome.Text = currentMonth + ": Rs. " + string.Format(new CultureInfo("en-IN"), "{0:C0}", totalIncome);
     }
 
     private async void PickFileClicked(object sender, EventArgs e)
@@ -249,7 +249,7 @@ public partial class AssetListPage : TabbedPage
         await SetUpDb();
         List<Assets> records = await _dbConnection.Table<Assets>().ToListAsync();
         decimal NetAssetValue = records.Sum(s => s.Amount);
-        string result = "Net Asset Value: Rs." + NetAssetValue.ToString("#,#.##", new CultureInfo(0x0439));
+        string result = "Net Asset Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", NetAssetValue);
         lblNetAssetValue.Text = result;
 
         decimal BankAssets = records.Where(b => b.Type == "Bank").Sum(s => s.Amount);
@@ -262,15 +262,15 @@ public partial class AssetListPage : TabbedPage
         decimal MutualFunds = records.Where(b => b.Type == "MF").Sum(s => s.Amount);
         decimal Stocks = records.Where(b => b.Type == "Stocks").Sum(s => s.Amount);
 
-        lblBank.Text = "Bank Assets Value: Rs." + BankAssets.ToString("#,#.##", new CultureInfo(0x0439));
-        lblNCD.Text = "Non Convertible Debentures: Rs." + NCDAssets.ToString("#,#.##", new CultureInfo(0x0439));
-        lblMLD.Text = "Market Linked Debentures: Rs." + MLDAssets.ToString("#,#.##", new CultureInfo(0x0439));
+        lblBank.Text = "Bank Assets Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", BankAssets);
+        lblNCD.Text = "Non Convertible Debentures: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", NCDAssets);
+        lblMLD.Text = "Market Linked Debentures: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", MLDAssets);
 
-        lblInsuranceMF.Text = "Insurance/MF: Rs." + Insurance_MF.ToString("#,#.##", new CultureInfo(0x0439));
-        lblPPF.Text = "Public Provident Fund: Rs." + PPF.ToString("#,#.##", new CultureInfo(0x0439));
-        lblEPF.Text = "Employee Provident Fund: Rs." + EPF.ToString("#,#.##", new CultureInfo(0x0439));
-        lblMF.Text = "Mutual Funds: Rs." + MutualFunds.ToString("#,#.##", new CultureInfo(0x0439));
-        lblStocks.Text = "Stocks: Rs." + Stocks.ToString("#,#.##", new CultureInfo(0x0439));
+        lblInsuranceMF.Text = "Insurance/MF: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Insurance_MF);
+        lblPPF.Text = "Public Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", PPF);
+        lblEPF.Text = "Employee Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", EPF);
+        lblMF.Text = "Mutual Funds: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", MutualFunds);
+        lblStocks.Text = "Stocks: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Stocks);
 
         decimal projectedAmount = 0;
         foreach (var item in records)
@@ -288,7 +288,7 @@ public partial class AssetListPage : TabbedPage
                 projectedAmount = projectedAmount + item.Amount;
             }
         }
-        lblProjectedAssetValue.Text = "Projected Asset Value: Rs." + Math.Round(projectedAmount, 2).ToString("#,#.##", new CultureInfo(0x0439)); ;
+        lblProjectedAssetValue.Text = "Projected Asset Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Math.Round(projectedAmount, 2));
 
     }
 

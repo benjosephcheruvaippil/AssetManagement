@@ -123,7 +123,7 @@ public partial class ReportsPage : ContentPage
                 TextCell objCategory = new TextCell();
                 objCategory.Text = category.CategoryName;
                 objCategory.TextColor = Colors.DarkBlue;
-                objCategory.Detail = "Rs. " + total.ToString("#,#.##", new CultureInfo(0x0439));
+                objCategory.Detail = string.Format(new CultureInfo("en-IN"), "{0:C0}", total);
                 objCategory.Height = 40;
                 tblscCategoryWiseReport.Add(objCategory);
             }         

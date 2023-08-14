@@ -35,6 +35,7 @@ namespace AssetManagement.ViewModels
                                                    select new MaturingAssets
                                                    {
                                                        InvestmentEntity = rec.InvestmentEntity,
+                                                       HolderName = rec.Holder,
                                                        Amount = Convert.ToString(rec.Amount),
                                                        MaturityDate = rec.MaturityDate
                                                    }).OrderBy(o => o.MaturityDate).ToList();
@@ -45,7 +46,8 @@ namespace AssetManagement.ViewModels
                     if (asset.MaturityDate.ToString("dd-MM-yyyy") != "01-01-0001")
                     {
                         decimal amount = Convert.ToDecimal(asset.Amount);
-                        asset.Amount = amount.ToString("#,#.##", new CultureInfo(0x0439));
+                        asset.HolderName = asset.HolderName;
+                        asset.Amount = string.Format(new CultureInfo("en-IN"), "{0:C0}", amount);
                         AssetDetails.Add(asset);
                     }
                 }
@@ -61,6 +63,7 @@ namespace AssetManagement.ViewModels
                                                            select new MaturingAssets
                                                            {
                                                                InvestmentEntity = rec.InvestmentEntity,
+                                                               HolderName=rec.Holder,
                                                                Amount = Convert.ToString(rec.Amount),
                                                                MaturityDate = rec.MaturityDate
                                                            }).OrderBy(o => o.MaturityDate).ToList();
@@ -71,7 +74,8 @@ namespace AssetManagement.ViewModels
                     if (asset.MaturityDate.ToString("dd-MM-yyyy") != "01-01-0001")
                     {
                         decimal amount = Convert.ToDecimal(asset.Amount);
-                        asset.Amount = amount.ToString("#,#.##", new CultureInfo(0x0439));
+                        asset.HolderName = asset.HolderName;
+                        asset.Amount = string.Format(new CultureInfo("en-IN"), "{0:C0}", amount);
                         AssetDetails.Add(asset);
                     }
                 }
