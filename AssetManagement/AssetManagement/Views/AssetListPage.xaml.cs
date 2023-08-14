@@ -388,7 +388,8 @@ public partial class AssetListPage : TabbedPage
     {
         tblscExpenses.Clear();
         await SetUpDb();
-        List<IncomeExpenseModel> expenses = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense").OrderByDescending(e => e.Date).Take(5).ToListAsync();
+        
+        List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
 
         foreach (var item in expenses)
         {
@@ -414,7 +415,8 @@ public partial class AssetListPage : TabbedPage
     {
         tblscIncome.Clear();
         await SetUpDb();
-        List<IncomeExpenseModel> income = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Income").OrderByDescending(e => e.Date).Take(5).ToListAsync();
+        
+        List<IncomeExpenseModel> income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 5");
 
         foreach (var item in income)
         {

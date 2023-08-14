@@ -12,7 +12,7 @@ public partial class AssetReportPage : ContentPage
 	{
 		InitializeComponent();
         _dbConnection = dbConnection;
-        SummaryByCategory();
+        SummaryByHolderName();
 
     }
 
@@ -25,37 +25,37 @@ public partial class AssetReportPage : ContentPage
         }
     }
 
-    public async void SummaryByCategory()
+    public async void SummaryByHolderName()
     {
         var holders = await _dbConnection.QueryAsync<Assets>("select Holder from Assets Group By Holder");
 
-        double total = 0;
+        List<Assets> holderDetailList = new List<Assets>();
         foreach (var holder in holders)
         {
             if (!string.IsNullOrEmpty(holder.Holder))
             {
-                total = 0;
                 string query = "select Sum(Amount) as Amount from Assets where Holder='" + holder.Holder + "'";
                 List<Assets> holderWiseSum = await _dbConnection.QueryAsync<Assets>(query);
-                //foreach (var item in records)
-                //{
-                //    if (item.CategoryName == category.CategoryName)
-                //    {
-                //        total = total + item.Amount;
-                //    }
 
-                //}
-                TextCell objHolder = new TextCell();
-                objHolder.Text = holder.Holder;
-                objHolder.TextColor = Colors.DarkBlue;
-                objHolder.Detail = "Rs. " + holderWiseSum[0].Amount.ToString("#,#.##", new CultureInfo(0x0439));
-                objHolder.Height = 40;
-                tblscHolderWiseReport.Add(objHolder);
+                Assets holderDetails = new Assets
+                {
+                    Holder=holder.Holder,
+                    Amount = holderWiseSum[0].Amount
+                };
+                holderDetailList.Add(holderDetails);
             }
         }
 
-        //tblscCategoryWiseReport.Title = "Category Wise Report " + selectedYear;
+        holderDetailList= holderDetailList.OrderByDescending(x => x.Amount).ToList();
 
-
+        foreach (var holder in holderDetailList)
+        {
+            TextCell objHolder = new TextCell();
+            objHolder.Text = holder.Holder;
+            objHolder.TextColor = Colors.DarkBlue;
+            objHolder.Detail = "Rs. " + holder.Amount.ToString("#,#.##", new CultureInfo(0x0439));
+            objHolder.Height = 40;
+            tblscHolderWiseReport.Add(objHolder);
+        }
     }
 }
