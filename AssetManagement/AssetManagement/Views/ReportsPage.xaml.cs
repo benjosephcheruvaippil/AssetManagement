@@ -29,6 +29,7 @@ public partial class ReportsPage : ContentPage
 
     private async void LoadIncomeExpenseReport(string selectedYear)
     {
+        yearPicker.SelectedItem = selectedYear;
         tblscIncomeExpenseReport.Clear();
         tblscCategoryWiseReport.Clear();
         await SetUpDb();

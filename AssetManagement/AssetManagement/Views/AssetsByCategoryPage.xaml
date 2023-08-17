@@ -5,52 +5,15 @@
              xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
              x:Class="AssetManagement.Views.AssetsByCategoryPage"
              Title="AssetsByCategoryPage" BackgroundColor="#80000000" CloseWhenBackgroundIsClicked="True">
-    <ScrollView HorizontalOptions="Center" VerticalOptions="Center">
-        <Border WidthRequest="300" HeightRequest="450"
-                BackgroundColor="White"
-                HorizontalOptions="Center">
-            <VerticalStackLayout x:Name="stackLayout">
-                <!--<CollectionView>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <SwipeView>
-                                <Frame>
-                                    <VerticalStackLayout>
-                                        --><!--<Label Text="{Binding InvestmentEntity}" FontSize="18" FontAttributes="Bold" />
-                                        <Label Text="{Binding MaturityDate,StringFormat='{0:MMMM dd, yyyy}'}" FontSize="18" FontAttributes="Bold" />
-                                        <Label Text="{Binding Amount}" FontSize="15" />--><!--
-                                        <Label Text="EntityName" FontSize="10" FontAttributes="Bold" />
-                                        <Label Text="TotalAmount" FontSize="10" FontAttributes="Bold" />
-                                    </VerticalStackLayout>
-                                </Frame>
-                            </SwipeView>
+    <ScrollView WidthRequest="300" HeightRequest="450" HorizontalOptions="Center" VerticalOptions="Center" Orientation="Vertical">
 
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>-->
-                <!--<Entry
-                    x:Name="UsernameEntry"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center"
-                    Placeholder="Username" />
 
-                <Entry
-                    x:Name="PasswordEntry"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center"
-                    IsPassword="True"
-                    Placeholder="Password" />-->
+        <Border BackgroundColor="White">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="10,10,10,10"/>
+            </Border.StrokeShape>
+            <VerticalStackLayout x:Name="stackLayout" Padding="3" Spacing="8" HorizontalOptions="FillAndExpand" VerticalOptions="Start">
 
-                <!--<Button
-                    x:Name="LoginButton"
-                    Margin="10,5"
-                    HorizontalOptions="Fill"
-                    VerticalOptions="EndAndExpand"
-                    Text="Login"
-                    Clicked="LoginButton_Clicked">
-                </Button>-->
-                <!--<Label x:Name="lblFrom" Text="" FontSize="18" FontAttributes="Bold" />-->
-                <!--<Line X1="1" X2="60" Y1="1" Y2="1" StrokeThickness="3" Stroke="red"/>-->
             </VerticalStackLayout>
         </Border>
 
