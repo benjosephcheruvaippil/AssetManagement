@@ -1,4 +1,6 @@
 using AssetManagement.Models;
+using Mopups.Interfaces;
+using Mopups.Services;
 using SQLite;
 using System.Data.Common;
 using System.Globalization;
@@ -8,10 +10,12 @@ namespace AssetManagement.Views;
 public partial class AssetReportPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
-    public AssetReportPage(SQLiteAsyncConnection dbConnection)
+    private IPopupNavigation _popupNavigation;
+    public AssetReportPage(SQLiteAsyncConnection dbConnection, IPopupNavigation popupNavigation)
 	{
 		InitializeComponent();
         _dbConnection = dbConnection;
+        _popupNavigation=popupNavigation;
         SummaryByHolderName();
 
     }
@@ -50,11 +54,17 @@ public partial class AssetReportPage : ContentPage
 
         foreach (var holder in holderDetailList)
         {
+            //TapGestureRecognizer textCell = new TapGestureRecognizer();
             TextCell objHolder = new TextCell();
             objHolder.Text = holder.Holder;
             objHolder.TextColor = Colors.DarkBlue;
             objHolder.Detail = string.Format(new CultureInfo("en-IN"), "{0:C0}", holder.Amount);
             objHolder.Height = 40;
+            objHolder.Tapped += (sender, args) =>
+            {
+                _popupNavigation.PushAsync(new AssetsByHolder(holder.Holder));
+            };
+
             tblscHolderWiseReport.Add(objHolder);
         }
     }

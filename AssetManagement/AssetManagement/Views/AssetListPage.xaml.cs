@@ -766,6 +766,6 @@ public partial class AssetListPage : TabbedPage
 
     private async void btnAssetReport_Clicked(object sender, EventArgs e)
     {
-        await Navigation.PushAsync(new AssetReportPage(_dbConnection));
+        await Navigation.PushAsync(new AssetReportPage(_dbConnection, _popupNavigation));
     }
 }
