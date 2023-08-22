@@ -22,22 +22,6 @@ public partial class AssetsByCategoryPage
         //_assetService = assetService;
     }
 
-    //private async Task SetUpDb()
-    //{
-    //    if (_dbConnection == null)
-    //    {
-    //        string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
-    //        _dbConnection = new SQLiteAsyncConnection(dbPath);
-    //        await _dbConnection.CreateTableAsync<Assets>();
-    //    }
-    //}
-
-    //protected async override void OnAppearing()
-    //{
-    //    base.OnAppearing();
-    //    ShowAssetsByEntity();
-    //}
-
     public async Task ShowAssetsByEntity()
 	{
         List<Assets> records = await _assetService.GetAssetsList();
@@ -49,13 +33,13 @@ public partial class AssetsByCategoryPage
             .Select(entity => new EntitywiseModel
             {
                 InvestmentEntity = entity.First().InvestmentEntity,
-                TotalAmount = entity.Sum(s => s.Amount).ToString("#,#.##", new CultureInfo(0x0439))
+                TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
             }).ToList();
 
         foreach(var item in investmentEntity)
         {
             Label name = new Label();
-            name.Text = item.InvestmentEntity + " = Rs " + item.TotalAmount;
+            name.Text = item.InvestmentEntity + " = " + item.TotalAmount;
             name.FontSize = 18;
             name.FontAttributes = FontAttributes.Bold;
             Line objLine = new Line

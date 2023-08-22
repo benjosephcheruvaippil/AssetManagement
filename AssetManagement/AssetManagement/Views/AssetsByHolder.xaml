@@ -5,7 +5,7 @@
              xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
              x:Class="AssetManagement.Views.AssetsByHolder"
              Title="AssetsByHolder" BackgroundColor="#80000000" CloseWhenBackgroundIsClicked="True">
-    <ScrollView WidthRequest="300" HeightRequest="450" HorizontalOptions="Center" VerticalOptions="Center" Orientation="Vertical">
+    <ScrollView WidthRequest="300" HeightRequest="550" HorizontalOptions="Center" VerticalOptions="Center" Orientation="Vertical">
 
 
         <Border BackgroundColor="White">
@@ -13,7 +13,6 @@
                 <RoundRectangle CornerRadius="10,10,10,10"/>
             </Border.StrokeShape>
             <VerticalStackLayout x:Name="stackLayout" Padding="3" Spacing="8" HorizontalOptions="FillAndExpand" VerticalOptions="Start">
-                <Label Text="Testing it out"></Label>
             </VerticalStackLayout>
         </Border>
 
