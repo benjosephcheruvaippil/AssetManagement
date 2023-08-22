@@ -4,6 +4,7 @@ using Mopups.Services;
 using SQLite;
 using System.Data.Common;
 using System.Globalization;
+using System.Xml.Linq;
 
 namespace AssetManagement.Views;
 
@@ -74,17 +75,30 @@ public partial class AssetReportPage : ContentPage
         var totalAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets");
         var debtPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Bank'" +
             ",'NCD','MLD','PPF','EPF')");
-        decimal debtPortfolioPercentage = (debtPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100;
-        //assetsByEquityAndDebt.chil
+        decimal debtPortfolioPercentage = Math.Round((debtPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
         Label lblDebt = new Label();
-        lblDebt.Text = "Debt/Fixed Income: Rs. " + debtPortfolioAmount[0].Amount + " (" + debtPortfolioPercentage + ")";
+        lblDebt.Text = "Debt/Fixed Income: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", debtPortfolioAmount[0].Amount) + " (" + debtPortfolioPercentage + "%)";
+        lblDebt.FontSize = 18;
+        lblDebt.FontAttributes = FontAttributes.Bold;
 
         var equityPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Insurance_MF'" +
             ",'MF','Stocks')");
-        decimal equityPortfolioPercentage = (equityPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100;
+        decimal equityPortfolioPercentage = Math.Round((equityPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
         Label lblEquity = new Label();
-        lblEquity.Text = "Equity: Rs. " + equityPortfolioAmount[0].Amount + " (" + equityPortfolioPercentage + ")";
+        lblEquity.Text = "Equity: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", equityPortfolioAmount[0].Amount) + " (" + equityPortfolioPercentage + "%)";
+        lblEquity.FontSize = 18;
+        lblEquity.FontAttributes = FontAttributes.Bold;
+
+        var goldPortfolioAmount= await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('SGB'" +
+            ",'Gold')");
+        decimal goldPortfolioPercentage = Math.Round((goldPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
+        Label lblGold = new Label();
+        lblGold.Text = "Gold: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", goldPortfolioAmount[0].Amount) + " (" + goldPortfolioPercentage + "%)";
+        lblGold.FontSize = 18;
+        lblGold.FontAttributes = FontAttributes.Bold;
+
         stackLayout.Add(lblDebt);
         stackLayout.Add(lblEquity);
+        stackLayout.Add(lblGold);
     }
 }
