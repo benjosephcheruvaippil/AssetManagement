@@ -17,7 +17,7 @@ public partial class AssetReportPage : ContentPage
         _dbConnection = dbConnection;
         _popupNavigation=popupNavigation;
         SummaryByHolderName();
-
+        ShowAssetsByEquityAndDebt();
     }
 
     private async Task SetUpDb()
@@ -67,5 +67,24 @@ public partial class AssetReportPage : ContentPage
 
             tblscHolderWiseReport.Add(objHolder);
         }
+    }
+
+    public async void ShowAssetsByEquityAndDebt()
+    {
+        var totalAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets");
+        var debtPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Bank'" +
+            ",'NCD','MLD','PPF','EPF')");
+        decimal debtPortfolioPercentage = (debtPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100;
+        //assetsByEquityAndDebt.chil
+        Label lblDebt = new Label();
+        lblDebt.Text = "Debt/Fixed Income: Rs. " + debtPortfolioAmount[0].Amount + " (" + debtPortfolioPercentage + ")";
+
+        var equityPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Insurance_MF'" +
+            ",'MF','Stocks')");
+        decimal equityPortfolioPercentage = (equityPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100;
+        Label lblEquity = new Label();
+        lblEquity.Text = "Equity: Rs. " + equityPortfolioAmount[0].Amount + " (" + equityPortfolioPercentage + ")";
+        stackLayout.Add(lblDebt);
+        stackLayout.Add(lblEquity);
     }
 }

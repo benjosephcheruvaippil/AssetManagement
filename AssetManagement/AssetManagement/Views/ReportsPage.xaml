@@ -27,7 +27,14 @@
                 </TableSection>
             </TableRoot>
         </TableView>
-
+        <Line X1="-2"
+        Y1="0"
+        X2="600"
+        Y2="0"
+        Stroke="orange"
+        StrokeThickness="5" />
+        <!--drawing a straight line-->
+        
         <TableView x:Name="tblviewCategoryWiseReport" Intent="Menu">
             <TableRoot>
                 <TableSection x:Name="tblscCategoryWiseReport" TextColor="Red">

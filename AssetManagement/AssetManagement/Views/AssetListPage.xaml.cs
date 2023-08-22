@@ -134,7 +134,7 @@ public partial class AssetListPage : TabbedPage
         await SetUpDb();
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Expense" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
         var totalExpense = query.Sum(s => s.Amount);
-        lblCurrentMonthExpenses.Text = currentMonth + ": Rs. " + string.Format(new CultureInfo("en-IN"), "{0:C0}", totalExpense);
+        lblCurrentMonthExpenses.Text = currentMonth + ": " + string.Format(new CultureInfo("en-IN"), "{0:C0}", totalExpense);
     }
 
     public async Task ShowCurrentMonthIncome()
@@ -147,7 +147,7 @@ public partial class AssetListPage : TabbedPage
         await SetUpDb();
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Income" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
         var totalIncome = query.Sum(s => s.Amount);
-        lblCurrentMonthIncome.Text = currentMonth + ": Rs. " + string.Format(new CultureInfo("en-IN"), "{0:C0}", totalIncome);
+        lblCurrentMonthIncome.Text = currentMonth + ": " + string.Format(new CultureInfo("en-IN"), "{0:C0}", totalIncome);
     }
 
     private async void PickFileClicked(object sender, EventArgs e)
@@ -386,6 +386,7 @@ public partial class AssetListPage : TabbedPage
 
     private async void LoadExpensesInPage()
     {
+        pickerExpenseCategory.SelectedItem = "Household Items"; //set this value by default
         tblscExpenses.Clear();
         await SetUpDb();
         

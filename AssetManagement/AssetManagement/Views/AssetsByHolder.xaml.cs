@@ -9,13 +9,11 @@ namespace AssetManagement.Views;
 public partial class AssetsByHolder
 {
     private string _holderName;
-    //private readonly IAssetService _assetService;
     private SQLiteAsyncConnection _dbConnection;
     public AssetsByHolder(string holderName)
 	{
 		InitializeComponent();
         _holderName = holderName;
-        //_assetService=assetService;
         ShowAssetsByHolder();
 
     }

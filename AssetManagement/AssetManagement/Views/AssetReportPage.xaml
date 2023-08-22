@@ -3,14 +3,22 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AssetManagement.Views.AssetReportPage"
              Title="Asset Reports">
-    <VerticalStackLayout>
-        
-        <TableView x:Name="tblviewHolderWiseReport" MaximumHeightRequest="500" Intent="Menu">
-            <TableRoot>
-                <TableSection x:Name="tblscHolderWiseReport" Title="Holder Wise Report" TextColor="Red">
-                </TableSection>
-            </TableRoot>
-        </TableView>
+    <ScrollView>
+        <VerticalStackLayout x:Name="stackLayout">
 
-    </VerticalStackLayout>
+            <TableView x:Name="tblviewHolderWiseReport" MaximumHeightRequest="500" Intent="Menu">
+                <TableRoot>
+                    <TableSection x:Name="tblscHolderWiseReport" Title="Holder Wise Report" TextColor="Red">
+                    </TableSection>
+                </TableRoot>
+            </TableView>
+            <Line X1="-2"
+          Y1="0"
+          X2="600"
+          Y2="0"
+          Stroke="orange"
+          StrokeThickness="5" /> <!--drawing a straight line-->
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

@@ -59,7 +59,6 @@
                 <BoxView HeightRequest="50" Color="Transparent"/>
                 <Label x:Name="lblCurrentMonthExpenses" FontSize="Large" Text="" HorizontalOptions="CenterAndExpand"></Label>
                 <ActivityIndicator x:Name="activityIndicator" IsRunning="False" Color="Blue"/>
-                <!--<BoxView HeightRequest="50" Color="Transparent"/>-->
                 <Label x:Name="lblLastUploaded" Text="" HorizontalOptions="CenterAndExpand"></Label>
                 <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="End">
                     <Button
