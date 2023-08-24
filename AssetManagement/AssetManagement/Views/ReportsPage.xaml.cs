@@ -10,12 +10,13 @@ namespace AssetManagement.Views;
 public partial class ReportsPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
+    private bool onLoad = false;
     public ReportsPage(SQLiteAsyncConnection dbConnection)
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         _dbConnection = dbConnection;
+        onLoad = true;
         LoadIncomeExpenseReport(DateTime.Now.Year.ToString());
-
     }
 
     private async Task SetUpDb()
@@ -36,6 +37,7 @@ public partial class ReportsPage : ContentPage
 
         PopulateTableSection(selectedYear);
         SummaryByCategory(selectedYear);
+        onLoad = false;
     }
 
     public async void PopulateTableSection(string selectedYear)
@@ -96,12 +98,15 @@ public partial class ReportsPage : ContentPage
 
     private async void yearPicker_SelectedIndexChanged(object sender, EventArgs e)
     {
-        string selectedYear = yearPicker.SelectedItem.ToString();
-        LoadIncomeExpenseReport(selectedYear);
+        if (onLoad == false)
+        {
+            string selectedYear = yearPicker.SelectedItem.ToString();
+            LoadIncomeExpenseReport(selectedYear);
+        }
     }
 
     public async void SummaryByCategory(string selectedYear)
-    {       
+    {
         DateTime yearBegin = new DateTime(Convert.ToInt32(selectedYear), 1, 1, 0, 0, 0);
         DateTime yearEnd = new DateTime(Convert.ToInt32(selectedYear), 12, 31, 23, 59, 59);
         var categories = await _dbConnection.QueryAsync<IncomeExpenseModel>("select CategoryName from IncomeExpenseModel Group By CategoryName");
@@ -110,24 +115,36 @@ public partial class ReportsPage : ContentPage
         double total = 0;
         foreach (var category in categories)
         {
+            total = 0;
             if (!string.IsNullOrEmpty(category.CategoryName))
             {
-                total = 0;
                 foreach (var item in records)
                 {
                     if (item.CategoryName == category.CategoryName)
                     {
                         total = total + item.Amount;
                     }
-                   
                 }
-                TextCell objCategory = new TextCell();
-                objCategory.Text = category.CategoryName;
-                objCategory.TextColor = Colors.DarkBlue;
-                objCategory.Detail = string.Format(new CultureInfo("en-IN"), "{0:C0}", total);
-                objCategory.Height = 40;
-                tblscCategoryWiseReport.Add(objCategory);
-            }         
+            }
+            //new code
+            if (string.IsNullOrEmpty(category.CategoryName))
+            {
+                foreach (var item in records)
+                {
+                    if (string.IsNullOrEmpty(item.CategoryName))
+                    {
+                        total = total + item.Amount;
+                    }
+                }
+                category.CategoryName = "Uncategorized Expense";
+            }
+            //new code
+            TextCell objCategory = new TextCell();
+            objCategory.Text = category.CategoryName;
+            objCategory.TextColor = Colors.DarkBlue;
+            objCategory.Detail = string.Format(new CultureInfo("en-IN"), "{0:C0}", total);
+            objCategory.Height = 40;
+            tblscCategoryWiseReport.Add(objCategory);
         }
 
         tblscCategoryWiseReport.Title = "Category Wise Report " + selectedYear;
