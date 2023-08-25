@@ -8,7 +8,6 @@ using Google.Cloud.Firestore;
 using Microsoft.Maui.Graphics;
 using Mopups.Interfaces;
 using Newtonsoft.Json;
-using Plugin.LocalNotification;
 using SQLite;
 using System.Data;
 using System.Globalization;

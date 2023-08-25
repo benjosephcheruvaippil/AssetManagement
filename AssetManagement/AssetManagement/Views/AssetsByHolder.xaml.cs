@@ -33,20 +33,14 @@ public partial class AssetsByHolder
     public async Task ShowAssetsByHolder()
     {
         await SetUpDb();
-        List<Assets> records = await _dbConnection.Table<Assets>().OrderBy(d => d.Type).ToListAsync();
-
-        var investmentEntity = records
-            .Where(w => w.Holder == _holderName)
-            .Select(entity => new EntitywiseModel
-            {
-                InvestmentEntity = entity.InvestmentEntity,
-                TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Amount)
-            }).ToList();
+        string query = "select InvestmentEntity,Sum(Amount) as Amount from Assets where Holder='" + _holderName + "' group by InvestmentEntity " +
+            "order by InvestmentEntity ASC";
+        var investmentEntity = await _dbConnection.QueryAsync<Assets>(query);
 
         foreach (var item in investmentEntity)
         {
             Label name = new Label();
-            name.Text = item.InvestmentEntity + " = " + item.TotalAmount;
+            name.Text = item.InvestmentEntity + " = " + item.Amount;
             name.FontSize = 18;
             name.FontAttributes = FontAttributes.Bold;
             Line objLine = new Line

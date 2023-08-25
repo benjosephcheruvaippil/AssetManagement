@@ -68,13 +68,6 @@
                 FontSize="20"
                 HorizontalOptions="Center" />
 
-            <Button
-                x:Name="AssetsMaturingSoon"
-                Text="Assets Maturing Soon"
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="AssetsMaturingSoon_Clicked"
-                HorizontalOptions="Center" />
-
             <CollectionView ItemsSource="{Binding AssetDetails}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Assets">

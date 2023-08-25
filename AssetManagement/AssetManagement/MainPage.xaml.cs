@@ -2,7 +2,6 @@
 using AssetManagement.ViewModels;
 using CommunityToolkit.Mvvm.Input;
 using ExcelDataReader;
-using Plugin.LocalNotification;
 using SQLite;
 using System.Collections.ObjectModel;
 using System.Data;
@@ -146,39 +145,6 @@ public partial class MainPage : ContentPage
         lblProjectedAssetValue.Text = "Projected Asset Value: Rs." + Math.Round(projectedAmount, 2);
 
 
-    }
-
-    private async void AssetsMaturingSoon_Clicked(object sender, EventArgs e)
-    {
-        await SetUpDb();
-        List<Assets> records = await _dbConnection.Table<Assets>().ToListAsync();
-        List<Assets> assetsMaturingIn10Days = (from rec in records
-                                               where (rec.MaturityDate < DateTime.Now.AddDays(60))
-                                               select new Assets
-                                               {
-                                                   InvestmentEntity = rec.InvestmentEntity,
-                                                   Amount = rec.Amount,
-                                                   MaturityDate = rec.MaturityDate
-                                               }).ToList();
-        foreach (var asset in assetsMaturingIn10Days)
-        {
-            var request = new NotificationRequest
-            {
-                NotificationId = 1000,
-                Title = asset.InvestmentEntity,
-                Subtitle = Convert.ToString(asset.MaturityDate),
-                Description = Convert.ToString(asset.Amount),
-                BadgeNumber = 42,
-                Schedule = new NotificationRequestSchedule
-                {
-                    NotifyTime = DateTime.Now.AddSeconds(5),
-                    NotifyRepeatInterval = TimeSpan.FromDays(1)
-                }
-            };
-            await LocalNotificationCenter.Current.Show(request);
-        }
-
-        //GetAssetsList();
     }
 }
 
