@@ -310,11 +310,12 @@ public partial class AssetListPage : TabbedPage
         }
         if (string.IsNullOrEmpty(txtTransactionId.Text))//insert
         {
+
             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
             {
                 Amount = Convert.ToDouble(entryExpenseAmount.Text),
                 TransactionType = "Expense",
-                Date = DateTime.Now,
+                Date = dpDateExpense.Date != DateTime.Now.Date ? dpDateExpense.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerExpenseCategory.SelectedItem),
                 Remarks = entryExpenseRemarks.Text
             };
@@ -340,7 +341,7 @@ public partial class AssetListPage : TabbedPage
                 TransactionId = Convert.ToInt32(txtTransactionId.Text),
                 Amount = Convert.ToDouble(entryExpenseAmount.Text),
                 TransactionType = "Expense",
-                Date = DateTime.Now,
+                Date = dpDateExpense.Date != DateTime.Now.Date ? dpDateExpense.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerExpenseCategory.SelectedItem),
                 Remarks = entryExpenseRemarks.Text
             };
@@ -367,28 +368,42 @@ public partial class AssetListPage : TabbedPage
     {
 
         var tappedViewCell = (TextCell)sender;
-        pickerExpenseCategory.SelectedItem = tappedViewCell.Text.ToString().Split("|")[0].Trim();
+        var textCell = tappedViewCell.Text.ToString().Split("|");
+        string date = textCell[1].Trim().Split(" ")[0];
+        int year = Convert.ToInt32(date.Split("-")[2]);
+        int month = Convert.ToInt32(date.Split("-")[1]);
+        int day = Convert.ToInt32(date.Split("-")[0]);
+
+        pickerExpenseCategory.SelectedItem = textCell[0].Trim();
 
         if (tappedViewCell.Detail.Contains("-"))
         {
+            dpDateExpense.Date = new DateTime(year, month, day);
+
             entryExpenseAmount.Text = tappedViewCell.Detail.Split("-")[0].Trim();
             entryExpenseRemarks.Text = tappedViewCell.Detail.Split("-")[1].Trim();
         }
         else
         {
+            dpDateExpense.Date = new DateTime(year, month, day);
+
             entryExpenseAmount.Text = tappedViewCell.Detail;
             entryExpenseRemarks.Text = "";
         }
 
-        txtTransactionId.Text = tappedViewCell.Text.ToString().Split("|")[2].Trim();
+        txtTransactionId.Text = textCell[2].Trim();
     }
 
     private async void LoadExpensesInPage()
     {
         pickerExpenseCategory.SelectedItem = "Household Items"; //set this value by default
+        dpDateExpense.MinimumDate = new DateTime(2020, 1, 1);
+        dpDateExpense.MaximumDate = new DateTime(2050, 12, 31);
+        dpDateExpense.Date = DateTime.Now;
+        dpDateExpense.Format = "dd-MM-yyyy";
         tblscExpenses.Clear();
         await SetUpDb();
-        
+
         List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
 
         foreach (var item in expenses)
@@ -413,9 +428,15 @@ public partial class AssetListPage : TabbedPage
 
     private async void LoadIncomeInPage()
     {
+        //set date
+        dpDateIncome.MinimumDate = new DateTime(2020, 1, 1);
+        dpDateIncome.MaximumDate = new DateTime(2050, 12, 31);
+        dpDateIncome.Date = DateTime.Now;
+        dpDateIncome.Format = "dd-MM-yyyy";
+        //set date
         tblscIncome.Clear();
         await SetUpDb();
-        
+
         List<IncomeExpenseModel> income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 5");
 
         foreach (var item in income)
@@ -441,20 +462,30 @@ public partial class AssetListPage : TabbedPage
     private void ObjCell_IncomeTapped(object sender, EventArgs e)
     {
         var tappedViewCell = (TextCell)sender;
-        pickerIncomeCategory.SelectedItem = tappedViewCell.Text.ToString().Split("|")[0].Trim();
+        var textCell = tappedViewCell.Text.ToString().Split("|");
+        string date = textCell[1].Trim().Split(" ")[0];
+        int year = Convert.ToInt32(date.Split("-")[2]);
+        int month = Convert.ToInt32(date.Split("-")[1]);
+        int day = Convert.ToInt32(date.Split("-")[0]);
+
+        pickerIncomeCategory.SelectedItem = textCell[0].Trim();
 
         if (tappedViewCell.Detail.Contains("-"))
         {
+            dpDateIncome.Date = new DateTime(year, month, day);
+
             entryIncomeAmount.Text = tappedViewCell.Detail.Split("-")[0].Trim();
             entryIncomeRemarks.Text = tappedViewCell.Detail.Split("-")[1].Trim();
         }
         else
         {
+            dpDateIncome.Date = new DateTime(year, month, day);
+
             entryIncomeAmount.Text = tappedViewCell.Detail;
             entryIncomeRemarks.Text = "";
         }
 
-        txtIncomeTransactionId.Text = tappedViewCell.Text.ToString().Split("|")[2].Trim();
+        txtIncomeTransactionId.Text = textCell[2].Trim();
     }
 
     private void btnClearExpense_Clicked(object sender, EventArgs e)
@@ -468,6 +499,7 @@ public partial class AssetListPage : TabbedPage
         entryExpenseAmount.Text = "";
         pickerExpenseCategory.SelectedIndex = -1;
         entryExpenseRemarks.Text = "";
+        dpDateExpense.Date = DateTime.Now;
     }
 
     private async void btnUploadData_Clicked(object sender, EventArgs e)
@@ -661,17 +693,18 @@ public partial class AssetListPage : TabbedPage
             {
                 Amount = Convert.ToDouble(entryIncomeAmount.Text),
                 TransactionType = "Income",
-                Date = DateTime.Now,
+                Date = dpDateIncome.Date != DateTime.Now.Date ? dpDateIncome.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerIncomeCategory.SelectedItem),
                 Remarks = entryIncomeRemarks.Text
             };
             await SetUpDb();
             int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpense);
             entryIncomeAmount.Text = "";
-            entryExpenseRemarks.Text = "";
+            entryIncomeRemarks.Text = "";
             if (rowsAffected > 0)
             {
                 LoadIncomeInPage();
+                //ClearIncome();
             }
             else
             {
@@ -685,7 +718,7 @@ public partial class AssetListPage : TabbedPage
                 TransactionId = Convert.ToInt32(txtIncomeTransactionId.Text),
                 Amount = Convert.ToDouble(entryIncomeAmount.Text),
                 TransactionType = "Income",
-                Date = DateTime.Now,
+                Date = dpDateIncome.Date != DateTime.Now.Date ? dpDateIncome.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerIncomeCategory.SelectedItem),
                 Remarks = entryIncomeRemarks.Text
             };
@@ -698,6 +731,7 @@ public partial class AssetListPage : TabbedPage
             if (rowsAffected > 0)
             {
                 LoadIncomeInPage();
+                //ClearIncome();
             }
             else
             {
@@ -717,6 +751,7 @@ public partial class AssetListPage : TabbedPage
         entryIncomeAmount.Text = "";
         pickerIncomeCategory.SelectedIndex = -1;
         entryIncomeRemarks.Text = "";
+        dpDateIncome.Date = DateTime.Now;
     }
 
     private async void btnGoToReports_Clicked(object sender, EventArgs e)
