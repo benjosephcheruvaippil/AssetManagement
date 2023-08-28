@@ -26,9 +26,10 @@ namespace AssetManagement.ViewModels
         }
 
         [RelayCommand]
-        public async void GetAssetsList()
+        public async Task<decimal> GetAssetsList()
         {
             AssetDetails.Clear();
+            decimal MaturingAssetsTotalValue = 0;
             List<Assets> records = await _assetService.GetAssetsList();
             List<MaturingAssets> assetsMaturingIn10Days = (from rec in records
                                                    where (rec.MaturityDate < DateTime.Now.AddDays(20) || rec.MaturityDate < DateTime.Now)
@@ -46,17 +47,21 @@ namespace AssetManagement.ViewModels
                     if (asset.MaturityDate.ToString("dd-MM-yyyy") != "01-01-0001")
                     {
                         decimal amount = Convert.ToDecimal(asset.Amount);
+                        MaturingAssetsTotalValue = MaturingAssetsTotalValue + amount;
                         asset.HolderName = asset.HolderName;
                         asset.Amount = string.Format(new CultureInfo("en-IN"), "{0:C0}", amount);
                         AssetDetails.Add(asset);
                     }
                 }
             }
+
+            return MaturingAssetsTotalValue;
         }
 
-        public async void GetMaturingAssetsListByDaysLeft(int daysLeft)
+        public async Task<decimal> GetMaturingAssetsListByDaysLeft(int daysLeft)
         {
             AssetDetails.Clear();
+            decimal MaturingAssetsTotalValue = 0;
             List<Assets> records = await _assetService.GetAssetsList();
             List<MaturingAssets> assetsMaturingIn10Days = (from rec in records
                                                            where (rec.MaturityDate < DateTime.Now.AddDays(daysLeft) || rec.MaturityDate < DateTime.Now)
@@ -68,18 +73,21 @@ namespace AssetManagement.ViewModels
                                                                MaturityDate = rec.MaturityDate
                                                            }).OrderBy(o => o.MaturityDate).ToList();
             if (assetsMaturingIn10Days?.Count > 0)
-            {
+            {              
                 foreach (var asset in assetsMaturingIn10Days)
                 {
                     if (asset.MaturityDate.ToString("dd-MM-yyyy") != "01-01-0001")
                     {
                         decimal amount = Convert.ToDecimal(asset.Amount);
+                        MaturingAssetsTotalValue = MaturingAssetsTotalValue + amount;
                         asset.HolderName = asset.HolderName;
                         asset.Amount = string.Format(new CultureInfo("en-IN"), "{0:C0}", amount);
                         AssetDetails.Add(asset);
                     }
                 }
             }
+
+            return MaturingAssetsTotalValue;
         }
     }
 }

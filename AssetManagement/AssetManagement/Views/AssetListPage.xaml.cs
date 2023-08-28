@@ -82,7 +82,7 @@ public partial class AssetListPage : TabbedPage
         else if (selectedTab.Title == "Asset Details")
         {
             //base.OnAppearing();
-            _viewModel.GetAssetsList();
+            await _viewModel.GetAssetsList();
             await ShowPrimaryAssetDetails();
         }
     }
@@ -97,7 +97,7 @@ public partial class AssetListPage : TabbedPage
         LoadIncomeInPage();
         await ShowCurrentMonthIncome();
 
-        _viewModel.GetAssetsList();
+        lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", await _viewModel.GetAssetsList());
         await ShowPrimaryAssetDetails();
     }
 
@@ -291,14 +291,14 @@ public partial class AssetListPage : TabbedPage
 
     }
 
-    private void entryDays_TextChanged(object sender, TextChangedEventArgs e)
+    private async void entryDays_TextChanged(object sender, TextChangedEventArgs e)
     {
         string daysLeft = entryDays.Text;
         if (string.IsNullOrEmpty(entryDays.Text))
         {
             daysLeft = "0";
         }
-        _viewModel.GetMaturingAssetsListByDaysLeft(Convert.ToInt32(daysLeft));
+        lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", await _viewModel.GetMaturingAssetsListByDaysLeft(Convert.ToInt32(daysLeft)));
     }
 
     private async void btnSaveExpense_Clicked(object sender, EventArgs e)
