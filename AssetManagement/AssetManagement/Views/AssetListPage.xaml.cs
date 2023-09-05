@@ -127,8 +127,9 @@ public partial class AssetListPage : TabbedPage
     {
         DateTime currentDate = DateTime.Now;
         string currentMonth = currentDate.ToString("MMMM");
-        DateTime startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
-        DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+        DateTime startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1, 0, 0, 0);
+        int lastDayOfMonth = DateTime.DaysInMonth(currentDate.Year, currentDate.Month);
+        DateTime endOfMonth = new DateTime(currentDate.Year, currentDate.Month, lastDayOfMonth, 23, 59, 59);
 
         await SetUpDb();
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Expense" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
@@ -141,7 +142,8 @@ public partial class AssetListPage : TabbedPage
         DateTime currentDate = DateTime.Now;
         string currentMonth = currentDate.ToString("MMMM");
         DateTime startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
-        DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+        int lastDayOfMonth = DateTime.DaysInMonth(currentDate.Year, currentDate.Month);
+        DateTime endOfMonth = new DateTime(currentDate.Year, currentDate.Month, lastDayOfMonth, 23, 59, 59);
 
         await SetUpDb();
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Income" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
