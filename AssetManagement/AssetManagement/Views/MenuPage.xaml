@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AssetManagement.Views.MenuPage"
+             Title="MenuPage">
+    <ScrollView>
+        <VerticalStackLayout VerticalOptions="Start"
+                         HorizontalOptions="Center">
+            <BoxView HeightRequest="20" Color="Transparent"></BoxView>
+            <Button 
+    x:Name="btnExpensePage"
+    x:FieldModifier="public"
+    Text="Expense"
+    VerticalOptions="Start" 
+    HorizontalOptions="Center"/>
+            <BoxView HeightRequest="20" Color="Transparent"></BoxView>
+            <Button 
+    x:Name="btnIncomePage"
+    x:FieldModifier="public"
+    Text="Income"
+    VerticalOptions="Start" 
+    HorizontalOptions="Center"/>
+            <BoxView HeightRequest="20" Color="Transparent"></BoxView>
+            <Button 
+    x:Name="btnAssetPage"
+    x:FieldModifier="public"
+    Text="Asset Details"
+    VerticalOptions="Start" 
+    HorizontalOptions="Center"/>
+        </VerticalStackLayout>
+    </ScrollView>
+    
+</ContentPage>
