@@ -82,7 +82,7 @@ public partial class AssetListPage : TabbedPage
         else if (selectedTab.Title == "Asset Details")
         {
             //base.OnAppearing();
-            _viewModel.GetAssetsList();
+            await _viewModel.GetAssetsList();
             await ShowPrimaryAssetDetails();
         }
     }
@@ -97,7 +97,7 @@ public partial class AssetListPage : TabbedPage
         LoadIncomeInPage();
         await ShowCurrentMonthIncome();
 
-        _viewModel.GetAssetsList();
+        lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", await _viewModel.GetAssetsList());
         await ShowPrimaryAssetDetails();
     }
 
@@ -127,8 +127,9 @@ public partial class AssetListPage : TabbedPage
     {
         DateTime currentDate = DateTime.Now;
         string currentMonth = currentDate.ToString("MMMM");
-        DateTime startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
-        DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+        DateTime startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1, 0, 0, 0);
+        int lastDayOfMonth = DateTime.DaysInMonth(currentDate.Year, currentDate.Month);
+        DateTime endOfMonth = new DateTime(currentDate.Year, currentDate.Month, lastDayOfMonth, 23, 59, 59);
 
         await SetUpDb();
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Expense" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
@@ -141,7 +142,8 @@ public partial class AssetListPage : TabbedPage
         DateTime currentDate = DateTime.Now;
         string currentMonth = currentDate.ToString("MMMM");
         DateTime startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
-        DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+        int lastDayOfMonth = DateTime.DaysInMonth(currentDate.Year, currentDate.Month);
+        DateTime endOfMonth = new DateTime(currentDate.Year, currentDate.Month, lastDayOfMonth, 23, 59, 59);
 
         await SetUpDb();
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Income" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
@@ -291,14 +293,14 @@ public partial class AssetListPage : TabbedPage
 
     }
 
-    private void entryDays_TextChanged(object sender, TextChangedEventArgs e)
+    private async void entryDays_TextChanged(object sender, TextChangedEventArgs e)
     {
         string daysLeft = entryDays.Text;
         if (string.IsNullOrEmpty(entryDays.Text))
         {
             daysLeft = "0";
         }
-        _viewModel.GetMaturingAssetsListByDaysLeft(Convert.ToInt32(daysLeft));
+        lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", await _viewModel.GetMaturingAssetsListByDaysLeft(Convert.ToInt32(daysLeft)));
     }
 
     private async void btnSaveExpense_Clicked(object sender, EventArgs e)

@@ -241,6 +241,11 @@
                Keyboard="Numeric"
                TextChanged="entryDays_TextChanged" />
 
+                <Label x:Name="lblMaturingAssetsTotalValue" Text="Total Value: "
+                TextColor="Green" 
+                FontAttributes="Bold"
+                FontSize="17"/>
+
                 <CollectionView ItemsSource="{Binding AssetDetails}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:MaturingAssets">

@@ -40,7 +40,7 @@ public partial class AssetsByHolder
         foreach (var item in investmentEntity)
         {
             Label name = new Label();
-            name.Text = item.InvestmentEntity + " = " + item.Amount;
+            name.Text = item.InvestmentEntity + " = " + string.Format(new CultureInfo("en-IN"), "{0:C0}", item.Amount);
             name.FontSize = 18;
             name.FontAttributes = FontAttributes.Bold;
             Line objLine = new Line
