@@ -1,8 +1,8 @@
 namespace AssetManagement.Views;
 
-public partial class TestPage : ContentPage
+public partial class AssetPage : ContentPage
 {
-	public TestPage()
+	public AssetPage()
 	{
 		InitializeComponent();
 	}

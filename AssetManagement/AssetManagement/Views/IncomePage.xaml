@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AssetManagement.Views.IncomePage"
+             Title="Income">
+    <ScrollView>
+            <VerticalStackLayout>
+                <Entry x:Name="txtIncomeTransactionId"
+           IsVisible="false" />
+
+                <Entry x:Name="entryIncomeAmount"
+           Placeholder="Enter amount"
+           Keyboard="Numeric" />
+
+                <Picker x:Name="pickerIncomeCategory" Title="Select category">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>Salary</x:String>
+                            <x:String>Passive Income</x:String>
+                            <x:String>Business Income</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
+
+                <DatePicker x:Name="dpDateIncome"/>
+
+                <Entry x:Name="entryIncomeRemarks"
+           Placeholder="Enter remarks" />
+
+                <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                    <Button
+                x:Name="btnSaveIncome"
+                Text="Save Income"
+                Margin="0,0,5,0"
+                Clicked="btnSaveIncome_Clicked"/>
+
+                    <Button
+                x:Name="btnDeleteIncome"
+                Text="Delete Income"
+                Margin="0,0,5,0"
+                Clicked="btnDeleteIncome_Clicked"/>
+
+                    <Button
+                x:Name="btnClearIncome"
+                Text="Clear"
+                Margin="5,0,0,0"
+                Clicked="btnClearIncome_Clicked"/>
+                </StackLayout>
+                <TableView x:Name="tblviewIncome" Intent="Menu">
+                    <TableRoot>
+                        <TableSection x:Name="tblscIncome" Title="Last 5 Transactions">
+                        </TableSection>
+                    </TableRoot>
+                </TableView>
+                <BoxView HeightRequest="50" Color="Transparent"/>
+                <Label x:Name="lblCurrentMonthIncome" FontSize="Large" Text="" HorizontalOptions="CenterAndExpand"></Label>
+            </VerticalStackLayout>
+        </ScrollView>
+    </ContentPage>

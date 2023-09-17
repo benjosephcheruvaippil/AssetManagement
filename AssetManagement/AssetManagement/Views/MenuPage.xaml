@@ -27,6 +27,20 @@
     Text="Asset Details"
     VerticalOptions="Start" 
     HorizontalOptions="Center"/>
+            <BoxView HeightRequest="20" Color="Transparent"></BoxView>
+            <Button 
+x:Name="btnIncomeExpenseReport"
+x:FieldModifier="public"
+Text="Income Expense Report"
+VerticalOptions="Start" 
+HorizontalOptions="Center"/>
+            <BoxView HeightRequest="20" Color="Transparent"></BoxView>
+            <Button 
+x:Name="btnAssetReport"
+x:FieldModifier="public"
+Text="Asset Report"
+VerticalOptions="Start" 
+HorizontalOptions="Center"/>
         </VerticalStackLayout>
     </ScrollView>
     

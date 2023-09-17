@@ -10,7 +10,7 @@
     <FlyoutPage.Detail>
         <NavigationPage>
             <x:Arguments>
-                <local:TestPage/>
+                <local:ExpensePage/>
             </x:Arguments>
         </NavigationPage>
         <!--<Shell>
