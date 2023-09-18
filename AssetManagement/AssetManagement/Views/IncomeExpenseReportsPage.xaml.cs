@@ -7,14 +7,14 @@ using System.Linq;
 
 namespace AssetManagement.Views;
 
-public partial class ReportsPage : ContentPage
+public partial class IncomeExpenseReportsPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
     private bool onLoad = false;
-    public ReportsPage(SQLiteAsyncConnection dbConnection)
+    public IncomeExpenseReportsPage()
     {
         InitializeComponent();
-        _dbConnection = dbConnection;
+        //_dbConnection = dbConnection;
         onLoad = true;
         LoadIncomeExpenseReport(DateTime.Now.Year.ToString());
     }

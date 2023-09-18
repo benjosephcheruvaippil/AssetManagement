@@ -758,7 +758,7 @@ public partial class AssetListPage : TabbedPage
 
     private async void btnGoToReports_Clicked(object sender, EventArgs e)
     {
-        await Navigation.PushAsync(new ReportsPage(_dbConnection));
+        await Navigation.PushAsync(new IncomeExpenseReportsPage());
     }
 
     private async void btnDeleteExpense_Clicked(object sender, EventArgs e)
@@ -803,6 +803,6 @@ public partial class AssetListPage : TabbedPage
 
     private async void btnAssetReport_Clicked(object sender, EventArgs e)
     {
-        await Navigation.PushAsync(new AssetReportPage(_dbConnection, _popupNavigation));
+        await Navigation.PushAsync(new AssetReportPage(_popupNavigation));
     }
 }

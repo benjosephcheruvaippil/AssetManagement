@@ -1,6 +1,7 @@
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using Mopups.Interfaces;
+using SQLite;
 
 namespace AssetManagement.Views;
 
@@ -42,20 +43,20 @@ public partial class AppFlyoutPage : FlyoutPage
     {
         if (!((IFlyoutPageController)this).ShouldShowSplitMode)
             IsPresented = false;
-        Detail = new NavigationPage(new AssetPage());
+        Detail = new NavigationPage(new AssetPage(_viewModel, _popupNavigation, _assetService));
     }
 
     private void OpenIncomeExpenseReportPageClicked(object sender, EventArgs e)
     {
         if (!((IFlyoutPageController)this).ShouldShowSplitMode)
             IsPresented = false;
-        Detail = new NavigationPage(new AssetListPage(_viewModel, _popupNavigation, _assetService));
+        Detail = new NavigationPage(new IncomeExpenseReportsPage());
     }
 
     private void OpenAssetReportPageClicked(object sender, EventArgs e)
     {
         if (!((IFlyoutPageController)this).ShouldShowSplitMode)
             IsPresented = false;
-        Detail = new NavigationPage(new AssetListPage(_viewModel, _popupNavigation, _assetService));
+        Detail = new NavigationPage(new AssetReportPage(_popupNavigation));
     }
 }

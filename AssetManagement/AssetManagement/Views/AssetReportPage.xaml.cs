@@ -12,10 +12,9 @@ public partial class AssetReportPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
     private IPopupNavigation _popupNavigation;
-    public AssetReportPage(SQLiteAsyncConnection dbConnection, IPopupNavigation popupNavigation)
+    public AssetReportPage(IPopupNavigation popupNavigation)
 	{
 		InitializeComponent();
-        _dbConnection = dbConnection;
         _popupNavigation=popupNavigation;
         SummaryByHolderName();
         ShowAssetsByEquityAndDebt();

@@ -1,12 +1,142 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:AssetManagement.Models"
+             xmlns:viewModels="clr-namespace:AssetManagement.ViewModels"
+             x:DataType="viewModels:AssetListPageViewModel"
              x:Class="AssetManagement.Views.AssetPage"
              Title="AssetPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
+    <ScrollView>
+            <VerticalStackLayout
+        Spacing="25"
+        Padding="30,0"
+        VerticalOptions="Center">
+
+                <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                    <Button
+                x:Name="PickFile"
+                Text="Pick File"
+                Clicked="PickFileClicked"
+                HorizontalOptions="Center" />
+
+                </StackLayout>
+
+                <Label
+            x:Name="lblBank"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
             HorizontalOptions="Center" />
-    </VerticalStackLayout>
+                <Label
+            x:Name="lblNCD"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+                <Label
+            x:Name="lblMLD"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblInsuranceMF"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblPPF"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblEPF"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblMF"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblStocks"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblNetAssetValue"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="20"
+            HorizontalOptions="Center" />
+                <Label
+            x:Name="lblProjectedAssetValue"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="20"
+            HorizontalOptions="Center" />
+
+                <Label Text="Matured/Maturing Soon" 
+         TextColor="Blue" 
+         FontAttributes="Bold" 
+         FontSize="25"/>
+
+                <Entry x:Name="entryDays"
+           Placeholder="Enter days left"
+           Keyboard="Numeric"
+           TextChanged="entryDays_TextChanged" />
+
+                <Label x:Name="lblMaturingAssetsTotalValue" Text="Total Value: "
+            TextColor="Green" 
+            FontAttributes="Bold"
+            FontSize="17"/>
+
+                <CollectionView ItemsSource="{Binding AssetDetails}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:MaturingAssets">
+                            <SwipeView>
+                                <SwipeView.LeftItems>
+                                    <SwipeItems>
+                                        <SwipeItemView>
+                                            <VerticalStackLayout  BackgroundColor="LightBlue">
+                                                <Label Text="Edit" 
+                                           HorizontalTextAlignment="Center" 
+                                           VerticalTextAlignment="Center" FontAttributes="Bold" TextColor="White" />
+                                            </VerticalStackLayout>
+                                        </SwipeItemView>
+                                        <SwipeItemView>
+                                            <VerticalStackLayout BackgroundColor="Red">
+                                                <Label Text="Delete" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontAttributes="Bold" TextColor="White" />
+                                            </VerticalStackLayout>
+                                        </SwipeItemView>
+                                    </SwipeItems>
+                                </SwipeView.LeftItems>
+                                <Frame Margin="10" Padding="10" BackgroundColor="Aqua">
+                                    <VerticalStackLayout>
+                                        <Label Text="{Binding InvestmentEntity}" FontSize="18" FontAttributes="Bold" />
+                                        <Label Text="{Binding MaturityDate,StringFormat='{0:MMMM dd, yyyy}'}" FontSize="18" FontAttributes="Bold" />
+                                        <Label Text="{Binding HolderName}" FontSize="17" />
+                                        <Label Text="{Binding Amount}" FontSize="15" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </SwipeView>
+
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
 </ContentPage>

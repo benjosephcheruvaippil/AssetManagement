@@ -86,6 +86,9 @@
 	  <Compile Update="Views\ExpensePage.xaml.cs">
 	    <DependentUpon>ExpensePage.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Views\IncomeExpenseReportsPage.xaml.cs">
+	    <DependentUpon>IncomeExpenseReportsPage.xaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -113,7 +116,7 @@
 	  <MauiXaml Update="Views\MenuPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\ReportsPage.xaml">
+	  <MauiXaml Update="Views\IncomeExpenseReportsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\ExpensePage.xaml">
