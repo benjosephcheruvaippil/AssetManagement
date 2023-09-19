@@ -7,6 +7,7 @@
         <VerticalStackLayout VerticalOptions="Start"
                          HorizontalOptions="Center">
             <BoxView HeightRequest="20" Color="Transparent"></BoxView>
+            <!--<Image Source="dotnet_bot.svg" />-->
             <Button 
     x:Name="btnExpensePage"
     x:FieldModifier="public"

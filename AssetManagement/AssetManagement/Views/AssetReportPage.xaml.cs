@@ -16,11 +16,12 @@ public partial class AssetReportPage : ContentPage
 	{
 		InitializeComponent();
         _popupNavigation=popupNavigation;
+        SetUpDb();
         SummaryByHolderName();
         ShowAssetsByEquityAndDebt();
     }
 
-    private async Task SetUpDb()
+    private void SetUpDb()
     {
         if (_dbConnection == null)
         {

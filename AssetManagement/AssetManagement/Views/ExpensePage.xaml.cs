@@ -25,6 +25,7 @@ public partial class ExpensePage : ContentPage
 
         LoadExpensesInPage();// show expenses in the expense tab
         await ShowCurrentMonthExpenses();
+        SetLastUploadedDate();
     }
 
     private async Task SetUpDb()

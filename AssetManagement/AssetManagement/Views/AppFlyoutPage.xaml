@@ -13,10 +13,5 @@
                 <local:ExpensePage/>
             </x:Arguments>
         </NavigationPage>
-        <!--<Shell>
-            <ShellContent>
-                <local:AssetListPage/>
-            </ShellContent>
-        </Shell>-->
     </FlyoutPage.Detail>
 </FlyoutPage>

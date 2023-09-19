@@ -5,7 +5,7 @@
              xmlns:viewModels="clr-namespace:AssetManagement.ViewModels"
              x:DataType="viewModels:AssetListPageViewModel"
              x:Class="AssetManagement.Views.AssetPage"
-             Title="AssetPage">
+             Title="Asset Details">
     <ScrollView>
             <VerticalStackLayout
         Spacing="25"
