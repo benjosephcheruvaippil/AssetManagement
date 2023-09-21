@@ -54,6 +54,10 @@
 
 	<ItemGroup>
 	  <None Remove="firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json" />
+	  <None Remove="Resources\Images\asset_icon.png" />
+	  <None Remove="Resources\Images\expense_icon.png" />
+	  <None Remove="Resources\Images\income_icon.png" />
+	  <None Remove="Resources\Images\report_icon.png" />
 	</ItemGroup>
 
 	<ItemGroup>

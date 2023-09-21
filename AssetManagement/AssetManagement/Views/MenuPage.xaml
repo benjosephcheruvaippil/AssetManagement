@@ -7,42 +7,76 @@
         <VerticalStackLayout VerticalOptions="Start"
                          HorizontalOptions="Center">
             <BoxView HeightRequest="20" Color="Transparent"></BoxView>
-            <!--<Image Source="dotnet_bot.svg" />-->
-            <Button 
-    x:Name="btnExpensePage"
-    x:FieldModifier="public"
-    Text="Expense"
-    VerticalOptions="Start" 
-    HorizontalOptions="Center"/>
+            <FlexLayout JustifyContent="Center">
+                <Image HeightRequest="40" WidthRequest="40" Source="expense_icon.svg"/>
+                <Button 
+                x:Name="btnExpensePage"
+                x:FieldModifier="public"
+                Text="Expense"
+                BackgroundColor="White"
+                TextColor="Black"
+                FontAttributes="Bold"
+                VerticalOptions="Start" 
+                HorizontalOptions="Center"/>
+            </FlexLayout>
+
             <BoxView HeightRequest="20" Color="Transparent"></BoxView>
-            <Button 
-    x:Name="btnIncomePage"
-    x:FieldModifier="public"
-    Text="Income"
-    VerticalOptions="Start" 
-    HorizontalOptions="Center"/>
+            <FlexLayout JustifyContent="Center">
+                <Image HeightRequest="40" WidthRequest="40" Source="income_icon.png" />
+                <Button 
+                x:Name="btnIncomePage"
+                x:FieldModifier="public"
+                Text="Income"
+                BackgroundColor="White"
+                TextColor="Black"
+                FontAttributes="Bold"
+                VerticalOptions="Start" 
+                HorizontalOptions="Center"/>
+            </FlexLayout>
+            
             <BoxView HeightRequest="20" Color="Transparent"></BoxView>
-            <Button 
-    x:Name="btnAssetPage"
-    x:FieldModifier="public"
-    Text="Asset Details"
-    VerticalOptions="Start" 
-    HorizontalOptions="Center"/>
+            <FlexLayout JustifyContent="Center">
+                <Image HeightRequest="40" WidthRequest="40" Source="asset_icon.png" />
+                <Button 
+                x:Name="btnAssetPage"
+                x:FieldModifier="public"
+                Text="Asset Details"
+                BackgroundColor="White"
+                TextColor="Black"
+                FontAttributes="Bold"
+                VerticalOptions="Start" 
+                HorizontalOptions="Center"/>
+            </FlexLayout>
+            
             <BoxView HeightRequest="20" Color="Transparent"></BoxView>
-            <Button 
-x:Name="btnIncomeExpenseReport"
-x:FieldModifier="public"
-Text="Income Expense Report"
-VerticalOptions="Start" 
-HorizontalOptions="Center"/>
+            <FlexLayout JustifyContent="Center">
+                <Image HeightRequest="40" WidthRequest="40" Source="report_icon.png" />
+                <Button 
+                x:Name="btnIncomeExpenseReport"
+                x:FieldModifier="public"
+                Text="Income Expense Report"
+                BackgroundColor="White"
+                TextColor="Black"
+                FontAttributes="Bold"
+                VerticalOptions="Start" 
+                HorizontalOptions="Center"/>
+            </FlexLayout>
+           
             <BoxView HeightRequest="20" Color="Transparent"></BoxView>
-            <Button 
-x:Name="btnAssetReport"
-x:FieldModifier="public"
-Text="Asset Report"
-VerticalOptions="Start" 
-HorizontalOptions="Center"/>
+            <FlexLayout JustifyContent="Center">
+                <Image HeightRequest="40" WidthRequest="40" Source="report_icon.png" />
+                <Button 
+                x:Name="btnAssetReport"
+                x:FieldModifier="public"
+                Text="Asset Report"
+                BackgroundColor="White"
+                TextColor="Black"
+                FontAttributes="Bold"
+                VerticalOptions="Start" 
+                HorizontalOptions="Center"/>
+            </FlexLayout>
+            
         </VerticalStackLayout>
     </ScrollView>
-    
+
 </ContentPage>
