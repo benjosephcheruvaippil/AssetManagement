@@ -54,6 +54,10 @@
 
 	<ItemGroup>
 	  <None Remove="firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json" />
+	  <None Remove="Resources\Images\asset_icon.png" />
+	  <None Remove="Resources\Images\expense_icon.png" />
+	  <None Remove="Resources\Images\income_icon.png" />
+	  <None Remove="Resources\Images\report_icon.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -77,7 +81,28 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Views\AppFlyoutPage.xaml.cs">
+	    <DependentUpon>%(Filename)</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\MenuPage.xaml.cs">
+	    <DependentUpon>%(Filename)</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\ExpensePage.xaml.cs">
+	    <DependentUpon>ExpensePage.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\IncomeExpenseReportsPage.xaml.cs">
+	    <DependentUpon>IncomeExpenseReportsPage.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Views\AppFlyoutPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\AssetListPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\AssetPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\AssetReportPage.xaml">
@@ -89,7 +114,16 @@
 	  <MauiXaml Update="Views\AssetsByHolder.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\ReportsPage.xaml">
+	  <MauiXaml Update="Views\IncomePage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\MenuPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\IncomeExpenseReportsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\ExpensePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

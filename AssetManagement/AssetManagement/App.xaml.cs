@@ -19,6 +19,7 @@ public partial class App : Application
         _popupNavigation= popupNavigation;
         _assetService= assetService;
 
-        MainPage = new NavigationPage(new AssetListPage(_viewModel, _popupNavigation, _assetService));
+        //MainPage = new NavigationPage(new AssetListPage(_viewModel, _popupNavigation, _assetService));
+        MainPage = new AppFlyoutPage(_viewModel, _popupNavigation, _assetService);
     }
 }
