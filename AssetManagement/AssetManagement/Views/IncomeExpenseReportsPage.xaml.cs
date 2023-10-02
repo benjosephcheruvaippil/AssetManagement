@@ -197,36 +197,51 @@ public partial class IncomeExpenseReportsPage : ContentPage
             workSheet.Column(3).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
             workSheet.Column(4).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
             workSheet.Column(5).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(6).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(7).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
             // Header of the Excel sheet
             workSheet.Cells[1, 1].Value = "Transaction Type";
             workSheet.Cells[1, 2].Value = "Date";
-            workSheet.Cells[1, 3].Value = "Category Name";
-            workSheet.Cells[1, 4].Value = "Amount";
-            workSheet.Cells[1, 5].Value = "Remarks";
+            workSheet.Cells[1, 3].Value = "Category Name";            
+            workSheet.Cells[1, 4].Value = "Owner Name";
+            workSheet.Cells[1, 5].Value = "Tax Cut";
+            workSheet.Cells[1, 6].Value = "Amount";
+            workSheet.Cells[1, 7].Value = "Remarks";
 
             int recordIndex = 2;
-            decimal totalIncome = 0;
+            decimal totalIncome = 0,totalTaxCut=0;
             foreach (var income in incomeList)
             {
                 workSheet.Cells[recordIndex, 1].Value = income.TransactionType;
                 workSheet.Cells[recordIndex, 2].Value = income.Date.ToString("dd-MM-yyyy");
                 workSheet.Cells[recordIndex, 3].Value = income.CategoryName;
-                workSheet.Cells[recordIndex, 4].Value = income.Amount;
-                workSheet.Cells[recordIndex, 5].Value = income.Remarks;
+                workSheet.Cells[recordIndex, 4].Value = income.OwnerName;
+                workSheet.Cells[recordIndex, 5].Value = income.TaxAmountCut;
+                workSheet.Cells[recordIndex, 6].Value = income.Amount;
+                workSheet.Cells[recordIndex, 7].Value = income.Remarks;
                 workSheet.Row(recordIndex).Height = 16;
+                totalTaxCut = totalTaxCut + Convert.ToDecimal(income.TaxAmountCut);
                 totalIncome = totalIncome + Convert.ToDecimal(income.Amount);
                 recordIndex++;
             }
 
-            workSheet.Cells[recordIndex, 3].Value = "Total Income";
-            workSheet.Cells[recordIndex, 4].Value = totalIncome;
+            recordIndex++;
+            //workSheet.Cells[recordIndex, 3].Value = "Total Income";
+            //workSheet.Cells[recordIndex, 3].Style.Font.Bold = true;
+            workSheet.Cells[recordIndex, 5].Value = totalTaxCut;
+            workSheet.Cells[recordIndex, 5].Style.Font.Bold = true;
+            workSheet.Cells[recordIndex, 6].Value = totalIncome;
+            workSheet.Cells[recordIndex, 6].Style.Font.Bold = true;
+            
 
             workSheet.Column(1).AutoFit();
             workSheet.Column(2).AutoFit();
             workSheet.Column(3).AutoFit();
             workSheet.Column(4).AutoFit();
             workSheet.Column(5).AutoFit();
+            workSheet.Column(6).AutoFit();
+            workSheet.Column(7).AutoFit();
 
             //Context currentContext = Android.App.Application.Context;
             //string directory = Path.Combine(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath, Android.OS.Environment.DirectoryDocuments);
