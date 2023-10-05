@@ -84,18 +84,25 @@ public partial class IncomePage : ContentPage
         var tappedViewCell = (TextCell)sender;
         var textCell = tappedViewCell.Text.ToString().Split("|");
         string date = textCell[1].Trim().Split(" ")[0];
+        int transactionId = Convert.ToInt32(textCell[2].Trim());
         int year = Convert.ToInt32(date.Split("-")[2]);
         int month = Convert.ToInt32(date.Split("-")[1]);
         int day = Convert.ToInt32(date.Split("-")[0]);
 
+        //call database to get corresponding Id details
+        var incomeDetail = _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionId == transactionId).FirstOrDefaultAsync();
+        //call database to get corresponding Id details
+
         pickerIncomeCategory.SelectedItem = textCell[0].Trim();
+        pickerOwnerName.SelectedItem = incomeDetail.Result.OwnerName;
+        entryTaxAmount.Text = Convert.ToString(incomeDetail.Result.TaxAmountCut);      
 
         if (tappedViewCell.Detail.Contains("-"))
         {
             dpDateIncome.Date = new DateTime(year, month, day);
 
             entryIncomeAmount.Text = tappedViewCell.Detail.Split("-")[0].Trim();
-            entryIncomeRemarks.Text = tappedViewCell.Detail.Split("-")[1].Trim();
+            entryIncomeRemarks.Text = tappedViewCell.Detail.Split("-")[1].Trim();  
         }
         else
         {
@@ -120,14 +127,17 @@ public partial class IncomePage : ContentPage
             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
             {
                 Amount = Convert.ToDouble(entryIncomeAmount.Text),
+                TaxAmountCut=Convert.ToDouble(entryTaxAmount.Text),
                 TransactionType = "Income",
                 Date = dpDateIncome.Date != DateTime.Now.Date ? dpDateIncome.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerIncomeCategory.SelectedItem),
+                OwnerName=Convert.ToString(pickerOwnerName.SelectedItem),
                 Remarks = entryIncomeRemarks.Text
             };
             await SetUpDb();
             int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpense);
             entryIncomeAmount.Text = "";
+            entryTaxAmount.Text = "";
             entryIncomeRemarks.Text = "";
             if (rowsAffected > 0)
             {
@@ -146,14 +156,17 @@ public partial class IncomePage : ContentPage
             {
                 TransactionId = Convert.ToInt32(txtIncomeTransactionId.Text),
                 Amount = Convert.ToDouble(entryIncomeAmount.Text),
+                TaxAmountCut = Convert.ToDouble(entryTaxAmount.Text),
                 TransactionType = "Income",
                 Date = dpDateIncome.Date != DateTime.Now.Date ? dpDateIncome.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerIncomeCategory.SelectedItem),
+                OwnerName = Convert.ToString(pickerOwnerName.SelectedItem),
                 Remarks = entryIncomeRemarks.Text
             };
             await SetUpDb();
             int rowsAffected = await _dbConnection.UpdateAsync(objIncomeExpense);
             entryIncomeAmount.Text = "";
+            entryTaxAmount.Text = "";
             entryIncomeRemarks.Text = "";
             txtIncomeTransactionId.Text = "";
 

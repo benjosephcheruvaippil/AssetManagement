@@ -15,6 +15,8 @@ namespace AssetManagement.Models
         public double Amount { get; set; }
         public string TransactionType { get; set; }
         public DateTime Date { get; set; }
+        public double TaxAmountCut { get; set; }
+        public string OwnerName { get; set; }
         public string CategoryName { get; set; }
         public string Remarks { get; set; }
     }

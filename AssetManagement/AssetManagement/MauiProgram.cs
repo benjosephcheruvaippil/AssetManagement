@@ -1,6 +1,8 @@
 ﻿using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using AssetManagement.Views;
+using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Storage;
 using Microsoft.Extensions.Logging;
 using Mopups.Hosting;
 using Mopups.Interfaces;
@@ -15,6 +17,7 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
+			.UseMauiCommunityToolkit()
 			.ConfigureMopups()
 			.ConfigureFonts(fonts =>
 			{
@@ -22,6 +25,7 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
+		builder.Services.AddSingleton<IFileSaver>(FileSaver.Default);
         builder.Services.AddSingleton<IAssetService, AssetService>();
 		builder.Services.AddSingleton<IPopupNavigation>(MopupService.Instance);
 

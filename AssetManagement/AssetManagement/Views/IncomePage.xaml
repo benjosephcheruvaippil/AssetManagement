@@ -11,8 +11,13 @@
                 <Entry x:Name="entryIncomeAmount"
            Placeholder="Enter amount"
            Keyboard="Numeric" />
+                
+            <Entry x:Name="entryTaxAmount"
+            Placeholder="Enter tax amount"
+            Keyboard="Numeric" 
+                   Text="0" />
 
-                <Picker x:Name="pickerIncomeCategory" Title="Select category">
+            <Picker x:Name="pickerIncomeCategory" Title="Select category">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
                             <x:String>Salary</x:String>
@@ -20,11 +25,21 @@
                             <x:String>Business Income</x:String>
                         </x:Array>
                     </Picker.ItemsSource>
-                </Picker>
+            </Picker>
 
                 <DatePicker x:Name="dpDateIncome"/>
 
-                <Entry x:Name="entryIncomeRemarks"
+            <Picker x:Name="pickerOwnerName" Title="Select owner">
+                <Picker.ItemsSource>
+                    <x:Array Type="{x:Type x:String}">
+                        <x:String>Ben Joseph</x:String>
+                        <x:String>Deepa Jossy</x:String>
+                        <x:String>Ann Mary Joseph</x:String>
+                    </x:Array>
+                </Picker.ItemsSource>
+            </Picker>
+
+            <Entry x:Name="entryIncomeRemarks"
            Placeholder="Enter remarks" />
 
                 <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">

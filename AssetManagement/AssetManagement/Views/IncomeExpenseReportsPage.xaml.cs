@@ -1,8 +1,14 @@
+using Android.Content;
+using Android.SE.Omapi;
 using AssetManagement.Models;
 using AssetManagement.Models.Reports;
+using OfficeOpenXml.Style;
+using OfficeOpenXml;
 using SQLite;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using CommunityToolkit.Maui.Storage;
 //using static Android.Content.ClipData;
 
 namespace AssetManagement.Views;
@@ -17,6 +23,8 @@ public partial class IncomeExpenseReportsPage : ContentPage
         //_dbConnection = dbConnection;
         onLoad = true;
         LoadIncomeExpenseReport(DateTime.Now.Year.ToString());
+        dpFromDateIncomeReport.Format = "dd-MM-yyyy";
+        dpTODateIncomeReport.Format = "dd-MM-yyyy";
     }
 
     private async Task SetUpDb()
@@ -150,5 +158,116 @@ public partial class IncomeExpenseReportsPage : ContentPage
         tblscCategoryWiseReport.Title = "Category Wise Report " + selectedYear;
 
 
+    }
+
+    private async void btnGenerateIncomeReport_Clicked(object sender, EventArgs e)
+    {
+        try
+        {
+            activityIndicator.IsRunning = true;        
+            DateTime fromDateIncomeReport = dpFromDateIncomeReport.Date;
+            DateTime toDateIncomeReport = dpTODateIncomeReport.Date;
+            DateTime fromDate = new DateTime(fromDateIncomeReport.Year, fromDateIncomeReport.Month, fromDateIncomeReport.Day, 0, 0, 0);
+            DateTime toDate = new DateTime(toDateIncomeReport.Year, toDateIncomeReport.Month, toDateIncomeReport.Day, 23, 59, 59);
+            var incomeList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Income" && (i.Date >= fromDate && i.Date <= toDate))
+                .OrderBy(i=>i.Date)
+                .ToListAsync();
+
+            // Creating an instance
+            // of ExcelPackage
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage excel = new ExcelPackage();
+
+            // name of the sheet
+            var workSheet = excel.Workbook.Worksheets.Add("Income Report");
+
+            // setting the properties
+            // of the work sheet 
+            workSheet.TabColor = System.Drawing.Color.Black;
+            workSheet.DefaultRowHeight = 12;
+
+            // Setting the properties
+            // of the first row
+            workSheet.Row(1).Height = 20;
+            workSheet.Row(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;           
+            workSheet.Row(1).Style.Font.Bold = true;
+
+            workSheet.Column(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(2).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(3).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(4).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(5).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(6).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(7).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+            // Header of the Excel sheet
+            workSheet.Cells[1, 1].Value = "Transaction Type";
+            workSheet.Cells[1, 2].Value = "Date";
+            workSheet.Cells[1, 3].Value = "Category Name";            
+            workSheet.Cells[1, 4].Value = "Owner Name";
+            workSheet.Cells[1, 5].Value = "Tax Cut";
+            workSheet.Cells[1, 6].Value = "Amount";
+            workSheet.Cells[1, 7].Value = "Remarks";
+
+            int recordIndex = 2;
+            decimal totalIncome = 0,totalTaxCut=0;
+            foreach (var income in incomeList)
+            {
+                workSheet.Cells[recordIndex, 1].Value = income.TransactionType;
+                workSheet.Cells[recordIndex, 2].Value = income.Date.ToString("dd-MM-yyyy");
+                workSheet.Cells[recordIndex, 3].Value = income.CategoryName;
+                workSheet.Cells[recordIndex, 4].Value = income.OwnerName;
+                workSheet.Cells[recordIndex, 5].Value = income.TaxAmountCut;
+                workSheet.Cells[recordIndex, 6].Value = income.Amount;
+                workSheet.Cells[recordIndex, 7].Value = income.Remarks;
+                workSheet.Row(recordIndex).Height = 16;
+                totalTaxCut = totalTaxCut + Convert.ToDecimal(income.TaxAmountCut);
+                totalIncome = totalIncome + Convert.ToDecimal(income.Amount);
+                recordIndex++;
+            }
+
+            recordIndex++;
+            //workSheet.Cells[recordIndex, 3].Value = "Total Income";
+            //workSheet.Cells[recordIndex, 3].Style.Font.Bold = true;
+            workSheet.Cells[recordIndex, 5].Value = totalTaxCut;
+            workSheet.Cells[recordIndex, 5].Style.Font.Bold = true;
+            workSheet.Cells[recordIndex, 6].Value = totalIncome;
+            workSheet.Cells[recordIndex, 6].Style.Font.Bold = true;
+            
+
+            workSheet.Column(1).AutoFit();
+            workSheet.Column(2).AutoFit();
+            workSheet.Column(3).AutoFit();
+            workSheet.Column(4).AutoFit();
+            workSheet.Column(5).AutoFit();
+            workSheet.Column(6).AutoFit();
+            workSheet.Column(7).AutoFit();
+
+            //Context currentContext = Android.App.Application.Context;
+            //string directory = Path.Combine(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath, Android.OS.Environment.DirectoryDocuments);
+            //if (!Directory.Exists(directory))
+            //{
+            //    Directory.CreateDirectory(directory);
+            //}
+            //string file = Path.Combine(directory, "Income_Report.xlsx");
+            //System.IO.File.WriteAllBytes(file, excel.GetAsByteArray());
+
+
+            var stream=new MemoryStream(excel.GetAsByteArray());
+            CancellationTokenSource Ctoken = new CancellationTokenSource();
+            var fileSaverResult = await FileSaver.Default.SaveAsync("Income_Report.xlsx", stream, Ctoken.Token);
+            if(fileSaverResult.IsSuccessful)
+            {
+                await DisplayAlert("Message", "Excel saved in " + fileSaverResult.FilePath, "Ok");
+            }
+
+            excel.Dispose();
+            activityIndicator.IsRunning = false;            
+        }
+        catch(Exception ex)
+        {
+            await DisplayAlert("Error", ex.Message, "Ok");
+            await DisplayAlert("Error", ex.InnerException.ToString(), "Ok");            
+        }
     }
 }
