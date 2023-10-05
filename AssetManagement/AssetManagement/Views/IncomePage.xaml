@@ -35,6 +35,7 @@
                         <x:String>Ben Joseph</x:String>
                         <x:String>Deepa Jossy</x:String>
                         <x:String>Ann Mary Joseph</x:String>
+                        <x:String>Jossy C Peter</x:String>
                     </x:Array>
                 </Picker.ItemsSource>
             </Picker>
@@ -67,7 +68,8 @@
                         </TableSection>
                     </TableRoot>
                 </TableView>
-                <BoxView HeightRequest="50" Color="Transparent"/>
+                <Label x:Name="lblShowRemainingRecords" Text="Show Remaining" FontAttributes="Bold" HorizontalOptions="Center" />
+            <BoxView HeightRequest="50" Color="Transparent"/>
                 <Label x:Name="lblCurrentMonthIncome" FontSize="Large" Text="" HorizontalOptions="CenterAndExpand"></Label>
             </VerticalStackLayout>
         </ScrollView>

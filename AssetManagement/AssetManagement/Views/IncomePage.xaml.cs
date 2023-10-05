@@ -10,13 +10,20 @@ public partial class IncomePage : ContentPage
     public IncomePage()
     {
         InitializeComponent();
+
+        var labelShowRemaining = new TapGestureRecognizer();
+        labelShowRemaining.Tapped += (s, e) =>
+        {
+            LoadIncomeInPage("AllRecords");
+        };
+        lblShowRemainingRecords.GestureRecognizers.Add(labelShowRemaining);
     }
 
     protected async override void OnAppearing()
     {
         base.OnAppearing();
 
-        LoadIncomeInPage();
+        LoadIncomeInPage("Last5");
         await ShowCurrentMonthIncome();
     }
 
@@ -46,7 +53,7 @@ public partial class IncomePage : ContentPage
         lblCurrentMonthIncome.Text = currentMonth + ": " + string.Format(new CultureInfo("en-IN"), "{0:C0}", totalIncome);
     }
 
-    private async void LoadIncomeInPage()
+    private async void LoadIncomeInPage(string hint)
     {
         //set date
         dpDateIncome.MinimumDate = new DateTime(2020, 1, 1);
@@ -57,7 +64,17 @@ public partial class IncomePage : ContentPage
         tblscIncome.Clear();
         await SetUpDb();
 
-        List<IncomeExpenseModel> income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 5");
+        List<IncomeExpenseModel> income = new List<IncomeExpenseModel>();
+
+        if (hint == "Last5")
+        {
+            income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 5");
+        }
+        else if(hint == "AllRecords")
+        {
+            income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc");
+        }
+        
 
         foreach (var item in income)
         {
@@ -141,7 +158,7 @@ public partial class IncomePage : ContentPage
             entryIncomeRemarks.Text = "";
             if (rowsAffected > 0)
             {
-                LoadIncomeInPage();
+                LoadIncomeInPage("Last5");
                 await ShowCurrentMonthIncome();
                 //ClearIncome();
             }
@@ -172,7 +189,7 @@ public partial class IncomePage : ContentPage
 
             if (rowsAffected > 0)
             {
-                LoadIncomeInPage();
+                LoadIncomeInPage("Last5");
                 await ShowCurrentMonthIncome();
                 //ClearIncome();
             }
@@ -212,7 +229,7 @@ public partial class IncomePage : ContentPage
                 await SetUpDb();
                 int rowsAffected = await _dbConnection.DeleteAsync(objIncome);
                 ClearIncome();
-                LoadIncomeInPage();
+                LoadIncomeInPage("Last5");
                 await ShowCurrentMonthIncome();
             }
         }
