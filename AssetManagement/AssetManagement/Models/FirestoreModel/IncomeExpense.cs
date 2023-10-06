@@ -15,11 +15,15 @@ namespace AssetManagement.Models.FirestoreModel
         [FirestoreProperty]
         public double Amount { get; set; }
         [FirestoreProperty]
+        public double TaxAmountCut { get; set; }
+        [FirestoreProperty]
         public string TransactionType { get; set; }
         [FirestoreProperty]
         public string Date { get; set; }
         [FirestoreProperty]
         public string CategoryName { get; set; }
+        [FirestoreProperty]
+        public string OwnerName { get; set; }
         [FirestoreProperty]
         public string Remarks { get; set; }
     }
