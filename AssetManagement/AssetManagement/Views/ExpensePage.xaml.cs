@@ -206,7 +206,7 @@ public partial class ExpensePage : ContentPage
 
     private async void btnUploadData_Clicked(object sender, EventArgs e)
     {
-        bool userResponse = await DisplayAlert("Message", "Are you sure to upload data?", "Yes", "No");
+        bool userResponse = await DisplayAlert("Message", "Are you sure to upload data to firestore DB?", "Yes", "No");
         if (!userResponse)
         {
             return;
@@ -241,6 +241,8 @@ public partial class ExpensePage : ContentPage
             IncomeExpense incomeExpense = new IncomeExpense();
             incomeExpense.TransactionId = trans.TransactionId;
             incomeExpense.Amount = trans.Amount;
+            incomeExpense.TaxAmountCut = trans.TaxAmountCut;
+            incomeExpense.OwnerName = trans.OwnerName;
             incomeExpense.TransactionType = trans.TransactionType;
             incomeExpense.Date = Convert.ToString(trans.Date);
             incomeExpense.CategoryName = trans.CategoryName;
@@ -351,6 +353,7 @@ public partial class ExpensePage : ContentPage
             {
                 IncomeExpenseModel model = new IncomeExpenseModel();
                 model.Amount = item.Amount;
+                model.TaxAmountCut=item.TaxAmountCut;
                 model.TransactionType = item.TransactionType;
                 if (DateTime.TryParse(item.Date, out DateTime result))
                 {
@@ -361,6 +364,7 @@ public partial class ExpensePage : ContentPage
                     model.Date = DateTime.Now;
                 }
 
+                model.OwnerName=item.OwnerName;
                 model.CategoryName = item.CategoryName;
                 model.Remarks = item.Remarks;
 
