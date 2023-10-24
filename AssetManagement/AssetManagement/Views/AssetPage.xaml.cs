@@ -4,19 +4,42 @@ using AssetManagement.ViewModels;
 using ExcelDataReader;
 using Mopups.Interfaces;
 using SQLite;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
+using System.Net.Http.Json;
 
 namespace AssetManagement.Views;
 
-public partial class AssetPage : ContentPage
+public partial class AssetPage : TabbedPage
 {
     private AssetListPageViewModel _viewModel;
     private SQLiteAsyncConnection _dbConnection;
     private IPopupNavigation _popupNavigation;
     private readonly IAssetService _assetService;
+
+    private readonly HttpClient httpClient = new();
+
+    public bool IsRefreshing { get; set; }
+    public ObservableCollection<Assets> Assets { get; set; } = new();
+    //public Command RefreshCommand { get; set; }
+    public Assets SelectedAsset { get; set; }
+    public bool PaginationEnabled { get; set; } = true;
     public AssetPage(AssetListPageViewModel viewModel, IPopupNavigation popupNavigation, IAssetService assetService)
     {
+        //RefreshCommand = new Command(async () =>
+        //{
+        //    // Simulate delay
+        //    await Task.Delay(2000);
+
+        //    await LoadMonkeys();
+
+        //    IsRefreshing = false;
+        //    OnPropertyChanged(nameof(IsRefreshing));
+        //});
+
+        //BindingContext = this;
+
         InitializeComponent();
         _viewModel = viewModel;
         this.BindingContext = _viewModel;
@@ -51,6 +74,58 @@ public partial class AssetPage : ContentPage
             _popupNavigation.PushAsync(new AssetsByCategoryPage("Insurance_MF", _assetService));
         };
         lblInsuranceMF.GestureRecognizers.Add(labelInsurance_MF);
+    }
+
+    protected async override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+
+        await LoadAssets();
+    }
+
+    private async Task LoadAssets()
+    {
+        ////var monkeys = await httpClient.GetFromJsonAsync<Monkey[]>("https://montemagno.com/monkeys.json");
+        //Monkey obj = new Monkey
+        //{
+        //    Image="fff",
+        //    Name="Ben",
+        //    Population=1200
+        //};
+
+        //Monkeys.Clear();
+
+        //Monkeys.Add(obj);
+        ////foreach (Monkey monkey in monkeys)
+        ////{
+        ////    Monkeys.Add(obj);
+        ////}
+
+        await _viewModel.LoadAssets();
+    }
+
+    private void btnGetDetail_Clicked(object sender, EventArgs e)
+    {
+      
+
+        //string image = SelectedMonkey.Image;
+        //string location = SelectedMonkey.Location;
+
+        Assets obj = _viewModel.GetSelectedRecordDetail();
+
+        entEntityName.Text = obj.InvestmentEntity;
+        entType.SelectedItem = obj.Type;
+        entAmount.Text = Convert.ToString(obj.Amount);
+        entInterestRate.Text = Convert.ToString(obj.InterestRate);
+        entInterestFrequency.Text = obj.InterestFrequency;
+        entHolder.Text= obj.Holder;
+        entStartDate.Date = obj.StartDate;
+        entMaturityDate.Date = obj.MaturityDate;
+        entAsOfDate.Date = obj.AsOfDate;
+        entRemarks.Text = obj.Remarks;
+
+        btnUpdate.IsVisible = true;
+        btnDelete.IsVisible = true;
     }
 
     protected async override void OnAppearing()

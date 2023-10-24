@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<TabbedPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:AssetManagement.Models"
              xmlns:viewModels="clr-namespace:AssetManagement.ViewModels"
              x:DataType="viewModels:AssetListPageViewModel"
              x:Class="AssetManagement.Views.AssetPage"
-             Title="Asset Details">
-    <ScrollView>
+            
+             Title="Tabbed Page" >
+
+    <ContentPage Title="Asset Details">
+        <ScrollView>
             <VerticalStackLayout
         Spacing="25"
         Padding="30,0"
@@ -139,4 +142,169 @@
 
             </VerticalStackLayout>
         </ScrollView>
-</ContentPage>
+    </ContentPage>
+    <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:dg="clr-namespace:Maui.DataGrid;assembly=Maui.DataGrid"
+                 Title="Manage Asset">
+
+        <ScrollView>
+            <Grid RowSpacing="4" ColumnSpacing="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="400" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <BoxView Color="Green" />
+                <Label Text="Investment Entity"
+               HorizontalOptions="Start"
+               VerticalOptions="Center" />
+                <BoxView Grid.Column="1" Color="Orange" />
+                <Entry Grid.Column="1" x:Name="entEntityName" />
+
+                <BoxView Grid.Row="1" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="1" Grid.Column="0" Text="Type"
+           HorizontalOptions="Start"
+           VerticalOptions="Center" />
+                <BoxView Grid.Row="1" Grid.Column="1" Color="Orange" />
+                <!--<Entry Grid.Row="1" Grid.Column="1" x:Name="entType" />-->
+                <Picker Grid.Row="1" Grid.Column="1" x:Name="entType" Title="Select type">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>Bank</x:String>
+                            <x:String>NCD</x:String>
+                            <x:String>SGB</x:String>
+                            <x:String>MLD</x:String>
+                            <x:String>Insurance_MF</x:String>
+                            <x:String>PPF</x:String>
+                            <x:String>EPF</x:String>
+                            <x:String>MF</x:String>
+                            <x:String>Stocks</x:String>
+                            <x:String></x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
+
+                <BoxView Grid.Row="2" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="2" Grid.Column="0" Text="Amount"
+           HorizontalOptions="Start"
+           VerticalOptions="Center" />
+                <BoxView Grid.Row="2" Grid.Column="1" Color="Orange" />
+                <Entry Grid.Row="2" Grid.Column="1" x:Name="entAmount" />
+
+                <BoxView Grid.Row="3" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="3" Grid.Column="0" Text="Interest Rate"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="3" Grid.Column="1" Color="Orange" />
+                <Entry Grid.Row="3" Grid.Column="1" x:Name="entInterestRate" />
+
+                <BoxView Grid.Row="4" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="4" Grid.Column="0" Text="Interest Frequency"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="4" Grid.Column="1" Color="Orange" />
+                <Entry Grid.Row="4" Grid.Column="1" x:Name="entInterestFrequency" />
+
+                <BoxView Grid.Row="5" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="5" Grid.Column="0" Text="Holder"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="5" Grid.Column="1" Color="Orange" />
+                <Entry Grid.Row="5" Grid.Column="1" x:Name="entHolder" />
+
+                <BoxView Grid.Row="6" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="6" Grid.Column="0" Text="Start Date"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="6" Grid.Column="1" Color="Orange" />
+                <DatePicker Grid.Row="6" Grid.Column="1" x:Name="entStartDate" />
+
+                <BoxView Grid.Row="7" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="7" Grid.Column="0" Text="Maturity Date"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="7" Grid.Column="1" Color="Orange" />
+                <DatePicker Grid.Row="7" Grid.Column="1" x:Name="entMaturityDate" />
+
+                <BoxView Grid.Row="8" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="8" Grid.Column="0" Text="As Of Date"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="8" Grid.Column="1" Color="Orange" />
+                <DatePicker Grid.Row="8" Grid.Column="1" x:Name="entAsOfDate" />
+
+                <BoxView Grid.Row="9" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="9" Grid.Column="0" Text="Remarks"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="9" Grid.Column="1" Color="Orange" />
+                <Entry Grid.Row="9" Grid.Column="1" x:Name="entRemarks" />
+
+                <!--Update and delete buttons-->
+                <BoxView Grid.Row="10" Grid.Column="0" Color="Orange" />
+                <Button Grid.Row="10" Grid.Column="0" x:Name="btnUpdate" IsVisible="False" Text="Update"></Button>
+                <BoxView Grid.Row="10" Grid.Column="1" Color="Orange" />
+                <Button Grid.Row="10" Grid.Column="1" x:Name="btnDelete" IsVisible="False" Text="Delete"></Button>
+                <!--Update and delete buttons-->
+
+                <BoxView Grid.Row="11"
+     Grid.ColumnSpan="2"
+     Color="Orange" />
+                <Button x:Name="btnGetDetail" Text="Get Detail" Clicked="btnGetDetail_Clicked" Grid.Row="11" Grid.ColumnSpan="2"></Button>
+
+                <BoxView Grid.Row="12"
+                 Grid.ColumnSpan="2"
+                 Color="Red" />
+                <dg:DataGrid Grid.Row="12" Grid.ColumnSpan="2"  ItemsSource="{Binding Assets}" SelectionEnabled="True" SelectedItem="{Binding SelectedAsset}"
+         RowHeight="70" HeaderHeight="50" PullToRefreshCommand="{Binding RefreshCommand}"
+         IsRefreshing="{Binding IsRefreshing}" HeaderBackground="Red" PaginationEnabled="{Binding PaginationEnabled}" PageSize="5">
+                    <dg:DataGrid.NoDataView>
+                        <Label Text="Nothing to see here 🙈" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </dg:DataGrid.NoDataView>
+                    <dg:DataGrid.Columns>
+                        <dg:DataGridColumn IsVisible="False" Title="Image" PropertyName="Image" Width="150" SortingEnabled="False">
+                            <dg:DataGridColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Source="{Binding}" HorizontalOptions="Center" VerticalOptions="Center"
+                   Aspect="AspectFit" HeightRequest="60" />
+                                </DataTemplate>
+                            </dg:DataGridColumn.CellTemplate>
+                        </dg:DataGridColumn>
+                        <dg:DataGridColumn Title="Investment Entity" PropertyName="InvestmentEntity"  />
+                        <dg:DataGridColumn Title="Amount" PropertyName="Amount"  />
+                        <dg:DataGridColumn Title="Maturity Date" PropertyName="MaturityDate"  />
+                        <dg:DataGridColumn Title="As Of Date" PropertyName="AsOfDate"  />
+                        <!--<dg:DataGridColumn Title="Longitude" PropertyName="Longitude" />
+                        <dg:DataGridColumn Title="Population" PropertyName="Population" />
+                        <dg:DataGridColumn Title="Details" PropertyName="Details" Width="0.5*" />-->
+                    </dg:DataGrid.Columns>
+                    <dg:DataGrid.RowsBackgroundColorPalette>
+                        <dg:PaletteCollection>
+                            <Color>#F2F2F2</Color>
+                            <Color>#FFFFFF</Color>
+                        </dg:PaletteCollection>
+                    </dg:DataGrid.RowsBackgroundColorPalette>
+
+                </dg:DataGrid>
+            </Grid>
+
+        </ScrollView>
+    </ContentPage>
+
+
+</TabbedPage>
