@@ -175,6 +175,7 @@
                VerticalOptions="Center" />
                 <BoxView Grid.Column="1" Color="Orange" />
                 <Entry Grid.Column="1" x:Name="entEntityName" />
+                <Label x:Name="lblAssetId" IsVisible="False"/>
 
                 <BoxView Grid.Row="1" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="1" Grid.Column="0" Text="Type"
@@ -257,9 +258,9 @@ VerticalOptions="Center" />
 
                 <!--Update and delete buttons-->
                 <BoxView Grid.Row="10" Grid.Column="0" Color="Orange" />
-                <Button Grid.Row="10" Grid.Column="0" x:Name="btnUpdate" IsVisible="False" Text="Update"></Button>
+                <Button Grid.Row="10" Grid.Column="0" x:Name="btnSave" Clicked="btnSave_Clicked" Text="Save"></Button>
                 <BoxView Grid.Row="10" Grid.Column="1" Color="Orange" />
-                <Button Grid.Row="10" Grid.Column="1" x:Name="btnDelete" IsVisible="False" Text="Delete"></Button>
+                <Button Grid.Row="10" Grid.Column="1" x:Name="btnDelete" Clicked="btnDelete_Clicked" Text="Delete"></Button>
                 <!--Update and delete buttons-->
 
                 <BoxView Grid.Row="11"

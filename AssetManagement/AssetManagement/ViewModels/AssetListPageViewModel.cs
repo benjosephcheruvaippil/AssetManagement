@@ -50,16 +50,17 @@ namespace AssetManagement.ViewModels
 
             Assets obj = new Assets()
             {
+                AssetId = SelectedAsset.AssetId,
                 InvestmentEntity = SelectedAsset.InvestmentEntity,
-                Type=SelectedAsset.Type,
+                Type = SelectedAsset.Type,
                 Amount = SelectedAsset.Amount,
-                InterestRate=SelectedAsset.InterestRate,
-                InterestFrequency=SelectedAsset.InterestFrequency,
-                Holder=SelectedAsset.Holder,
-                StartDate=SelectedAsset.StartDate,
+                InterestRate = SelectedAsset.InterestRate,
+                InterestFrequency = SelectedAsset.InterestFrequency,
+                Holder = SelectedAsset.Holder,
+                StartDate = SelectedAsset.StartDate,
                 MaturityDate = SelectedAsset.MaturityDate,
                 AsOfDate = SelectedAsset.AsOfDate,
-                Remarks=SelectedAsset.Remarks
+                Remarks = SelectedAsset.Remarks
             };
 
             return obj;

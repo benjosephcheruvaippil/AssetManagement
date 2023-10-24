@@ -22,21 +22,21 @@ public partial class AssetPage : TabbedPage
 
     public bool IsRefreshing { get; set; }
     public ObservableCollection<Assets> Assets { get; set; } = new();
-    //public Command RefreshCommand { get; set; }
+    public Command RefreshCommand { get; set; }
     public Assets SelectedAsset { get; set; }
     public bool PaginationEnabled { get; set; } = true;
     public AssetPage(AssetListPageViewModel viewModel, IPopupNavigation popupNavigation, IAssetService assetService)
     {
-        //RefreshCommand = new Command(async () =>
-        //{
-        //    // Simulate delay
-        //    await Task.Delay(2000);
+        RefreshCommand = new Command(async () =>
+        {
+            // Simulate delay
+            await Task.Delay(2000);
 
-        //    await LoadMonkeys();
+            await LoadAssets();
 
-        //    IsRefreshing = false;
-        //    OnPropertyChanged(nameof(IsRefreshing));
-        //});
+            IsRefreshing = false;
+            OnPropertyChanged(nameof(IsRefreshing));
+        });
 
         //BindingContext = this;
 
@@ -85,32 +85,11 @@ public partial class AssetPage : TabbedPage
 
     private async Task LoadAssets()
     {
-        ////var monkeys = await httpClient.GetFromJsonAsync<Monkey[]>("https://montemagno.com/monkeys.json");
-        //Monkey obj = new Monkey
-        //{
-        //    Image="fff",
-        //    Name="Ben",
-        //    Population=1200
-        //};
-
-        //Monkeys.Clear();
-
-        //Monkeys.Add(obj);
-        ////foreach (Monkey monkey in monkeys)
-        ////{
-        ////    Monkeys.Add(obj);
-        ////}
-
         await _viewModel.LoadAssets();
     }
 
     private void btnGetDetail_Clicked(object sender, EventArgs e)
     {
-      
-
-        //string image = SelectedMonkey.Image;
-        //string location = SelectedMonkey.Location;
-
         Assets obj = _viewModel.GetSelectedRecordDetail();
 
         entEntityName.Text = obj.InvestmentEntity;
@@ -124,8 +103,10 @@ public partial class AssetPage : TabbedPage
         entAsOfDate.Date = obj.AsOfDate;
         entRemarks.Text = obj.Remarks;
 
-        btnUpdate.IsVisible = true;
-        btnDelete.IsVisible = true;
+        lblAssetId.Text = Convert.ToString(obj.AssetId);
+
+        //btnSave.IsVisible = true;
+        //btnDelete.IsVisible = true;
     }
 
     protected async override void OnAppearing()
@@ -235,7 +216,6 @@ public partial class AssetPage : TabbedPage
         }
         catch (Exception ex)
         {
-            //await DisplayAlert("Alert - Message", ex.Message.ToString(), "OK");
             await DisplayAlert("Alert - StackTrace", ex.StackTrace.ToString(), "OK");
         }
     }
@@ -296,5 +276,47 @@ public partial class AssetPage : TabbedPage
             daysLeft = "0";
         }
         lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", await _viewModel.GetMaturingAssetsListByDaysLeft(Convert.ToInt32(daysLeft)));
+    }
+
+    private async void btnSave_Clicked(object sender, EventArgs e)
+    {
+        Models.Assets objAsset = new Assets()
+        {
+            InvestmentEntity = entEntityName.Text,
+            Type = entType.SelectedItem.ToString(),
+            Amount = Convert.ToDecimal(entAmount.Text),
+            InterestRate = Convert.ToDecimal(entInterestRate.Text),
+            InterestFrequency = entInterestFrequency.Text,
+            Holder = entHolder.Text,
+            StartDate = entStartDate.Date,
+            MaturityDate = entMaturityDate.Date,
+            AsOfDate = entAsOfDate.Date,
+            Remarks = entRemarks.Text
+        };
+
+        await SetUpDb();
+        int rowsAffected = await _dbConnection.InsertAsync(objAsset);
+
+        if (rowsAffected > 0)
+        {
+            await DisplayAlert("Message", "Asset Saved", "OK");
+            await LoadAssets();
+        }
+    }
+
+    private async void btnDelete_Clicked(object sender, EventArgs e)
+    {
+        Models.Assets objAsset = new Assets()
+        {
+            AssetId = Convert.ToInt32(lblAssetId.Text)
+        };
+
+        await SetUpDb();
+        int rowsAffected = await _dbConnection.DeleteAsync(objAsset);
+        if (rowsAffected > 0)
+        {
+            await DisplayAlert("Message", "Asset Deleted", "OK");
+            await LoadAssets();
+        }
     }
 }
