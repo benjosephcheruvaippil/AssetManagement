@@ -88,23 +88,30 @@ public partial class AssetPage : TabbedPage
         await _viewModel.LoadAssets();
     }
 
-    private void btnGetDetail_Clicked(object sender, EventArgs e)
+    private async void btnGetDetail_Clicked(object sender, EventArgs e)
     {
         Assets obj = _viewModel.GetSelectedRecordDetail();
 
-        entEntityName.Text = obj.InvestmentEntity;
-        entType.SelectedItem = obj.Type;
-        entAmount.Text = Convert.ToString(obj.Amount);
-        entInterestRate.Text = Convert.ToString(obj.InterestRate);
-        entInterestFrequency.Text = obj.InterestFrequency;
-        entHolder.Text= obj.Holder;
-        entStartDate.Date = obj.StartDate;
-        entMaturityDate.Date = obj.MaturityDate;
-        entAsOfDate.Date = obj.AsOfDate;
-        entRemarks.Text = obj.Remarks;
+        if (obj.AssetId != 0)
+        {
 
-        lblAssetId.Text = Convert.ToString(obj.AssetId);
+            entEntityName.Text = obj.InvestmentEntity;
+            entType.SelectedItem = obj.Type;
+            entAmount.Text = Convert.ToString(obj.Amount);
+            entInterestRate.Text = Convert.ToString(obj.InterestRate);
+            entInterestFrequency.Text = obj.InterestFrequency;
+            entHolder.SelectedItem = obj.Holder;
+            entStartDate.Date = obj.StartDate;
+            entMaturityDate.Date = obj.MaturityDate;
+            entAsOfDate.Date = obj.AsOfDate;
+            entRemarks.Text = obj.Remarks;
 
+            lblAssetId.Text = Convert.ToString(obj.AssetId);
+        }
+        else
+        {
+            await DisplayAlert("Message", "Please select an asset", "OK");
+        }
         //btnSave.IsVisible = true;
         //btnDelete.IsVisible = true;
     }
@@ -280,6 +287,13 @@ public partial class AssetPage : TabbedPage
 
     private async void btnSave_Clicked(object sender, EventArgs e)
     {
+        if (string.IsNullOrEmpty(entEntityName.Text))
+        {
+            await DisplayAlert("Message", "Please input all required fields", "OK");
+            return;
+        }
+
+        int rowsAffected = 0;
         Models.Assets objAsset = new Assets()
         {
             InvestmentEntity = entEntityName.Text,
@@ -287,15 +301,41 @@ public partial class AssetPage : TabbedPage
             Amount = Convert.ToDecimal(entAmount.Text),
             InterestRate = Convert.ToDecimal(entInterestRate.Text),
             InterestFrequency = entInterestFrequency.Text,
-            Holder = entHolder.Text,
-            StartDate = entStartDate.Date,
-            MaturityDate = entMaturityDate.Date,
-            AsOfDate = entAsOfDate.Date,
+            Holder = entHolder.SelectedItem.ToString(),
+            //StartDate = entStartDate.Date,
+            //MaturityDate = entMaturityDate.Date,
+            //AsOfDate = entAsOfDate.Date,
             Remarks = entRemarks.Text
         };
 
+        if(objAsset.Type=="Insurance_MF" || objAsset.Type=="PPF" || objAsset.Type=="EPF" || objAsset.Type=="MF" || objAsset.Type == "Stocks")
+        {
+            objAsset.AsOfDate = entAsOfDate.Date;
+            objAsset.StartDate= Convert.ToDateTime("01-01-0001");
+            objAsset.MaturityDate= Convert.ToDateTime("01-01-0001");
+
+            entStartDate.IsEnabled = false;
+            entMaturityDate.IsEnabled = false;
+        }
+        else
+        {
+            objAsset.AsOfDate = Convert.ToDateTime("01-01-0001");
+            objAsset.StartDate = entStartDate.Date;
+            objAsset.MaturityDate = entMaturityDate.Date;
+
+            entAsOfDate.IsEnabled = false;
+        }
+
         await SetUpDb();
-        int rowsAffected = await _dbConnection.InsertAsync(objAsset);
+        if (string.IsNullOrEmpty(lblAssetId.Text)) //insert asset
+        {
+            rowsAffected = await _dbConnection.InsertAsync(objAsset);
+        }
+        else //update asset
+        {
+            objAsset.AssetId = Convert.ToInt32(lblAssetId.Text);
+            rowsAffected = await _dbConnection.UpdateAsync(objAsset);
+        }
 
         if (rowsAffected > 0)
         {
@@ -306,17 +346,28 @@ public partial class AssetPage : TabbedPage
 
     private async void btnDelete_Clicked(object sender, EventArgs e)
     {
-        Models.Assets objAsset = new Assets()
+        if (!string.IsNullOrEmpty(lblAssetId.Text))
         {
-            AssetId = Convert.ToInt32(lblAssetId.Text)
-        };
+            bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
+            if (userResponse)
+            {
+                Models.Assets objAsset = new Assets()
+                {
+                    AssetId = Convert.ToInt32(lblAssetId.Text)
+                };
 
-        await SetUpDb();
-        int rowsAffected = await _dbConnection.DeleteAsync(objAsset);
-        if (rowsAffected > 0)
+                await SetUpDb();
+                int rowsAffected = await _dbConnection.DeleteAsync(objAsset);
+                if (rowsAffected > 0)
+                {
+                    await DisplayAlert("Message", "Asset Deleted", "OK");
+                    await LoadAssets();
+                }
+            }
+        }
+        else
         {
-            await DisplayAlert("Message", "Asset Deleted", "OK");
-            await LoadAssets();
+            await DisplayAlert("Message", "Please select an asset", "OK");
         }
     }
 }

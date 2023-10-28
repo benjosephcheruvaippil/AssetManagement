@@ -226,7 +226,21 @@ VerticalOptions="Center" />
 HorizontalOptions="Start"
 VerticalOptions="Center" />
                 <BoxView Grid.Row="5" Grid.Column="1" Color="Orange" />
-                <Entry Grid.Row="5" Grid.Column="1" x:Name="entHolder" />
+                <!--<Entry Grid.Row="5" Grid.Column="1" x:Name="entHolder" />-->
+                <Picker Grid.Row="5" Grid.Column="1" x:Name="entHolder" Title="Select holder">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>Ben Joseph</x:String>
+                            <x:String>Ann Mary Joseph</x:String>
+                            <x:String>Deepa Jossy</x:String>
+                            <x:String>Jossy C Peter/Deepa Jossy</x:String>
+                            <x:String>Ouseph KK(Pappa)</x:String>
+                            <x:String>Ben Joseph/Ann Mary Joseph</x:String>
+                            <x:String>Ben Joseph/Ann Mary Joseph/Deepa Jossy</x:String>
+                            <x:String></x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
 
                 <BoxView Grid.Row="6" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="6" Grid.Column="0" Text="Start Date"

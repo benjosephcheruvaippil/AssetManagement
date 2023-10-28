@@ -47,21 +47,24 @@ namespace AssetManagement.ViewModels
         //public string location = SelectedMonkey.Location;
         public Assets GetSelectedRecordDetail()
         {
-
-            Assets obj = new Assets()
+            Assets obj = new Assets();
+            if (SelectedAsset != null)
             {
-                AssetId = SelectedAsset.AssetId,
-                InvestmentEntity = SelectedAsset.InvestmentEntity,
-                Type = SelectedAsset.Type,
-                Amount = SelectedAsset.Amount,
-                InterestRate = SelectedAsset.InterestRate,
-                InterestFrequency = SelectedAsset.InterestFrequency,
-                Holder = SelectedAsset.Holder,
-                StartDate = SelectedAsset.StartDate,
-                MaturityDate = SelectedAsset.MaturityDate,
-                AsOfDate = SelectedAsset.AsOfDate,
-                Remarks = SelectedAsset.Remarks
-            };
+                obj = new Assets()
+                {
+                    AssetId = SelectedAsset.AssetId,
+                    InvestmentEntity = SelectedAsset.InvestmentEntity,
+                    Type = SelectedAsset.Type,
+                    Amount = SelectedAsset.Amount,
+                    InterestRate = SelectedAsset.InterestRate,
+                    InterestFrequency = SelectedAsset.InterestFrequency,
+                    Holder = SelectedAsset.Holder,
+                    StartDate = SelectedAsset.StartDate,
+                    MaturityDate = SelectedAsset.MaturityDate,
+                    AsOfDate = SelectedAsset.AsOfDate,
+                    Remarks = SelectedAsset.Remarks
+                };
+            }
 
             return obj;
         }
