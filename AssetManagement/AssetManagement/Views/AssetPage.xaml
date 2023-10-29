@@ -163,6 +163,7 @@
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
                     <RowDefinition Height="400" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -183,7 +184,7 @@
            VerticalOptions="Center" />
                 <BoxView Grid.Row="1" Grid.Column="1" Color="Orange" />
                 <!--<Entry Grid.Row="1" Grid.Column="1" x:Name="entType" />-->
-                <Picker Grid.Row="1" Grid.Column="1" x:Name="entType" Title="Select type">
+                <Picker Grid.Row="1" Grid.Column="1" x:Name="entType" SelectedIndexChanged="entType_SelectedIndexChanged" Title="Select type">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
                             <x:String>Bank</x:String>
@@ -283,9 +284,14 @@ VerticalOptions="Center" />
                 <Button x:Name="btnGetDetail" Text="Get Detail" Clicked="btnGetDetail_Clicked" Grid.Row="11" Grid.ColumnSpan="2"></Button>
 
                 <BoxView Grid.Row="12"
+Grid.ColumnSpan="2"
+Color="White" />
+                <Entry x:Name="entAssetSearch" TextChanged="entAssetSearch_TextChanged" Grid.Row="12" Grid.ColumnSpan="2" Placeholder="Search by name,amount,date"/>
+
+                <BoxView Grid.Row="13"
                  Grid.ColumnSpan="2"
                  Color="Red" />
-                <dg:DataGrid Grid.Row="12" Grid.ColumnSpan="2"  ItemsSource="{Binding Assets}" SelectionEnabled="True" SelectedItem="{Binding SelectedAsset}"
+                <dg:DataGrid Grid.Row="13" Grid.ColumnSpan="2"  ItemsSource="{Binding Assets}" SelectionEnabled="True" SelectedItem="{Binding SelectedAsset}"
          RowHeight="70" HeaderHeight="50" PullToRefreshCommand="{Binding RefreshCommand}"
          IsRefreshing="{Binding IsRefreshing}" HeaderBackground="Red" PaginationEnabled="{Binding PaginationEnabled}" PageSize="5">
                     <dg:DataGrid.NoDataView>

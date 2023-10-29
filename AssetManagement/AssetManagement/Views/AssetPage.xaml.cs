@@ -370,4 +370,32 @@ public partial class AssetPage : TabbedPage
             await DisplayAlert("Message", "Please select an asset", "OK");
         }
     }
+
+    private void entType_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        string type = entType.SelectedItem.ToString();
+
+        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "MF" || type == "Stocks")
+        {
+            entStartDate.Date = Convert.ToDateTime("01-01-0001");
+            entMaturityDate.Date = Convert.ToDateTime("01-01-0001");
+
+            entStartDate.IsEnabled = false;
+            entMaturityDate.IsEnabled = false;
+            entAsOfDate.IsEnabled = true;
+        }
+        else
+        {
+            entAsOfDate.Date = Convert.ToDateTime("01-01-0001");
+
+            entStartDate.IsEnabled = true;
+            entMaturityDate.IsEnabled = true;
+            entAsOfDate.IsEnabled = false;
+        }
+    }
+
+    private async void entAssetSearch_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        await DisplayAlert("Message", entAssetSearch.Text, "OK");
+    }
 }
