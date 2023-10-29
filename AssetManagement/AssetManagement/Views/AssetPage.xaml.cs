@@ -85,7 +85,7 @@ public partial class AssetPage : TabbedPage
 
     private async Task LoadAssets()
     {
-        await _viewModel.LoadAssets();
+        await _viewModel.LoadAssets("");
     }
 
     private async void btnGetDetail_Clicked(object sender, EventArgs e)
@@ -99,7 +99,7 @@ public partial class AssetPage : TabbedPage
             entType.SelectedItem = obj.Type;
             entAmount.Text = Convert.ToString(obj.Amount);
             entInterestRate.Text = Convert.ToString(obj.InterestRate);
-            entInterestFrequency.Text = obj.InterestFrequency;
+            entInterestFrequency.SelectedItem = obj.InterestFrequency;
             entHolder.SelectedItem = obj.Holder;
             entStartDate.Date = obj.StartDate;
             entMaturityDate.Date = obj.MaturityDate;
@@ -210,7 +210,8 @@ public partial class AssetPage : TabbedPage
                         Holder = Holder,
                         StartDate = StartDate,
                         MaturityDate = MaturityDate,
-                        Remarks = Remarks
+                        Remarks = Remarks,
+                        AsOfDate= AsOfDate
                     };
                     await SetUpDb();
                     int rowsAffected = await _dbConnection.InsertAsync(assets);
@@ -300,7 +301,7 @@ public partial class AssetPage : TabbedPage
             Type = entType.SelectedItem.ToString(),
             Amount = Convert.ToDecimal(entAmount.Text),
             InterestRate = Convert.ToDecimal(entInterestRate.Text),
-            InterestFrequency = entInterestFrequency.Text,
+            InterestFrequency = entInterestFrequency.SelectedItem.ToString(),
             Holder = entHolder.SelectedItem.ToString(),
             //StartDate = entStartDate.Date,
             //MaturityDate = entMaturityDate.Date,
@@ -396,6 +397,10 @@ public partial class AssetPage : TabbedPage
 
     private async void entAssetSearch_TextChanged(object sender, TextChangedEventArgs e)
     {
-        await DisplayAlert("Message", entAssetSearch.Text, "OK");
+        string searchText = entAssetSearch.Text.Trim();
+        await _viewModel.LoadAssets(searchText);
+        //List<Assets> objAssets = await _assetService.GetAssetsList();
+        //objAssets = objAssets.Where(a => searchText.Contains(a.InvestmentEntity)).ToList();
+        //await DisplayAlert("Message", entAssetSearch.Text, "OK");
     }
 }

@@ -196,7 +196,6 @@
                             <x:String>EPF</x:String>
                             <x:String>MF</x:String>
                             <x:String>Stocks</x:String>
-                            <x:String></x:String>
                         </x:Array>
                     </Picker.ItemsSource>
                 </Picker>
@@ -206,28 +205,38 @@
            HorizontalOptions="Start"
            VerticalOptions="Center" />
                 <BoxView Grid.Row="2" Grid.Column="1" Color="Orange" />
-                <Entry Grid.Row="2" Grid.Column="1" x:Name="entAmount" />
+                <Entry Grid.Row="2" Grid.Column="1" x:Name="entAmount" Keyboard="Numeric" />
 
                 <BoxView Grid.Row="3" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="3" Grid.Column="0" Text="Interest Rate"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
                 <BoxView Grid.Row="3" Grid.Column="1" Color="Orange" />
-                <Entry Grid.Row="3" Grid.Column="1" x:Name="entInterestRate" />
+                <Entry Grid.Row="3" Grid.Column="1" x:Name="entInterestRate" Keyboard="Numeric" />
 
                 <BoxView Grid.Row="4" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="4" Grid.Column="0" Text="Interest Frequency"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
                 <BoxView Grid.Row="4" Grid.Column="1" Color="Orange" />
-                <Entry Grid.Row="4" Grid.Column="1" x:Name="entInterestFrequency" />
+                <!--<Entry Grid.Row="4" Grid.Column="1" x:Name="entInterestFrequency" />-->
+                <Picker Grid.Row="4" Grid.Column="1" x:Name="entInterestFrequency" Title="Select frequency">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>Monthly</x:String>
+                            <x:String>Quarterly</x:String>
+                            <x:String>Semi-Annually</x:String>
+                            <x:String>Yearly</x:String>
+                            <x:String>Cumulative</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
 
                 <BoxView Grid.Row="5" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="5" Grid.Column="0" Text="Holder"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
                 <BoxView Grid.Row="5" Grid.Column="1" Color="Orange" />
-                <!--<Entry Grid.Row="5" Grid.Column="1" x:Name="entHolder" />-->
                 <Picker Grid.Row="5" Grid.Column="1" x:Name="entHolder" Title="Select holder">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
@@ -238,7 +247,6 @@ VerticalOptions="Center" />
                             <x:String>Ouseph KK(Pappa)</x:String>
                             <x:String>Ben Joseph/Ann Mary Joseph</x:String>
                             <x:String>Ben Joseph/Ann Mary Joseph/Deepa Jossy</x:String>
-                            <x:String></x:String>
                         </x:Array>
                     </Picker.ItemsSource>
                 </Picker>
@@ -286,7 +294,7 @@ VerticalOptions="Center" />
                 <BoxView Grid.Row="12"
 Grid.ColumnSpan="2"
 Color="White" />
-                <Entry x:Name="entAssetSearch" TextChanged="entAssetSearch_TextChanged" Grid.Row="12" Grid.ColumnSpan="2" Placeholder="Search by name,amount,date"/>
+                <Entry x:Name="entAssetSearch" TextChanged="entAssetSearch_TextChanged" Grid.Row="12" Grid.ColumnSpan="2" Placeholder="Search by name,amount,holder"/>
 
                 <BoxView Grid.Row="13"
                  Grid.ColumnSpan="2"

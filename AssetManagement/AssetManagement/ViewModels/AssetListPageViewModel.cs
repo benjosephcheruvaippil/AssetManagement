@@ -32,14 +32,40 @@ namespace AssetManagement.ViewModels
             _assetService = assetService;
         }
 
-        public async Task LoadAssets()
+        public async Task LoadAssets(string searchText)
         {
-            //var monkeys = await httpClient.GetFromJsonAsync<Monkey[]>("https://montemagno.com/monkeys.json");
-            List<Assets> records = await _assetService.GetAssetsList();
-            Assets.Clear();
-            foreach (var record in records)
+            try
             {
-                Assets.Add(record);
+                decimal result;
+                List<Assets> records = await _assetService.GetAssetsList();
+                Assets.Clear();
+                if (string.IsNullOrEmpty(searchText))
+                {
+                    foreach (var record in records)
+                    {
+                        Assets.Add(record);
+                    }
+                }
+                else
+                {
+                    if (decimal.TryParse(searchText, out result))
+                    {
+                        records = records.Where(a => a.Amount.Equals(result)).ToList();
+                    }
+                    else
+                    {
+                        records = records.Where(a => a.InvestmentEntity.ToLower().Contains(searchText.ToLower()) || a.Holder.ToLower().Contains(searchText.ToLower())).ToList();
+                    }
+
+                    foreach (var record in records)
+                    {
+                        Assets.Add(record);
+                    }
+                }
+            }
+            catch(System.Exception ex)
+            {
+                return;
             }
         }
 
