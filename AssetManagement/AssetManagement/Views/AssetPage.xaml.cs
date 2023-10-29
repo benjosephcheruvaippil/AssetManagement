@@ -4,19 +4,42 @@ using AssetManagement.ViewModels;
 using ExcelDataReader;
 using Mopups.Interfaces;
 using SQLite;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
+using System.Net.Http.Json;
 
 namespace AssetManagement.Views;
 
-public partial class AssetPage : ContentPage
+public partial class AssetPage : TabbedPage
 {
     private AssetListPageViewModel _viewModel;
     private SQLiteAsyncConnection _dbConnection;
     private IPopupNavigation _popupNavigation;
     private readonly IAssetService _assetService;
+
+    private readonly HttpClient httpClient = new();
+
+    public bool IsRefreshing { get; set; }
+    public ObservableCollection<Assets> Assets { get; set; } = new();
+    public Command RefreshCommand { get; set; }
+    public Assets SelectedAsset { get; set; }
+    public bool PaginationEnabled { get; set; } = true;
     public AssetPage(AssetListPageViewModel viewModel, IPopupNavigation popupNavigation, IAssetService assetService)
     {
+        RefreshCommand = new Command(async () =>
+        {
+            // Simulate delay
+            await Task.Delay(2000);
+
+            await LoadAssets();
+
+            IsRefreshing = false;
+            OnPropertyChanged(nameof(IsRefreshing));
+        });
+
+        //BindingContext = this;
+
         InitializeComponent();
         _viewModel = viewModel;
         this.BindingContext = _viewModel;
@@ -51,6 +74,46 @@ public partial class AssetPage : ContentPage
             _popupNavigation.PushAsync(new AssetsByCategoryPage("Insurance_MF", _assetService));
         };
         lblInsuranceMF.GestureRecognizers.Add(labelInsurance_MF);
+    }
+
+    protected async override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+
+        await LoadAssets();
+    }
+
+    private async Task LoadAssets()
+    {
+        await _viewModel.LoadAssets("");
+    }
+
+    private async void btnGetDetail_Clicked(object sender, EventArgs e)
+    {
+        Assets obj = _viewModel.GetSelectedRecordDetail();
+
+        if (obj.AssetId != 0)
+        {
+
+            entEntityName.Text = obj.InvestmentEntity;
+            entType.SelectedItem = obj.Type;
+            entAmount.Text = Convert.ToString(obj.Amount);
+            entInterestRate.Text = Convert.ToString(obj.InterestRate);
+            entInterestFrequency.SelectedItem = obj.InterestFrequency;
+            entHolder.SelectedItem = obj.Holder;
+            entStartDate.Date = obj.StartDate;
+            entMaturityDate.Date = obj.MaturityDate;
+            entAsOfDate.Date = obj.AsOfDate;
+            entRemarks.Text = obj.Remarks;
+
+            lblAssetId.Text = Convert.ToString(obj.AssetId);
+        }
+        else
+        {
+            await DisplayAlert("Message", "Please select an asset", "OK");
+        }
+        //btnSave.IsVisible = true;
+        //btnDelete.IsVisible = true;
     }
 
     protected async override void OnAppearing()
@@ -147,7 +210,8 @@ public partial class AssetPage : ContentPage
                         Holder = Holder,
                         StartDate = StartDate,
                         MaturityDate = MaturityDate,
-                        Remarks = Remarks
+                        Remarks = Remarks,
+                        AsOfDate= AsOfDate
                     };
                     await SetUpDb();
                     int rowsAffected = await _dbConnection.InsertAsync(assets);
@@ -160,7 +224,6 @@ public partial class AssetPage : ContentPage
         }
         catch (Exception ex)
         {
-            //await DisplayAlert("Alert - Message", ex.Message.ToString(), "OK");
             await DisplayAlert("Alert - StackTrace", ex.StackTrace.ToString(), "OK");
         }
     }
@@ -221,5 +284,123 @@ public partial class AssetPage : ContentPage
             daysLeft = "0";
         }
         lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", await _viewModel.GetMaturingAssetsListByDaysLeft(Convert.ToInt32(daysLeft)));
+    }
+
+    private async void btnSave_Clicked(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(entEntityName.Text))
+        {
+            await DisplayAlert("Message", "Please input all required fields", "OK");
+            return;
+        }
+
+        int rowsAffected = 0;
+        Models.Assets objAsset = new Assets()
+        {
+            InvestmentEntity = entEntityName.Text,
+            Type = entType.SelectedItem.ToString(),
+            Amount = Convert.ToDecimal(entAmount.Text),
+            InterestRate = Convert.ToDecimal(entInterestRate.Text),
+            InterestFrequency = entInterestFrequency.SelectedItem.ToString(),
+            Holder = entHolder.SelectedItem.ToString(),
+            //StartDate = entStartDate.Date,
+            //MaturityDate = entMaturityDate.Date,
+            //AsOfDate = entAsOfDate.Date,
+            Remarks = entRemarks.Text
+        };
+
+        if(objAsset.Type=="Insurance_MF" || objAsset.Type=="PPF" || objAsset.Type=="EPF" || objAsset.Type=="MF" || objAsset.Type == "Stocks")
+        {
+            objAsset.AsOfDate = entAsOfDate.Date;
+            objAsset.StartDate= Convert.ToDateTime("01-01-0001");
+            objAsset.MaturityDate= Convert.ToDateTime("01-01-0001");
+
+            entStartDate.IsEnabled = false;
+            entMaturityDate.IsEnabled = false;
+        }
+        else
+        {
+            objAsset.AsOfDate = Convert.ToDateTime("01-01-0001");
+            objAsset.StartDate = entStartDate.Date;
+            objAsset.MaturityDate = entMaturityDate.Date;
+
+            entAsOfDate.IsEnabled = false;
+        }
+
+        await SetUpDb();
+        if (string.IsNullOrEmpty(lblAssetId.Text)) //insert asset
+        {
+            rowsAffected = await _dbConnection.InsertAsync(objAsset);
+        }
+        else //update asset
+        {
+            objAsset.AssetId = Convert.ToInt32(lblAssetId.Text);
+            rowsAffected = await _dbConnection.UpdateAsync(objAsset);
+        }
+
+        if (rowsAffected > 0)
+        {
+            await DisplayAlert("Message", "Asset Saved", "OK");
+            await LoadAssets();
+        }
+    }
+
+    private async void btnDelete_Clicked(object sender, EventArgs e)
+    {
+        if (!string.IsNullOrEmpty(lblAssetId.Text))
+        {
+            bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
+            if (userResponse)
+            {
+                Models.Assets objAsset = new Assets()
+                {
+                    AssetId = Convert.ToInt32(lblAssetId.Text)
+                };
+
+                await SetUpDb();
+                int rowsAffected = await _dbConnection.DeleteAsync(objAsset);
+                if (rowsAffected > 0)
+                {
+                    await DisplayAlert("Message", "Asset Deleted", "OK");
+                    await LoadAssets();
+                }
+            }
+        }
+        else
+        {
+            await DisplayAlert("Message", "Please select an asset", "OK");
+        }
+    }
+
+    private void entType_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        string type = entType.SelectedItem.ToString();
+
+        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "MF" || type == "Stocks")
+        {
+            entStartDate.Date = Convert.ToDateTime("01-01-0001");
+            entMaturityDate.Date = Convert.ToDateTime("01-01-0001");
+
+            entStartDate.IsEnabled = false;
+            entMaturityDate.IsEnabled = false;
+            entAsOfDate.IsEnabled = true;
+        }
+        else
+        {
+            entAsOfDate.Date = Convert.ToDateTime("01-01-0001");
+
+            entStartDate.IsEnabled = true;
+            entMaturityDate.IsEnabled = true;
+            entAsOfDate.IsEnabled = false;
+        }
+    }
+
+    private async void entAssetSearch_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        string searchText = entAssetSearch.Text.Trim();
+        await _viewModel.LoadAssets(searchText);
+        //List<Assets> objAssets = await _assetService.GetAssetsList();
+        //objAssets = objAssets.Where(a => searchText.Contains(a.InvestmentEntity)).ToList();
+        //await DisplayAlert("Message", entAssetSearch.Text, "OK");
     }
 }
