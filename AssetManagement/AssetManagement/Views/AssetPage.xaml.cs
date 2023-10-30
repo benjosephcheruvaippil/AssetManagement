@@ -1,8 +1,14 @@
 using AssetManagement.Models;
+using AssetManagement.Models.Constants;
+using AssetManagement.Models.FirestoreModel;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using ExcelDataReader;
+using Google.Cloud.Firestore;
+using Microsoft.Maui;
+using Microsoft.Maui.Controls;
 using Mopups.Interfaces;
+using Newtonsoft.Json;
 using SQLite;
 using System.Collections.ObjectModel;
 using System.Data;
@@ -301,8 +307,8 @@ public partial class AssetPage : TabbedPage
             Type = entType.SelectedItem.ToString(),
             Amount = Convert.ToDecimal(entAmount.Text),
             InterestRate = Convert.ToDecimal(entInterestRate.Text),
-            InterestFrequency = entInterestFrequency.SelectedItem.ToString(),
-            Holder = entHolder.SelectedItem.ToString(),
+            InterestFrequency = entInterestFrequency.SelectedItem == null ? "" : entInterestFrequency.SelectedItem.ToString(),
+            Holder = entHolder.SelectedItem == null ? "" : entHolder.SelectedItem.ToString(),
             //StartDate = entStartDate.Date,
             //MaturityDate = entMaturityDate.Date,
             //AsOfDate = entAsOfDate.Date,
@@ -402,5 +408,200 @@ public partial class AssetPage : TabbedPage
         //List<Assets> objAssets = await _assetService.GetAssetsList();
         //objAssets = objAssets.Where(a => searchText.Contains(a.InvestmentEntity)).ToList();
         //await DisplayAlert("Message", entAssetSearch.Text, "OK");
+    }
+
+    private async void btnUploadAssets_Clicked(object sender, EventArgs e)
+    {
+        var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+
+        using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+        using var dest = File.Create(localPath);
+        await json.CopyToAsync(dest);
+
+        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
+        dest.Close();
+        string projectId = "firestoredemo-d2bdc";
+        var _fireStoreDb = FirestoreDb.Create(projectId);
+
+        await DeleteAllDocumentsInCollection(Constants.AssetFirestoreCollection);
+        //deleted all records in firestore
+
+
+        await SetUpDb();
+        List<Assets> assets = await _dbConnection.Table<Assets>().ToListAsync();
+        int writeFlag = 0;
+
+
+
+        CollectionReference collectionReference = _fireStoreDb.Collection(Constants.AssetFirestoreCollection);
+
+        foreach (var asset in assets)
+        {
+            AssetDetails assetDetail = new AssetDetails();
+            assetDetail.AssetId = asset.AssetId;
+            assetDetail.InvestmentEntity = asset.InvestmentEntity;
+            assetDetail.Type = asset.Type;
+            assetDetail.Amount = Convert.ToDouble(asset.Amount);
+            assetDetail.InterestRate = Convert.ToDouble(asset.InterestRate);
+            assetDetail.InterestFrequency = asset.InterestFrequency;
+            assetDetail.Holder = asset.Holder;
+            assetDetail.Remarks = asset.Remarks;
+            assetDetail.StartDate = Convert.ToString(asset.StartDate);
+            assetDetail.MaturityDate = Convert.ToString(asset.MaturityDate);
+            assetDetail.AsOfDate = Convert.ToString(asset.AsOfDate);
+
+            var result = await collectionReference.AddAsync(assetDetail);
+            writeFlag++;
+        }
+
+        if (writeFlag == assets.Count)
+        {
+            //DataSyncAudit objSync = new DataSyncAudit
+            //{
+            //    Date = DateTime.Now,
+            //    Action = "Upload"
+            //};
+            //await _dbConnection.InsertAsync(objSync);
+            //lblLastUploaded.Text = "Last Uploaded: " + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt");
+            //activityIndicator.IsRunning = false;
+            await DisplayAlert("Message", "Data Upload Successful", "OK");
+
+        }
+        else
+        {
+            //activityIndicator.IsRunning = false;
+            await DisplayAlert("Error", "Something went wrong", "OK");
+        }
+    }
+
+    private async void btnDownloadAssets_Clicked(object sender, EventArgs e)
+    {
+        await SetUpDb();
+        var existingRecords = await _dbConnection.Table<Assets>().Take(1).ToListAsync();
+        if (existingRecords.Count > 0)
+        {
+            bool userResponse = await DisplayAlert("Message", "There are existing records in the local database.Do you want to overwrite them?", "Yes", "No");
+            if (userResponse)
+            {
+                int recordsDeleted = await _dbConnection.ExecuteAsync("Delete from Assets"); //delete all present records in sqlite db
+                await DownloadData();
+            }
+            //activityIndicator.IsRunning = false;
+        }
+        else
+        {
+            await DownloadData();
+        }
+    }
+
+    public async Task DeleteAllDocumentsInCollection(string collectionPath)
+    {
+        var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+
+        using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+        using var dest = File.Create(localPath);
+        await json.CopyToAsync(dest);
+
+        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
+        dest.Close();
+        string projectId = "firestoredemo-d2bdc";
+        var _fireStoreDb = FirestoreDb.Create(projectId);
+
+        CollectionReference collectionRef = _fireStoreDb.Collection(collectionPath);
+
+        // Get all documents in the collection
+        QuerySnapshot snapshot = await collectionRef.GetSnapshotAsync();
+
+        // Delete each document
+        foreach (DocumentSnapshot document in snapshot.Documents)
+        {
+            await document.Reference.DeleteAsync();
+        }
+    }
+
+    public async Task DownloadData()
+    {
+        var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+
+        using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+        using var dest = File.Create(localPath);
+        await json.CopyToAsync(dest);
+
+        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
+        dest.Close();
+        string projectId = "firestoredemo-d2bdc";
+        var _fireStoreDb = FirestoreDb.Create(projectId);
+
+        int rowsAffected = 0;
+        try
+        {
+            Query orderQuery = _fireStoreDb.Collection(Constants.AssetFirestoreCollection);
+            QuerySnapshot orderQuerySnapshot = await orderQuery.GetSnapshotAsync();
+            List<AssetDetails> assetObj = new List<AssetDetails>();
+
+            foreach (DocumentSnapshot documentSnapshot in orderQuerySnapshot.Documents)
+            {
+                if (documentSnapshot.Exists)
+                {
+                    Dictionary<string, object> dictionary = documentSnapshot.ToDictionary();
+                    string jsonObj = JsonConvert.SerializeObject(dictionary);
+                    AssetDetails newAssetObj = JsonConvert.DeserializeObject<AssetDetails>(jsonObj);
+                    assetObj.Add(newAssetObj);
+                }
+            }
+
+            foreach (var item in assetObj)
+            {
+                Assets model = new Assets();
+                model.InvestmentEntity = item.InvestmentEntity;
+                model.Type = item.Type;
+                model.Amount = Convert.ToDecimal(item.Amount);
+                model.InterestRate = Convert.ToDecimal(item.InterestRate);
+                model.InterestFrequency = item.InterestFrequency;
+                model.Holder = item.Holder;
+                model.Remarks = item.Remarks;
+                if (DateTime.TryParse(item.StartDate, out DateTime startDate))
+                {
+                    model.StartDate = Convert.ToDateTime(item.StartDate);
+                }
+                else
+                {
+                    model.StartDate = DateTime.Now;
+                }
+
+                if (DateTime.TryParse(item.MaturityDate, out DateTime maturityDate))
+                {
+                    model.MaturityDate = Convert.ToDateTime(item.MaturityDate);
+                }
+                else
+                {
+                    model.MaturityDate = DateTime.Now;
+                }
+
+                if (DateTime.TryParse(item.AsOfDate, out DateTime asOfDate))
+                {
+                    model.AsOfDate = Convert.ToDateTime(item.AsOfDate);
+                }
+                else
+                {
+                    model.AsOfDate = DateTime.Now;
+                }
+
+                rowsAffected = rowsAffected + await _dbConnection.InsertAsync(model);
+            }
+
+
+            if (rowsAffected == assetObj.Count)
+            {
+                //activityIndicator.IsRunning = false;
+                await DisplayAlert("Message", "Success", "OK");
+            }
+            else
+            {
+                //activityIndicator.IsRunning = false;
+                await DisplayAlert("Error", "Something went wrong", "OK");
+            }
+        }
+        catch (Exception) { throw; }
     }
 }

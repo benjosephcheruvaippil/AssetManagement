@@ -20,7 +20,20 @@
                 x:Name="PickFile"
                 Text="Pick File"
                 Clicked="PickFileClicked"
+                IsVisible="False"
                 HorizontalOptions="Center" />
+
+                    <Button
+x:Name="btnUploadAssets"
+Text="Upload Assets"
+Clicked="btnUploadAssets_Clicked"
+HorizontalOptions="Center" />
+
+                    <Button
+x:Name="btnDownloadAssets"
+Text="Download Assets"
+Clicked="btnDownloadAssets_Clicked"
+HorizontalOptions="Center" />
 
                 </StackLayout>
 
