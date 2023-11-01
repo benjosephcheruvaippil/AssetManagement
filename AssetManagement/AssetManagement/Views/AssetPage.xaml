@@ -16,11 +16,34 @@
         VerticalOptions="Center">
 
                 <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                    <ActivityIndicator x:Name="activityIndicator" IsRunning="False" Color="Blue"/>
                     <Button
                 x:Name="PickFile"
                 Text="Pick File"
                 Clicked="PickFileClicked"
+                IsVisible="False"
                 HorizontalOptions="Center" />
+
+                    <Button
+x:Name="btnUploadAssets"
+Text="Upload Assets"
+Clicked="btnUploadAssets_Clicked"
+Margin="5"
+HorizontalOptions="Center" />
+
+                    <Button
+x:Name="btnDownloadAssets"
+Text="Download Assets"
+Clicked="btnDownloadAssets_Clicked"
+Margin="5"
+HorizontalOptions="Center" />
+
+                    <Button
+x:Name="btnDownloadAssetsExcel"
+Text="Download Excel"
+Clicked="btnDownloadAssetsExcel_Clicked"
+Margin="5"
+HorizontalOptions="Center" />
 
                 </StackLayout>
 
