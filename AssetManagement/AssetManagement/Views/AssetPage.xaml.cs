@@ -3,12 +3,15 @@ using AssetManagement.Models.Constants;
 using AssetManagement.Models.FirestoreModel;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
+using CommunityToolkit.Maui.Storage;
 using ExcelDataReader;
 using Google.Cloud.Firestore;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using Mopups.Interfaces;
 using Newtonsoft.Json;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using SQLite;
 using System.Collections.ObjectModel;
 using System.Data;
@@ -412,6 +415,12 @@ public partial class AssetPage : TabbedPage
 
     private async void btnUploadAssets_Clicked(object sender, EventArgs e)
     {
+        bool userResponse = await DisplayAlert("Message", "Are you sure to upload data to firestore DB?", "Yes", "No");
+        if (!userResponse)
+        {
+            return;
+        }
+        activityIndicator.IsRunning = true;
         var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
 
         using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
@@ -463,19 +472,19 @@ public partial class AssetPage : TabbedPage
             //};
             //await _dbConnection.InsertAsync(objSync);
             //lblLastUploaded.Text = "Last Uploaded: " + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt");
-            //activityIndicator.IsRunning = false;
+            activityIndicator.IsRunning = false;
             await DisplayAlert("Message", "Data Upload Successful", "OK");
 
         }
         else
         {
-            //activityIndicator.IsRunning = false;
+            activityIndicator.IsRunning = false;
             await DisplayAlert("Error", "Something went wrong", "OK");
         }
     }
 
     private async void btnDownloadAssets_Clicked(object sender, EventArgs e)
-    {
+    {      
         await SetUpDb();
         var existingRecords = await _dbConnection.Table<Assets>().Take(1).ToListAsync();
         if (existingRecords.Count > 0)
@@ -484,12 +493,14 @@ public partial class AssetPage : TabbedPage
             if (userResponse)
             {
                 int recordsDeleted = await _dbConnection.ExecuteAsync("Delete from Assets"); //delete all present records in sqlite db
+                activityIndicator.IsRunning = true;
                 await DownloadData();
             }
-            //activityIndicator.IsRunning = false;
+            activityIndicator.IsRunning = false;
         }
         else
         {
+            activityIndicator.IsRunning = true;
             await DownloadData();
         }
     }
@@ -593,15 +604,125 @@ public partial class AssetPage : TabbedPage
 
             if (rowsAffected == assetObj.Count)
             {
-                //activityIndicator.IsRunning = false;
+                activityIndicator.IsRunning = false;
                 await DisplayAlert("Message", "Success", "OK");
             }
             else
             {
-                //activityIndicator.IsRunning = false;
+                activityIndicator.IsRunning = false;
                 await DisplayAlert("Error", "Something went wrong", "OK");
             }
         }
         catch (Exception) { throw; }
+    }
+
+    private async void btnDownloadAssetsExcel_Clicked(object sender, EventArgs e)
+    {
+        try
+        {
+            activityIndicator.IsRunning = true;
+            //DateTime fromDateIncomeReport = dpFromDateIncomeReport.Date;
+            //DateTime toDateIncomeReport = dpTODateIncomeReport.Date;
+            //DateTime fromDate = new DateTime(fromDateIncomeReport.Year, fromDateIncomeReport.Month, fromDateIncomeReport.Day, 0, 0, 0);
+            //DateTime toDate = new DateTime(toDateIncomeReport.Year, toDateIncomeReport.Month, toDateIncomeReport.Day, 23, 59, 59);
+            var assetList = await _dbConnection.Table<Assets>()
+                .OrderBy(i => i.Type)
+                .ToListAsync();
+
+            // Creating an instance
+            // of ExcelPackage
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage excel = new ExcelPackage();
+
+            // name of the sheet
+            var workSheet = excel.Workbook.Worksheets.Add("Asset Report");
+
+            // setting the properties
+            // of the work sheet 
+            workSheet.TabColor = System.Drawing.Color.Black;
+            workSheet.DefaultRowHeight = 12;
+
+            // Setting the properties
+            // of the first row
+            workSheet.Row(1).Height = 20;
+            workSheet.Row(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Row(1).Style.Font.Bold = true;
+
+            workSheet.Column(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(2).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(3).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(4).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(5).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(6).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(7).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(8).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(9).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(10).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+
+            // Header of the Excel sheet
+            workSheet.Cells[1, 1].Value = "Investment Entity";
+            workSheet.Cells[1, 2].Value = "Type";
+            workSheet.Cells[1, 3].Value = "Amount";
+            workSheet.Cells[1, 4].Value = "Interest Rate";
+            workSheet.Cells[1, 5].Value = "Interest Frequency";
+            workSheet.Cells[1, 6].Value = "Holder";
+            workSheet.Cells[1, 7].Value = "Start Date";
+            workSheet.Cells[1, 8].Value = "Maturity Date";
+            workSheet.Cells[1, 9].Value = "As Of Date";
+            workSheet.Cells[1, 10].Value = "Remarks";
+
+            int recordIndex = 2;
+            //decimal totalIncome = 0, totalTaxCut = 0;
+            foreach (var asset in assetList)
+            {
+                workSheet.Cells[recordIndex, 1].Value = asset.InvestmentEntity;
+                workSheet.Cells[recordIndex, 2].Value = asset.Type;
+                workSheet.Cells[recordIndex, 3].Value = asset.Amount;
+                workSheet.Cells[recordIndex, 4].Value = asset.InterestRate;
+                workSheet.Cells[recordIndex, 5].Value = asset.InterestFrequency;
+                workSheet.Cells[recordIndex, 6].Value = asset.Holder;
+                workSheet.Cells[recordIndex, 7].Value = asset.StartDate.ToString("dd-MM-yyyy");
+                workSheet.Cells[recordIndex, 8].Value = asset.MaturityDate.ToString("dd-MM-yyyy");
+                workSheet.Cells[recordIndex, 9].Value = asset.AsOfDate.ToString("dd-MM-yyyy");
+                workSheet.Cells[recordIndex, 10].Value = asset.Remarks;
+                workSheet.Row(recordIndex).Height = 16;
+                recordIndex++;
+            }
+
+            //recordIndex++;
+            //workSheet.Cells[recordIndex, 5].Value = totalTaxCut;
+            //workSheet.Cells[recordIndex, 5].Style.Font.Bold = true;
+            //workSheet.Cells[recordIndex, 6].Value = totalIncome;
+            //workSheet.Cells[recordIndex, 6].Style.Font.Bold = true;
+
+
+            workSheet.Column(1).AutoFit();
+            workSheet.Column(2).AutoFit();
+            workSheet.Column(3).AutoFit();
+            workSheet.Column(4).AutoFit();
+            workSheet.Column(5).AutoFit();
+            workSheet.Column(6).AutoFit();
+            workSheet.Column(7).AutoFit();
+            workSheet.Column(8).AutoFit();
+            workSheet.Column(9).AutoFit();
+            workSheet.Column(10).AutoFit();
+
+            var stream = new MemoryStream(excel.GetAsByteArray());
+            CancellationTokenSource Ctoken = new CancellationTokenSource();
+            var fileSaverResult = await FileSaver.Default.SaveAsync("Asset_Report.xlsx", stream, Ctoken.Token);
+            if (fileSaverResult.IsSuccessful)
+            {
+                await DisplayAlert("Message", "Excel saved in " + fileSaverResult.FilePath, "Ok");
+            }
+
+            excel.Dispose();
+            activityIndicator.IsRunning = false;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", ex.Message, "Ok");
+            await DisplayAlert("Error", ex.InnerException.ToString(), "Ok");
+        }
     }
 }
