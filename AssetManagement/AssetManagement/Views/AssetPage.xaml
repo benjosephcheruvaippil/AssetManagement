@@ -14,36 +14,40 @@
         Spacing="25"
         Padding="30,0"
         VerticalOptions="Center">
-
+                <ActivityIndicator x:Name="activityIndicator" IsVisible="False" WidthRequest="40" HeightRequest="40" IsRunning="False" Color="Blue"/>
                 <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
-                    <ActivityIndicator x:Name="activityIndicator" IsRunning="False" Color="Blue"/>
+                    
                     <Button
                 x:Name="PickFile"
                 Text="Pick File"
                 Clicked="PickFileClicked"
-                IsVisible="False"
-                HorizontalOptions="Center" />
+                        FontSize="8"
+                        Margin="2"
+                HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
 
                     <Button
 x:Name="btnUploadAssets"
-Text="Upload Assets"
+Text="Upload"
 Clicked="btnUploadAssets_Clicked"
-Margin="5"
-HorizontalOptions="Center" />
+FontSize="8"
+Margin="2"
+HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
 
                     <Button
 x:Name="btnDownloadAssets"
-Text="Download Assets"
+Text="Download"
 Clicked="btnDownloadAssets_Clicked"
-Margin="5"
-HorizontalOptions="Center" />
+FontSize="8"
+Margin="2"
+HorizontalOptions="Center" WidthRequest="80" HeightRequest="35" />
 
                     <Button
 x:Name="btnDownloadAssetsExcel"
-Text="Download Excel"
+Text="Dwnld xl"
 Clicked="btnDownloadAssetsExcel_Clicked"
-Margin="5"
-HorizontalOptions="Center" />
+FontSize="8"
+Margin="2"
+HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
 
                 </StackLayout>
 
@@ -68,6 +72,13 @@ HorizontalOptions="Center" />
 
                 <Label
             x:Name="lblInsuranceMF"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblGold"
             Text=""
             SemanticProperties.HeadingLevel="Level1"
             FontSize="16"
@@ -213,6 +224,7 @@ HorizontalOptions="Center" />
                             <x:String>Bank</x:String>
                             <x:String>NCD</x:String>
                             <x:String>SGB</x:String>
+                            <x:String>Gold</x:String>
                             <x:String>MLD</x:String>
                             <x:String>Insurance_MF</x:String>
                             <x:String>PPF</x:String>

@@ -250,6 +250,7 @@ public partial class AssetPage : TabbedPage
         decimal MLDAssets = records.Where(b => b.Type == "MLD").Sum(s => s.Amount);
 
         decimal Insurance_MF = records.Where(b => b.Type == "Insurance_MF").Sum(s => s.Amount);
+        decimal Gold = records.Where(b => b.Type == "Gold" || b.Type=="SGB").Sum(s => s.Amount);
         decimal PPF = records.Where(b => b.Type == "PPF").Sum(s => s.Amount);
         decimal EPF = records.Where(b => b.Type == "EPF").Sum(s => s.Amount);
         decimal MutualFunds = records.Where(b => b.Type == "MF").Sum(s => s.Amount);
@@ -260,6 +261,7 @@ public partial class AssetPage : TabbedPage
         lblMLD.Text = "Market Linked Debentures: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", MLDAssets);
 
         lblInsuranceMF.Text = "Insurance/MF: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Insurance_MF);
+        lblGold.Text = "Gold: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Gold);
         lblPPF.Text = "Public Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", PPF);
         lblEPF.Text = "Employee Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", EPF);
         lblMF.Text = "Mutual Funds: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", MutualFunds);
@@ -385,7 +387,7 @@ public partial class AssetPage : TabbedPage
     {
         string type = entType.SelectedItem.ToString();
 
-        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "MF" || type == "Stocks")
+        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "MF" || type == "Stocks" || type == "Gold")
         {
             entStartDate.Date = Convert.ToDateTime("01-01-0001");
             entMaturityDate.Date = Convert.ToDateTime("01-01-0001");
@@ -420,6 +422,7 @@ public partial class AssetPage : TabbedPage
         {
             return;
         }
+        activityIndicator.IsVisible = true;
         activityIndicator.IsRunning = true;
         var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
 
@@ -472,12 +475,14 @@ public partial class AssetPage : TabbedPage
             //};
             //await _dbConnection.InsertAsync(objSync);
             //lblLastUploaded.Text = "Last Uploaded: " + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt");
+            activityIndicator.IsVisible = false;
             activityIndicator.IsRunning = false;
             await DisplayAlert("Message", "Data Upload Successful", "OK");
 
         }
         else
         {
+            activityIndicator.IsVisible = false;
             activityIndicator.IsRunning = false;
             await DisplayAlert("Error", "Something went wrong", "OK");
         }
@@ -493,13 +498,16 @@ public partial class AssetPage : TabbedPage
             if (userResponse)
             {
                 int recordsDeleted = await _dbConnection.ExecuteAsync("Delete from Assets"); //delete all present records in sqlite db
+                activityIndicator.IsVisible = true;
                 activityIndicator.IsRunning = true;
                 await DownloadData();
             }
+            activityIndicator.IsVisible = false;
             activityIndicator.IsRunning = false;
         }
         else
         {
+            activityIndicator.IsVisible = true;
             activityIndicator.IsRunning = true;
             await DownloadData();
         }
@@ -604,11 +612,13 @@ public partial class AssetPage : TabbedPage
 
             if (rowsAffected == assetObj.Count)
             {
+                activityIndicator.IsVisible = false;
                 activityIndicator.IsRunning = false;
                 await DisplayAlert("Message", "Success", "OK");
             }
             else
             {
+                activityIndicator.IsVisible = false;
                 activityIndicator.IsRunning = false;
                 await DisplayAlert("Error", "Something went wrong", "OK");
             }
@@ -620,6 +630,7 @@ public partial class AssetPage : TabbedPage
     {
         try
         {
+            activityIndicator.IsVisible = true;
             activityIndicator.IsRunning = true;
             //DateTime fromDateIncomeReport = dpFromDateIncomeReport.Date;
             //DateTime toDateIncomeReport = dpTODateIncomeReport.Date;
@@ -717,6 +728,7 @@ public partial class AssetPage : TabbedPage
             }
 
             excel.Dispose();
+            activityIndicator.IsVisible = false;
             activityIndicator.IsRunning = false;
         }
         catch (Exception ex)
