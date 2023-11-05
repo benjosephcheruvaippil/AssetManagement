@@ -87,7 +87,7 @@ public partial class AssetPage : TabbedPage
         var labelGold = new TapGestureRecognizer();
         labelGold.Tapped += (s, e) =>
         {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("Gold", _assetService));
+            _popupNavigation.PushAsync(new AssetsByCategoryPage("Gold,SGB", _assetService));
         };
         lblGold.GestureRecognizers.Add(labelGold);
 
