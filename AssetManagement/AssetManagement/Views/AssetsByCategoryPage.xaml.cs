@@ -22,19 +22,33 @@ public partial class AssetsByCategoryPage
         //_assetService = assetService;
     }
 
-    public async Task ShowAssetsByEntity()
+    public async void ShowAssetsByEntity()
 	{
         List<Assets> records = await _assetService.GetAssetsList();
-        //var result = records.Select(s=>s.InvestmentEntity).Where(i => i.Type == "Bank").GroupBy(g=>g.InvestmentEntity).Sum(s => s.Amount);
-        
-        var investmentEntity = records
-            .Where(w => w.Type == _from)
+        List<EntitywiseModel> investmentEntity;
+        if (_from.Contains("Gold"))
+        {
+            string[] type=_from.Split(',');
+            investmentEntity = records
+            .Where(w => type.Contains(w.Type))
             .GroupBy(g => g.InvestmentEntity)
             .Select(entity => new EntitywiseModel
             {
                 InvestmentEntity = entity.First().InvestmentEntity,
                 TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
             }).ToList();
+        }
+        else
+        {
+            investmentEntity = records
+                .Where(w => w.Type == _from)
+                .GroupBy(g => g.InvestmentEntity)
+                .Select(entity => new EntitywiseModel
+                {
+                    InvestmentEntity = entity.First().InvestmentEntity,
+                    TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
+                }).ToList();
+        }
 
         foreach(var item in investmentEntity)
         {
