@@ -85,6 +85,13 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
             HorizontalOptions="Center" />
 
                 <Label
+            x:Name="lblOthers"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
             x:Name="lblPPF"
             Text=""
             SemanticProperties.HeadingLevel="Level1"
@@ -231,6 +238,7 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
                             <x:String>EPF</x:String>
                             <x:String>MF</x:String>
                             <x:String>Stocks</x:String>
+                            <x:String>Others</x:String>
                         </x:Array>
                     </Picker.ItemsSource>
                 </Picker>

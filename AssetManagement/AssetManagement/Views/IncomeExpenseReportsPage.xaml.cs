@@ -255,7 +255,8 @@ public partial class IncomeExpenseReportsPage : ContentPage
 
             var stream=new MemoryStream(excel.GetAsByteArray());
             CancellationTokenSource Ctoken = new CancellationTokenSource();
-            var fileSaverResult = await FileSaver.Default.SaveAsync("Income_Report.xlsx", stream, Ctoken.Token);
+            string fileName = "Income_Report_" + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt") + ".xlsx";
+            var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
             if(fileSaverResult.IsSuccessful)
             {
                 await DisplayAlert("Message", "Excel saved in " + fileSaverResult.FilePath, "Ok");
