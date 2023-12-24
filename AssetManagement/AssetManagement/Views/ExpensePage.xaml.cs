@@ -1,9 +1,12 @@
+//using AndroidX.Lifecycle;
 using AssetManagement.Models;
 using AssetManagement.Models.Constants;
 using AssetManagement.Models.FirestoreModel;
+using ExcelDataReader;
 using Google.Cloud.Firestore;
 using Newtonsoft.Json;
 using SQLite;
+using System.Data;
 using System.Globalization;
 
 namespace AssetManagement.Views;
@@ -404,5 +407,96 @@ public partial class ExpensePage : ContentPage
                 LoadExpensesInPage();
             }
         }
+    }
+
+    private async void pickexpensefile_Clicked(object sender, EventArgs e)
+    {
+        try
+        {
+            var result = await FilePicker.PickAsync(new PickOptions
+            {
+                PickerTitle = "Pick File Please"
+            });
+
+            if (result == null)
+                return;
+
+            DataSet dsexcelRecords = new DataSet();
+            IExcelDataReader reader = null;
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            var filestream = await result.OpenReadAsync();
+            reader = ExcelReaderFactory.CreateOpenXmlReader(filestream);
+            dsexcelRecords = reader.AsDataSet();
+            reader.Close();
+            await SetUpDb();
+            await _dbConnection.DeleteAllAsync<Assets>(); // delete all records currenly present in the table
+
+            if (dsexcelRecords != null && dsexcelRecords.Tables.Count > 0)
+            {
+                DataTable dtStudentRecords = dsexcelRecords.Tables[0];
+                for (int i = 1; i < dtStudentRecords.Rows.Count; i++)
+                {
+                    //string InvestmentEntity = Convert.ToString(dtStudentRecords.Rows[i][1]);
+                    //string Type = Convert.ToString(dtStudentRecords.Rows[i][2]);
+                    //decimal Amount = Convert.ToDecimal(dtStudentRecords.Rows[i][3]);
+                    //decimal InterestRate = Convert.ToDecimal(dtStudentRecords.Rows[i][4]);
+                    //string InterestFrequency = Convert.ToString(dtStudentRecords.Rows[i][5]);
+                    //string Holder = Convert.ToString(dtStudentRecords.Rows[i][6]);
+                    //DateTime StartDate;
+                    //DateTime MaturityDate;
+                    //DateTime AsOfDate;
+                    //if (dtStudentRecords.Rows[i][7] is DBNull)
+                    //{
+                    //    //set as current date
+                    //    StartDate = Convert.ToDateTime("01-01-0001");
+                    //}
+                    //else
+                    //{
+                    //    StartDate = Convert.ToDateTime(dtStudentRecords.Rows[i][7]);
+                    //}
+                    //if (dtStudentRecords.Rows[i][8] is DBNull)
+                    //{
+                    //    MaturityDate = Convert.ToDateTime("01-01-0001");
+                    //}
+                    //else
+                    //{
+                    //    MaturityDate = Convert.ToDateTime(dtStudentRecords.Rows[i][8]);
+                    //}
+                    //string Remarks = Convert.ToString(dtStudentRecords.Rows[i][9]);
+
+                    //if (dtStudentRecords.Rows[i][10] is DBNull)
+                    //{
+                    //    AsOfDate = Convert.ToDateTime("01-01-0001");
+                    //}
+                    //else
+                    //{
+                    //    AsOfDate = Convert.ToDateTime(dtStudentRecords.Rows[i][10]);
+                    //}
+
+                    //var assets = new Assets
+                    //{
+                    //    InvestmentEntity = InvestmentEntity,
+                    //    Type = Type,
+                    //    Amount = Amount,
+                    //    InterestRate = InterestRate,
+                    //    InterestFrequency = InterestFrequency,
+                    //    Holder = Holder,
+                    //    StartDate = StartDate,
+                    //    MaturityDate = MaturityDate,
+                    //    Remarks = Remarks,
+                    //    AsOfDate = AsOfDate
+                    //};
+                    //await SetUpDb();
+                    //int rowsAffected = await _dbConnection.InsertAsync(assets);
+                }
+            }
+            await DisplayAlert("Info", "File Processed Successfully", "OK");
+            //throw new NotImplementedException();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Alert - StackTrace", ex.StackTrace.ToString(), "OK");
+        }
+
     }
 }

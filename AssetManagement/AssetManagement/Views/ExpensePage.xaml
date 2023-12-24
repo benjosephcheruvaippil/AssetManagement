@@ -5,7 +5,14 @@
              Title="Expense">
     <ScrollView>
             <VerticalStackLayout>
-                <Entry x:Name="txtTransactionId"
+            <Button
+x:Name="pickexpensefile"
+Text="Pick File"
+Clicked="pickexpensefile_Clicked"
+        FontSize="8"
+        Margin="2"
+HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
+            <Entry x:Name="txtTransactionId"
            IsVisible="false" />
 
                 <Entry x:Name="entryExpenseAmount"
