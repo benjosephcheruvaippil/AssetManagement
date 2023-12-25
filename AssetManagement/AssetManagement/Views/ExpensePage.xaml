@@ -25,7 +25,8 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
                             <x:String>Household Items</x:String>
                             <x:String>Automobile</x:String>
                             <x:String>Leisure</x:String>
-                        </x:Array>
+                            <x:String>Others</x:String>
+                    </x:Array>
                     </Picker.ItemsSource>
                 </Picker>
 

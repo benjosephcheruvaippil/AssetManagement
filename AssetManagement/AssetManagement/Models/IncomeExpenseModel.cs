@@ -19,5 +19,6 @@ namespace AssetManagement.Models
         public string OwnerName { get; set; }
         public string CategoryName { get; set; }
         public string Remarks { get; set; }
+        public string Mode { get; set; }
     }
 }

@@ -84,7 +84,8 @@ public partial class ExpensePage : ContentPage
                 TransactionType = "Expense",
                 Date = dpDateExpense.Date != DateTime.Now.Date ? dpDateExpense.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerExpenseCategory.SelectedItem),
-                Remarks = entryExpenseRemarks.Text
+                Remarks = entryExpenseRemarks.Text,
+                Mode = "manual"
             };
             await SetUpDb();
             int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpense);
@@ -92,9 +93,8 @@ public partial class ExpensePage : ContentPage
             entryExpenseRemarks.Text = "";
             if (rowsAffected > 0)
             {
-                //await DisplayAlert("Message", "Saved", "OK");
 
-                LoadExpensesInPage();
+                //LoadExpensesInPage();
             }
             else
             {
@@ -120,9 +120,8 @@ public partial class ExpensePage : ContentPage
 
             if (rowsAffected > 0)
             {
-                //await DisplayAlert("Message", "Saved", "OK");
 
-                LoadExpensesInPage();
+                //LoadExpensesInPage();
             }
             else
             {
@@ -250,6 +249,7 @@ public partial class ExpensePage : ContentPage
             incomeExpense.Date = Convert.ToString(trans.Date);
             incomeExpense.CategoryName = trans.CategoryName;
             incomeExpense.Remarks = trans.Remarks;
+            incomeExpense.Mode = trans.Mode;
 
             var result = await collectionReference.AddAsync(incomeExpense);
             writeFlag++;
@@ -356,7 +356,7 @@ public partial class ExpensePage : ContentPage
             {
                 IncomeExpenseModel model = new IncomeExpenseModel();
                 model.Amount = item.Amount;
-                model.TaxAmountCut=item.TaxAmountCut;
+                model.TaxAmountCut = item.TaxAmountCut;
                 model.TransactionType = item.TransactionType;
                 if (DateTime.TryParse(item.Date, out DateTime result))
                 {
@@ -367,9 +367,10 @@ public partial class ExpensePage : ContentPage
                     model.Date = DateTime.Now;
                 }
 
-                model.OwnerName=item.OwnerName;
+                model.OwnerName = item.OwnerName;
                 model.CategoryName = item.CategoryName;
                 model.Remarks = item.Remarks;
+                model.Mode = item.Mode;
 
                 rowsAffected = rowsAffected + await _dbConnection.InsertAsync(model);
             }
@@ -404,7 +405,7 @@ public partial class ExpensePage : ContentPage
                 await SetUpDb();
                 int rowsAffected = await _dbConnection.DeleteAsync(objExpense);
                 ClearExpense();
-                LoadExpensesInPage();
+                //LoadExpensesInPage();
             }
         }
     }
@@ -413,6 +414,19 @@ public partial class ExpensePage : ContentPage
     {
         try
         {
+            //get the last file_upload date
+            await SetUpDb();
+            List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' and Mode='file_upload' order by Date desc Limit 1");
+            if (expenses.Count > 0)
+            {
+                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}. Do you wish to continue uploading the file?", "Yes", "No");
+                if (!userResponse)
+                {
+                    return;
+                }
+            }
+            //get the last file_upload date
+
             var result = await FilePicker.PickAsync(new PickOptions
             {
                 PickerTitle = "Pick File Please"
@@ -421,6 +435,8 @@ public partial class ExpensePage : ContentPage
             if (result == null)
                 return;
 
+            activityIndicator.IsRunning = true;
+            int rowsAdded = 0;
             DataSet dsexcelRecords = new DataSet();
             IExcelDataReader reader = null;
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
@@ -436,66 +452,87 @@ public partial class ExpensePage : ContentPage
                 DataTable dtStudentRecords = dsexcelRecords.Tables[0];
                 for (int i = 1; i < dtStudentRecords.Rows.Count; i++)
                 {
-                    //string InvestmentEntity = Convert.ToString(dtStudentRecords.Rows[i][1]);
-                    //string Type = Convert.ToString(dtStudentRecords.Rows[i][2]);
-                    //decimal Amount = Convert.ToDecimal(dtStudentRecords.Rows[i][3]);
-                    //decimal InterestRate = Convert.ToDecimal(dtStudentRecords.Rows[i][4]);
-                    //string InterestFrequency = Convert.ToString(dtStudentRecords.Rows[i][5]);
-                    //string Holder = Convert.ToString(dtStudentRecords.Rows[i][6]);
-                    //DateTime StartDate;
-                    //DateTime MaturityDate;
-                    //DateTime AsOfDate;
-                    //if (dtStudentRecords.Rows[i][7] is DBNull)
-                    //{
-                    //    //set as current date
-                    //    StartDate = Convert.ToDateTime("01-01-0001");
-                    //}
-                    //else
-                    //{
-                    //    StartDate = Convert.ToDateTime(dtStudentRecords.Rows[i][7]);
-                    //}
-                    //if (dtStudentRecords.Rows[i][8] is DBNull)
-                    //{
-                    //    MaturityDate = Convert.ToDateTime("01-01-0001");
-                    //}
-                    //else
-                    //{
-                    //    MaturityDate = Convert.ToDateTime(dtStudentRecords.Rows[i][8]);
-                    //}
-                    //string Remarks = Convert.ToString(dtStudentRecords.Rows[i][9]);
-
-                    //if (dtStudentRecords.Rows[i][10] is DBNull)
-                    //{
-                    //    AsOfDate = Convert.ToDateTime("01-01-0001");
-                    //}
-                    //else
-                    //{
-                    //    AsOfDate = Convert.ToDateTime(dtStudentRecords.Rows[i][10]);
-                    //}
-
-                    //var assets = new Assets
-                    //{
-                    //    InvestmentEntity = InvestmentEntity,
-                    //    Type = Type,
-                    //    Amount = Amount,
-                    //    InterestRate = InterestRate,
-                    //    InterestFrequency = InterestFrequency,
-                    //    Holder = Holder,
-                    //    StartDate = StartDate,
-                    //    MaturityDate = MaturityDate,
-                    //    Remarks = Remarks,
-                    //    AsOfDate = AsOfDate
-                    //};
-                    //await SetUpDb();
-                    //int rowsAffected = await _dbConnection.InsertAsync(assets);
+                    string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]);
+                    if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
+                    {
+                        //Delete if exists mode=file_upload on the specified date
+                        await SetUpDb();
+                        string formattedDate = transactionDate.ToString("yyyy-MM-dd");
+                        string query = "Delete from IncomeExpenseModel where Mode='file_upload' and DATE(Date>='" + formattedDate + "')";
+                        var isDeleted = await _dbConnection.ExecuteAsync(query);
+                        //Delete if exists mode=file_upload on the specified date
+                        break;
+                    }
+                }
+                for (int i = 1; i < dtStudentRecords.Rows.Count; i++)
+                {
+                    string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]);
+                    if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
+                    {
+                        bool addExpense = false;
+                        string category = "";
+                        double amount = 0;
+                        if (!string.IsNullOrEmpty(Convert.ToString(dtStudentRecords.Rows[i][3])))
+                        {
+                            amount = Convert.ToDouble(dtStudentRecords.Rows[i][3]);
+                        }
+                        string description = Convert.ToString(dtStudentRecords.Rows[i][2]);
+                        description = description.Replace(" ", "");
+                        description = description.Replace("\n", "");
+                        if (description.Contains("/au/"))
+                        {
+                            addExpense = true;
+                            category = "Automobile";
+                        }
+                        else if (description.Contains("/hs/"))
+                        {
+                            addExpense = true;
+                            category = "Household Items";
+                        }
+                        else if (description.Contains("/le/"))
+                        {
+                            addExpense = true;
+                            category = "Leisure";
+                        }
+                        else if (description.Contains("/ot/"))
+                        {
+                            addExpense = true;
+                            category = "Others";
+                        }
+                        else if (description.Contains("/ex/"))
+                        {
+                            addExpense = true;
+                            category = "Others";
+                        }
+                        //add expense into database
+                        if (addExpense)
+                        {                           
+                            IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
+                            {
+                                Amount = amount,
+                                TransactionType = "Expense",
+                                Date = transactionDate,
+                                CategoryName = category,
+                                Remarks = "",
+                                Mode = "file_upload"
+                            };
+                            rowsAdded = await _dbConnection.InsertAsync(objIncomeExpense);
+                        }
+                        //add expense into database
+                    }
                 }
             }
-            await DisplayAlert("Info", "File Processed Successfully", "OK");
-            //throw new NotImplementedException();
+            if (rowsAdded > 0)
+            {
+                await DisplayAlert("Info", "File Processed Successfully", "OK");
+                activityIndicator.IsRunning = false;
+                //LoadExpensesInPage();
+            }
+            activityIndicator.IsRunning = false;
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Alert - StackTrace", ex.StackTrace.ToString(), "OK");
+            await DisplayAlert("Alert - StackTrace", ex.Message.ToString(), "OK");
         }
 
     }
