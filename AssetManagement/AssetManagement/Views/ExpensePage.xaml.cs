@@ -94,7 +94,7 @@ public partial class ExpensePage : ContentPage
             if (rowsAffected > 0)
             {
 
-                //LoadExpensesInPage();
+                LoadExpensesInPage();
             }
             else
             {
@@ -121,7 +121,7 @@ public partial class ExpensePage : ContentPage
             if (rowsAffected > 0)
             {
 
-                //LoadExpensesInPage();
+                LoadExpensesInPage();
             }
             else
             {
@@ -405,7 +405,7 @@ public partial class ExpensePage : ContentPage
                 await SetUpDb();
                 int rowsAffected = await _dbConnection.DeleteAsync(objExpense);
                 ClearExpense();
-                //LoadExpensesInPage();
+                LoadExpensesInPage();
             }
         }
     }
@@ -494,11 +494,11 @@ public partial class ExpensePage : ContentPage
                             addExpense = true;
                             category = "Leisure";
                         }
-                        else if (description.Contains("/ot/"))
-                        {
-                            addExpense = true;
-                            category = "Others";
-                        }
+                        //else if (description.Contains("/ot/"))
+                        //{
+                        //    addExpense = true;
+                        //    category = "Others";
+                        //}
                         else if (description.Contains("/ex/"))
                         {
                             addExpense = true;
@@ -526,7 +526,8 @@ public partial class ExpensePage : ContentPage
             {
                 await DisplayAlert("Info", "File Processed Successfully", "OK");
                 activityIndicator.IsRunning = false;
-                //LoadExpensesInPage();
+                await ShowCurrentMonthExpenses();
+                LoadExpensesInPage();
             }
             activityIndicator.IsRunning = false;
         }

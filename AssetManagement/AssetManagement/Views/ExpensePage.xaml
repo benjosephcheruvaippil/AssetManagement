@@ -12,6 +12,7 @@ Clicked="pickexpensefile_Clicked"
         FontSize="8"
         Margin="2"
 HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
+            <Label>au: Automobile,hs: Household Items,le: Leisure,ex: Others</Label>
             <Entry x:Name="txtTransactionId"
            IsVisible="false" />
 
