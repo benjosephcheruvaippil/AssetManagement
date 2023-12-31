@@ -169,9 +169,20 @@ public partial class IncomeExpenseReportsPage : ContentPage
             DateTime toDateIncomeReport = dpTODateIncomeReport.Date;
             DateTime fromDate = new DateTime(fromDateIncomeReport.Year, fromDateIncomeReport.Month, fromDateIncomeReport.Day, 0, 0, 0);
             DateTime toDate = new DateTime(toDateIncomeReport.Year, toDateIncomeReport.Month, toDateIncomeReport.Day, 23, 59, 59);
-            var incomeList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Income" && (i.Date >= fromDate && i.Date <= toDate))
-                .OrderBy(i=>i.Date)
-                .ToListAsync();
+            List<IncomeExpenseModel> inexpList = new List<IncomeExpenseModel>();
+            string type = typePicker.SelectedItem.ToString();
+            if (type == "Income")
+            {
+                inexpList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Income" && (i.Date >= fromDate && i.Date <= toDate))
+                    .OrderBy(i => i.Date)
+                    .ToListAsync();
+            }
+            else if (type == "Expense")
+            {
+                inexpList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Expense" && (i.Date >= fromDate && i.Date <= toDate))
+                    .OrderBy(i => i.Date)
+                    .ToListAsync();
+            }
 
             // Creating an instance
             // of ExcelPackage
@@ -211,7 +222,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
 
             int recordIndex = 2;
             decimal totalIncome = 0,totalTaxCut=0;
-            foreach (var income in incomeList)
+            foreach (var income in inexpList)
             {
                 workSheet.Cells[recordIndex, 1].Value = income.TransactionType;
                 workSheet.Cells[recordIndex, 2].Value = income.Date.ToString("dd-MM-yyyy");
@@ -255,7 +266,15 @@ public partial class IncomeExpenseReportsPage : ContentPage
 
             var stream=new MemoryStream(excel.GetAsByteArray());
             CancellationTokenSource Ctoken = new CancellationTokenSource();
-            string fileName = "Income_Report_" + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt") + ".xlsx";
+            string fileName = "";
+            if (type == "Income")
+            {
+                fileName = "Income_Report_" + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt") + ".xlsx";
+            }
+            else if (type == "Expense")
+            {
+                fileName = "Expense_Report_" + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt") + ".xlsx";
+            }
             var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
             if(fileSaverResult.IsSuccessful)
             {
