@@ -61,6 +61,7 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
                         </TableSection>
                     </TableRoot>
                 </TableView>
+                <Label x:Name="lblShowRemainingRecords" Text="Show Remaining" FontAttributes="Bold" HorizontalOptions="Center" />
                 <BoxView HeightRequest="50" Color="Transparent"/>
                 <Label x:Name="lblCurrentMonthExpenses" FontSize="Large" Text="" HorizontalOptions="CenterAndExpand"></Label>
                 <ActivityIndicator x:Name="activityIndicator" IsRunning="False" Color="Blue"/>

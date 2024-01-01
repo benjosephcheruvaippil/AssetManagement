@@ -20,13 +20,20 @@ public partial class ExpensePage : ContentPage
     public ExpensePage()
     {
         InitializeComponent();
+
+        var labelShowRemaining = new TapGestureRecognizer();
+        labelShowRemaining.Tapped += (s, e) =>
+        {
+            LoadExpensesInPage("Last40");
+        };
+        lblShowRemainingRecords.GestureRecognizers.Add(labelShowRemaining);
     }
 
     protected async override void OnAppearing()
     {
         base.OnAppearing();
 
-        LoadExpensesInPage();// show expenses in the expense tab
+        LoadExpensesInPage("Last5");// show expenses in the expense tab
         await ShowCurrentMonthExpenses();
         SetLastUploadedDate();
     }
@@ -94,7 +101,7 @@ public partial class ExpensePage : ContentPage
             if (rowsAffected > 0)
             {
 
-                LoadExpensesInPage();
+                LoadExpensesInPage("Last5");
             }
             else
             {
@@ -121,7 +128,7 @@ public partial class ExpensePage : ContentPage
             if (rowsAffected > 0)
             {
 
-                LoadExpensesInPage();
+                LoadExpensesInPage("Last5");
             }
             else
             {
@@ -160,7 +167,7 @@ public partial class ExpensePage : ContentPage
         txtTransactionId.Text = textCell[2].Trim();
     }
 
-    private async void LoadExpensesInPage()
+    private async void LoadExpensesInPage(string hint)
     {
         pickerExpenseCategory.SelectedItem = "Household Items"; //set this value by default
         dpDateExpense.MinimumDate = new DateTime(2020, 1, 1);
@@ -170,7 +177,16 @@ public partial class ExpensePage : ContentPage
         tblscExpenses.Clear();
         await SetUpDb();
 
-        List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
+        List<IncomeExpenseModel> expenses = new List<IncomeExpenseModel>();
+
+        if (hint == "Last5")
+        {
+            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
+        }
+        else if (hint == "Last40")
+        {
+            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 40");
+        }
 
         foreach (var item in expenses)
         {
@@ -405,7 +421,7 @@ public partial class ExpensePage : ContentPage
                 await SetUpDb();
                 int rowsAffected = await _dbConnection.DeleteAsync(objExpense);
                 ClearExpense();
-                LoadExpensesInPage();
+                LoadExpensesInPage("Last5");
             }
         }
     }
@@ -523,7 +539,7 @@ public partial class ExpensePage : ContentPage
                 await DisplayAlert("Info", "File Processed Successfully", "OK");
                 activityIndicator.IsRunning = false;
                 await ShowCurrentMonthExpenses();
-                LoadExpensesInPage();
+                LoadExpensesInPage("Last5");
             }
             activityIndicator.IsRunning = false;
         }
