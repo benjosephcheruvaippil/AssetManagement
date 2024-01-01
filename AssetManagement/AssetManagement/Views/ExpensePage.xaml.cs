@@ -479,6 +479,7 @@ public partial class ExpensePage : ContentPage
                         string description = Convert.ToString(dtStudentRecords.Rows[i][2]);
                         description = description.Replace(" ", "");
                         description = description.Replace("\n", "");
+                        description = description.ToLower();
                         if (description.Contains("/au/"))
                         {
                             addExpense = true;
@@ -494,11 +495,6 @@ public partial class ExpensePage : ContentPage
                             addExpense = true;
                             category = "Leisure";
                         }
-                        //else if (description.Contains("/ot/"))
-                        //{
-                        //    addExpense = true;
-                        //    category = "Others";
-                        //}
                         else if (description.Contains("/ex/"))
                         {
                             addExpense = true;
