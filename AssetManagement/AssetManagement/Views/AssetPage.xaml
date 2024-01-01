@@ -290,6 +290,9 @@ VerticalOptions="Center" />
                             <x:String>Ouseph KK(Pappa)</x:String>
                             <x:String>Ben Joseph/Ann Mary Joseph</x:String>
                             <x:String>Ben Joseph/Ann Mary Joseph/Deepa Jossy</x:String>
+                            
+                            <!--<x:String>Elsaba Jacob</x:String>
+                            <x:String>Deepu K Joseph</x:String>-->
                         </x:Array>
                     </Picker.ItemsSource>
                 </Picker>

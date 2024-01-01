@@ -10,6 +10,10 @@ namespace AssetManagement.Models.Constants
     {
         public const string IncomeExpenseFirestoreCollection = "IncomeExpenseFirestoreData";
         public const string AssetFirestoreCollection = "AssetFirestoreData";
+
+        //public const string IncomeExpenseFirestoreCollection = "Maami-IncomeExpenseFirestoreData";
+        //public const string AssetFirestoreCollection = "Maami-AssetFirestoreData";
+
         //IncomeExpenseTest - this is testing collection
         //IncomeExpenseFirestoreData - this is production collection
     } 

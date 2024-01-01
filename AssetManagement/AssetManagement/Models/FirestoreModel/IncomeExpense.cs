@@ -26,5 +26,7 @@ namespace AssetManagement.Models.FirestoreModel
         public string OwnerName { get; set; }
         [FirestoreProperty]
         public string Remarks { get; set; }
+        [FirestoreProperty]
+        public string Mode { get; set; }
     }
 }

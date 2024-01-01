@@ -5,7 +5,15 @@
              Title="Expense">
     <ScrollView>
             <VerticalStackLayout>
-                <Entry x:Name="txtTransactionId"
+            <Button
+x:Name="pickexpensefile"
+Text="Pick File"
+Clicked="pickexpensefile_Clicked"
+        FontSize="8"
+        Margin="2"
+HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
+            <Label>au: Automobile,hs: Household Items,le: Leisure,ex: Others</Label>
+            <Entry x:Name="txtTransactionId"
            IsVisible="false" />
 
                 <Entry x:Name="entryExpenseAmount"
@@ -18,7 +26,8 @@
                             <x:String>Household Items</x:String>
                             <x:String>Automobile</x:String>
                             <x:String>Leisure</x:String>
-                        </x:Array>
+                            <x:String>Others</x:String>
+                    </x:Array>
                     </Picker.ItemsSource>
                 </Picker>
 
@@ -52,6 +61,7 @@
                         </TableSection>
                     </TableRoot>
                 </TableView>
+                <Label x:Name="lblShowRemainingRecords" Text="Show Remaining" FontAttributes="Bold" HorizontalOptions="Center" />
                 <BoxView HeightRequest="50" Color="Transparent"/>
                 <Label x:Name="lblCurrentMonthExpenses" FontSize="Large" Text="" HorizontalOptions="CenterAndExpand"></Label>
                 <ActivityIndicator x:Name="activityIndicator" IsRunning="False" Color="Blue"/>

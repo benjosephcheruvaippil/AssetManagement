@@ -52,10 +52,18 @@
 
             <DatePicker x:Name="dpFromDateIncomeReport"/>
             <DatePicker x:Name="dpTODateIncomeReport"/>
+            <Picker x:Name="typePicker" Title="Select type">
+                <Picker.ItemsSource>
+                    <x:Array Type="{x:Type x:String}">
+                        <x:String>Income</x:String>
+                        <x:String>Expense</x:String>
+                    </x:Array>
+                </Picker.ItemsSource>
+            </Picker>
             <ActivityIndicator x:Name="activityIndicator" IsRunning="False" Color="Blue"/>
             <Button
             x:Name="btnGenerateIncomeReport"
-            Text="Generate Income Report"
+            Text="Generate Report"
             Clicked="btnGenerateIncomeReport_Clicked"/>
 
         </VerticalStackLayout>
