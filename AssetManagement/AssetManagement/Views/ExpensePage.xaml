@@ -26,6 +26,15 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
                             <x:String>Household Items</x:String>
                             <x:String>Automobile</x:String>
                             <x:String>Leisure</x:String>
+                            <!--<x:String>Medicine</x:String>
+                            <x:String>Dialysis</x:String>
+                            <x:String>Grocery</x:String>
+                            <x:String>Apparels</x:String>
+                            <x:String>Insurance</x:String>
+                            <x:String>Fee</x:String>
+                            <x:String>Mobile/Net</x:String>
+                            <x:String>Donations</x:String>
+                            <x:String>Fuel</x:String>-->
                             <x:String>Others</x:String>
                     </x:Array>
                     </Picker.ItemsSource>
