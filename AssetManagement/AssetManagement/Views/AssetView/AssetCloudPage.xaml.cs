@@ -1,5 +1,5 @@
 using AssetManagement.Models;
-using AssetManagement.Models.ApiResponse;
+using AssetManagement.Models.Api.Response;
 using AssetManagement.Models.Constants;
 using AssetManagement.Models.FirestoreModel;
 using AssetManagement.Services;
@@ -110,28 +110,38 @@ public partial class AssetCloudPage : TabbedPage
 
     private async Task LoadAssets()
     {
-        await _viewModel.LoadAssets("");
-
-        //populating dropdown from an api
-        HttpClient client = new HttpClient();
-        HttpResponseMessage message = await client.GetAsync("https://reqres.in/api/users?page=1");
-        if (message != null)
+        try
         {
-            string responseData = await message.Content.ReadAsStringAsync();
-            Users users = JsonConvert.DeserializeObject<Users>(responseData);
+            await _viewModel.LoadAssets("");
 
-            entHolder.ItemsSource = users.data;
-            entHolder.SelectedItem = users.data;
-            entHolder.SelectedIndexChanged += EntHolderSelectedIndexChanged;
+            //populating investment type dropdown from api
+            HttpClientHandler handler = new HttpClientHandler();
+            handler.AllowAutoRedirect = true;
+            HttpClient client = new HttpClient(handler);
+            HttpResponseMessage message = await client.GetAsync("https://4.236.215.216/api/General/GetInvestmentTypes");
+            if (message != null)
+            {
+                string responseData = await message.Content.ReadAsStringAsync();
+                List<InvestmentTypeResponse> invTypeList = JsonConvert.DeserializeObject<List<InvestmentTypeResponse>>(responseData);
+
+                entHolder.ItemsSource = invTypeList;
+                entHolder.SelectedItem = invTypeList;
+                entHolder.SelectedIndexChanged += EntHolderSelectedIndexChanged;
+            }
+            //populating investment type dropdown from api
         }
-        //populating dropdown from an api
+        catch(Exception ex)
+        {
+            throw ex;
+        }
     }
 
     private void EntHolderSelectedIndexChanged(object sender, EventArgs e)
     {
         int selectedIndex = entHolder.SelectedIndex;
-        Data user = (Data)entHolder.SelectedItem;
-        int userId = user.id;
+        InvestmentTypeResponse invType = (InvestmentTypeResponse)entHolder.SelectedItem;
+        int? investmentTypeId = invType.InvestmentTypeId;
+        string investmentTypeName = invType.InvestmentTypeName;
     }
 
     private async void btnGetDetail_Clicked(object sender, EventArgs e)

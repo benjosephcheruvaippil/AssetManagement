@@ -139,4 +139,8 @@
 	  </MauiXaml>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Models\Api\Request\" />
+	</ItemGroup>
+
 </Project>
