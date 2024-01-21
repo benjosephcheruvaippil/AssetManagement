@@ -460,8 +460,8 @@ public partial class ExpensePage : ContentPage
             reader = ExcelReaderFactory.CreateOpenXmlReader(filestream);
             dsexcelRecords = reader.AsDataSet();
             reader.Close();
-            await SetUpDb();
-            await _dbConnection.DeleteAllAsync<Assets>(); // delete all records currenly present in the table
+            //await SetUpDb();
+            //await _dbConnection.DeleteAllAsync<Assets>(); // delete all records currenly present in the table
 
             if (dsexcelRecords != null && dsexcelRecords.Tables.Count > 0)
             {
