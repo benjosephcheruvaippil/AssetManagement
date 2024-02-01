@@ -52,7 +52,7 @@ public partial class AppFlyoutPage : FlyoutPage
     {
         if (!((IFlyoutPageController)this).ShouldShowSplitMode)
             IsPresented = false;
-        Detail = new NavigationPage(new AssetCloudPage());
+        Detail = new NavigationPage(new AssetCloudPage(_viewModel, _popupNavigation, _assetService));
     }
 
     private void OpenIncomeExpenseReportPageClicked(object sender, EventArgs e)
