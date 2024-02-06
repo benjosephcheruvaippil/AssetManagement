@@ -460,31 +460,42 @@ public partial class ExpensePage : ContentPage
             reader = ExcelReaderFactory.CreateOpenXmlReader(filestream);
             dsexcelRecords = reader.AsDataSet();
             reader.Close();
-            //await SetUpDb();
-            //await _dbConnection.DeleteAllAsync<Assets>(); // delete all records currenly present in the table
 
             if (dsexcelRecords != null && dsexcelRecords.Tables.Count > 0)
             {
                 DataTable dtStudentRecords = dsexcelRecords.Tables[0];
                 for (int i = 1; i < dtStudentRecords.Rows.Count; i++)
                 {
-                    string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]);
-                    if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
+                    string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]).Trim();
+                    //string transactionDateString = (dtStudentRecords.Rows[i][0]).ToString("MM/dd/yyyy");
+                    string[] dateArr = transactionDateString.Split(" ")[0].Split("/");
+                    if(dateArr.Count() == 3)
+                    //if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
                     {
                         //Delete if exists mode=file_upload on the specified date
                         await SetUpDb();
-                        string formattedDate = transactionDate.ToString("yyyy-MM-dd");
-                        string query = "Delete from IncomeExpenseModel where Mode='file_upload' and DATE(Date>='" + formattedDate + "')";
-                        var isDeleted = await _dbConnection.ExecuteAsync(query);
+
+                        DateTime transactionDate = new DateTime(Convert.ToInt32(dateArr[2]), Convert.ToInt32(dateArr[0]), Convert.ToInt32(dateArr[1]));
+                        DateTime date = transactionDate.Date;
+                        var recordsToBeDeleted = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.Mode == "file_upload" && i.TransactionType == "Expense" && i.Date >= date).ToListAsync();
+                        foreach(var record in recordsToBeDeleted)
+                        {
+                            await _dbConnection.DeleteAsync(record);
+                        }
                         //Delete if exists mode=file_upload on the specified date
                         break;
                     }
                 }
                 for (int i = 1; i < dtStudentRecords.Rows.Count; i++)
                 {
-                    string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]);
-                    if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
+                    string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]).Trim();
+                    string[] dateArr = transactionDateString.Split(" ")[0].Split("/");
+
+                    //if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
+                    if (dateArr.Count() == 3)
                     {
+                        DateTime transactionDate = new DateTime(Convert.ToInt32(dateArr[2]), Convert.ToInt32(dateArr[0]), Convert.ToInt32(dateArr[1]));
+                        DateTime date = transactionDate.Date;
                         bool addExpense = false;
                         string category = "";
                         double amount = 0;
@@ -518,12 +529,12 @@ public partial class ExpensePage : ContentPage
                         }
                         //add expense into database
                         if (addExpense)
-                        {                           
+                        {
                             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
                             {
                                 Amount = amount,
                                 TransactionType = "Expense",
-                                Date = transactionDate,
+                                Date = date,
                                 CategoryName = category,
                                 Remarks = "",
                                 Mode = "file_upload"
