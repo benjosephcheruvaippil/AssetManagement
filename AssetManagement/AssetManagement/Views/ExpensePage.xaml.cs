@@ -435,7 +435,7 @@ public partial class ExpensePage : ContentPage
             List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' and Mode='file_upload' order by Date desc Limit 1");
             if (expenses.Count > 0)
             {
-                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}. Do you wish to continue uploading the file?", "Yes", "No");
+                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n1.Upload only excel file with only a single sheet.\n2.First column is date.\n3.Third column is description.\n4.Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
                 if (!userResponse)
                 {
                     return;
@@ -539,7 +539,7 @@ public partial class ExpensePage : ContentPage
                                 Remarks = "",
                                 Mode = "file_upload"
                             };
-                            rowsAdded = await _dbConnection.InsertAsync(objIncomeExpense);
+                            rowsAdded = rowsAdded + await _dbConnection.InsertAsync(objIncomeExpense);
                         }
                         //add expense into database
                     }
@@ -547,7 +547,7 @@ public partial class ExpensePage : ContentPage
             }
             if (rowsAdded > 0)
             {
-                await DisplayAlert("Info", "File Processed Successfully", "OK");
+                await DisplayAlert("Info", $"File Processed Successfully\n\n{rowsAdded.ToString()} records added.", "OK");
                 activityIndicator.IsRunning = false;
                 await ShowCurrentMonthExpenses();
                 LoadExpensesInPage("Last5");
