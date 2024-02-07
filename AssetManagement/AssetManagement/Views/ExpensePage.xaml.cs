@@ -110,13 +110,16 @@ public partial class ExpensePage : ContentPage
         }
         else //update
         {
+            int transId = Convert.ToInt32(txtTransactionId.Text);
+            var incExpResult = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionId == transId).FirstOrDefaultAsync();
             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
             {
-                TransactionId = Convert.ToInt32(txtTransactionId.Text),
+                TransactionId = transId,
                 Amount = Convert.ToDouble(entryExpenseAmount.Text),
                 TransactionType = "Expense",
                 Date = dpDateExpense.Date != DateTime.Now.Date ? dpDateExpense.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerExpenseCategory.SelectedItem),
+                Mode = incExpResult.Mode,
                 Remarks = entryExpenseRemarks.Text
             };
             await SetUpDb();

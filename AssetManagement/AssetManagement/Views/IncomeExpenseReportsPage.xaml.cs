@@ -156,7 +156,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
         DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
         endOfMonth = new DateTime(endOfMonth.Year, endOfMonth.Month, endOfMonth.Day, 23, 59, 59); //24 hour format
 
-        var manualAddedExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && (e.Mode == "" || e.Mode == null) && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
+        var manualAddedExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && (e.Mode == "" || e.Mode == null || e.Mode=="manual") && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
         var totalManualAddedExpenses = manualAddedExpenseList.Select(s => s.Amount).Sum();
 
         var fileUploadExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && e.Mode == "file_upload" && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
@@ -252,7 +252,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             ExcelPackage excel = new ExcelPackage();
 
             // name of the sheet
-            var workSheet = excel.Workbook.Worksheets.Add("Income Report");
+            var workSheet = excel.Workbook.Worksheets.Add("Report");
 
             // setting the properties
             // of the work sheet 
@@ -272,6 +272,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             workSheet.Column(5).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
             workSheet.Column(6).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
             workSheet.Column(7).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(8).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
             // Header of the Excel sheet
             workSheet.Cells[1, 1].Value = "Transaction Type";
@@ -280,7 +281,8 @@ public partial class IncomeExpenseReportsPage : ContentPage
             workSheet.Cells[1, 4].Value = "Owner Name";
             workSheet.Cells[1, 5].Value = "Tax Cut";
             workSheet.Cells[1, 6].Value = "Amount";
-            workSheet.Cells[1, 7].Value = "Remarks";
+            workSheet.Cells[1, 7].Value = "Mode";
+            workSheet.Cells[1, 8].Value = "Remarks";
 
             int recordIndex = 2;
             decimal totalIncome = 0,totalTaxCut=0;
@@ -292,7 +294,8 @@ public partial class IncomeExpenseReportsPage : ContentPage
                 workSheet.Cells[recordIndex, 4].Value = income.OwnerName;
                 workSheet.Cells[recordIndex, 5].Value = income.TaxAmountCut;
                 workSheet.Cells[recordIndex, 6].Value = income.Amount;
-                workSheet.Cells[recordIndex, 7].Value = income.Remarks;
+                workSheet.Cells[recordIndex, 7].Value = income.Mode;
+                workSheet.Cells[recordIndex, 8].Value = income.Remarks;
                 workSheet.Row(recordIndex).Height = 16;
                 totalTaxCut = totalTaxCut + Convert.ToDecimal(income.TaxAmountCut);
                 totalIncome = totalIncome + Convert.ToDecimal(income.Amount);
@@ -315,6 +318,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             workSheet.Column(5).AutoFit();
             workSheet.Column(6).AutoFit();
             workSheet.Column(7).AutoFit();
+            workSheet.Column(8).AutoFit();
 
             //Context currentContext = Android.App.Application.Context;
             //string directory = Path.Combine(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath, Android.OS.Environment.DirectoryDocuments);
