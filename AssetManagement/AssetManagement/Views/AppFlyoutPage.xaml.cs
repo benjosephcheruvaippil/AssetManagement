@@ -22,9 +22,10 @@ public partial class AppFlyoutPage : FlyoutPage
         flyoutPage.btnExpensePage.Clicked += OpenExpensePageClicked;
         flyoutPage.btnIncomePage.Clicked += OpenIncomePageClicked;
         flyoutPage.btnAssetPage.Clicked += OpenAssetPageClicked;
-        flyoutPage.btnAssetCloudPage.Clicked += OpenAssetCloudPageClicked;
+        //flyoutPage.btnAssetCloudPage.Clicked += OpenAssetCloudPageClicked;
         flyoutPage.btnIncomeExpenseReport.Clicked += OpenIncomeExpenseReportPageClicked;
         flyoutPage.btnAssetReport.Clicked += OpenAssetReportPageClicked;
+        flyoutPage.btnSettings.Clicked += OpenSettingsPageClicked;
     }
 
     private void OpenExpensePageClicked(object sender, EventArgs e)
@@ -67,5 +68,12 @@ public partial class AppFlyoutPage : FlyoutPage
         if (!((IFlyoutPageController)this).ShouldShowSplitMode)
             IsPresented = false;
         Detail = new NavigationPage(new AssetReportPage(_popupNavigation));
+    }
+
+    private void OpenSettingsPageClicked(object sender, EventArgs e)
+    {
+        if (!((IFlyoutPageController)this).ShouldShowSplitMode)
+            IsPresented = false;
+        Detail = new NavigationPage(new SettingsPage());
     }
 }

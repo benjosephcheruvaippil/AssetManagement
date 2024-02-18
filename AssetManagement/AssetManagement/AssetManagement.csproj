@@ -63,6 +63,7 @@
 	  <None Remove="Resources\Images\expense_icon.png" />
 	  <None Remove="Resources\Images\income_icon.png" />
 	  <None Remove="Resources\Images\report_icon.png" />
+	  <None Remove="Resources\Images\settings.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -135,6 +136,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\ExpensePage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\SettingsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
