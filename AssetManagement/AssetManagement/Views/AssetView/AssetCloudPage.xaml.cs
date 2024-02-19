@@ -1,4 +1,5 @@
 using AssetManagement.Models;
+using AssetManagement.Models.Api.Response;
 using AssetManagement.Models.Constants;
 using AssetManagement.Models.FirestoreModel;
 using AssetManagement.Services;
@@ -17,10 +18,11 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 
-namespace AssetManagement.Views;
+namespace AssetManagement.Views.AssetView;
 
-public partial class AssetPage : TabbedPage
+public partial class AssetCloudPage : TabbedPage
 {
     private AssetListPageViewModel _viewModel;
     private SQLiteAsyncConnection _dbConnection;
@@ -34,7 +36,7 @@ public partial class AssetPage : TabbedPage
     public Command RefreshCommand { get; set; }
     public Assets SelectedAsset { get; set; }
     public bool PaginationEnabled { get; set; } = true;
-    public AssetPage(AssetListPageViewModel viewModel, IPopupNavigation popupNavigation, IAssetService assetService)
+    public AssetCloudPage(AssetListPageViewModel viewModel, IPopupNavigation popupNavigation, IAssetService assetService)
     {
         RefreshCommand = new Command(async () =>
         {
@@ -111,11 +113,35 @@ public partial class AssetPage : TabbedPage
         try
         {
             await _viewModel.LoadAssets("");
+
+            //populating investment type dropdown from api
+            HttpClientHandler handler = new HttpClientHandler();
+            handler.AllowAutoRedirect = true;
+            HttpClient client = new HttpClient(handler);
+            HttpResponseMessage message = await client.GetAsync("https://4.236.215.216/api/General/GetInvestmentTypes");
+            if (message != null)
+            {
+                string responseData = await message.Content.ReadAsStringAsync();
+                List<InvestmentTypeResponse> invTypeList = JsonConvert.DeserializeObject<List<InvestmentTypeResponse>>(responseData);
+
+                entHolder.ItemsSource = invTypeList;
+                entHolder.SelectedItem = invTypeList;
+                entHolder.SelectedIndexChanged += EntHolderSelectedIndexChanged;
+            }
+            //populating investment type dropdown from api
         }
-        catch
+        catch(Exception ex)
         {
-            await DisplayAlert("Info", "Welcome to asset management!", "OK");
+            throw ex;
         }
+    }
+
+    private void EntHolderSelectedIndexChanged(object sender, EventArgs e)
+    {
+        int selectedIndex = entHolder.SelectedIndex;
+        InvestmentTypeResponse invType = (InvestmentTypeResponse)entHolder.SelectedItem;
+        int? investmentTypeId = invType.InvestmentTypeId;
+        string investmentTypeName = invType.InvestmentTypeName;
     }
 
     private async void btnGetDetail_Clicked(object sender, EventArgs e)
@@ -241,7 +267,7 @@ public partial class AssetPage : TabbedPage
                         StartDate = StartDate,
                         MaturityDate = MaturityDate,
                         Remarks = Remarks,
-                        AsOfDate= AsOfDate
+                        AsOfDate = AsOfDate
                     };
                     await SetUpDb();
                     int rowsAffected = await _dbConnection.InsertAsync(assets);
@@ -271,7 +297,7 @@ public partial class AssetPage : TabbedPage
         decimal MLDAssets = records.Where(b => b.Type == "MLD").Sum(s => s.Amount);
 
         decimal Insurance_MF = records.Where(b => b.Type == "Insurance_MF").Sum(s => s.Amount);
-        decimal Gold = records.Where(b => b.Type == "Gold" || b.Type=="SGB").Sum(s => s.Amount);
+        decimal Gold = records.Where(b => b.Type == "Gold" || b.Type == "SGB").Sum(s => s.Amount);
         decimal PPF = records.Where(b => b.Type == "PPF").Sum(s => s.Amount);
         decimal EPF = records.Where(b => b.Type == "EPF").Sum(s => s.Amount);
         decimal MutualFunds = records.Where(b => b.Type == "MF").Sum(s => s.Amount);
@@ -288,7 +314,7 @@ public partial class AssetPage : TabbedPage
         lblPPF.Text = "Public Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", PPF);
         lblEPF.Text = "Employee Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", EPF);
         lblMF.Text = "Mutual Funds: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", MutualFunds);
-        lblStocks.Text = "Stocks: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Stocks);     
+        lblStocks.Text = "Stocks: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Stocks);
 
         decimal projectedAmount = 0;
         foreach (var item in records)
@@ -346,8 +372,8 @@ public partial class AssetPage : TabbedPage
         if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "MF" || objAsset.Type == "Stocks" || objAsset.Type == "Others")
         {
             objAsset.AsOfDate = entAsOfDate.Date;
-            objAsset.StartDate= Convert.ToDateTime("01-01-0001");
-            objAsset.MaturityDate= Convert.ToDateTime("01-01-0001");
+            objAsset.StartDate = Convert.ToDateTime("01-01-0001");
+            objAsset.MaturityDate = Convert.ToDateTime("01-01-0001");
 
             entStartDate.IsEnabled = false;
             entMaturityDate.IsEnabled = false;
@@ -512,7 +538,7 @@ public partial class AssetPage : TabbedPage
     }
 
     private async void btnDownloadAssets_Clicked(object sender, EventArgs e)
-    {      
+    {
         await SetUpDb();
         var existingRecords = await _dbConnection.Table<Assets>().Take(1).ToListAsync();
         if (existingRecords.Count > 0)
@@ -740,7 +766,7 @@ public partial class AssetPage : TabbedPage
 
             var stream = new MemoryStream(excel.GetAsByteArray());
             CancellationTokenSource Ctoken = new CancellationTokenSource();
-            string fileName = "Asset_Report_" + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt")+".xlsx";
+            string fileName = "Asset_Report_" + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt") + ".xlsx";
             var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
             if (fileSaverResult.IsSuccessful)
             {

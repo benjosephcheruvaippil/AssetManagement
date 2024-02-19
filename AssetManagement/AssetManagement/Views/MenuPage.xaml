@@ -47,7 +47,21 @@
                 VerticalOptions="Start" 
                 HorizontalOptions="Center"/>
             </FlexLayout>
-            
+
+            <!--<BoxView HeightRequest="20" Color="Transparent"></BoxView>
+            <FlexLayout JustifyContent="Center">
+                <Image HeightRequest="40" WidthRequest="40" Source="asset_icon.png" />
+                <Button 
+                x:Name="btnAssetCloudPage"
+                x:FieldModifier="public"
+                Text="Asset Cloud (Beta)"
+                BackgroundColor="White"
+                TextColor="Black"
+                FontAttributes="Bold"
+                VerticalOptions="Start" 
+                HorizontalOptions="Center"/>    
+            </FlexLayout>-->
+
             <BoxView HeightRequest="20" Color="Transparent"></BoxView>
             <FlexLayout JustifyContent="Center">
                 <Image HeightRequest="40" WidthRequest="40" Source="report_icon.png" />
@@ -75,7 +89,21 @@
                 VerticalOptions="Start" 
                 HorizontalOptions="Center"/>
             </FlexLayout>
-            
+
+            <BoxView HeightRequest="20" Color="Transparent"></BoxView>
+            <FlexLayout JustifyContent="Center">
+                <Image HeightRequest="40" WidthRequest="40" Source="settings.png" />
+                <Button 
+                x:Name="btnSettings"
+                x:FieldModifier="public"
+                Text="Settings"
+                BackgroundColor="White"
+                TextColor="Black"
+                FontAttributes="Bold"
+                VerticalOptions="Start" 
+                HorizontalOptions="Center"/>
+            </FlexLayout>
+
         </VerticalStackLayout>
     </ScrollView>
 

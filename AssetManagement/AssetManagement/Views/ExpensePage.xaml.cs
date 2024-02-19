@@ -2,6 +2,7 @@
 using AssetManagement.Models;
 using AssetManagement.Models.Constants;
 using AssetManagement.Models.FirestoreModel;
+using CommunityToolkit.Maui.Storage;
 using ExcelDataReader;
 using Google.Cloud.Firestore;
 using Newtonsoft.Json;
@@ -31,22 +32,36 @@ public partial class ExpensePage : ContentPage
 
     protected async override void OnAppearing()
     {
-        base.OnAppearing();
+        try
+        {
+            base.OnAppearing();
 
-        LoadExpensesInPage("Last5");// show expenses in the expense tab
-        await ShowCurrentMonthExpenses();
-        SetLastUploadedDate();
+            LoadExpensesInPage("Last5");// show expenses in the expense tab
+            await ShowCurrentMonthExpenses();
+            SetLastUploadedDate();
+        }
+        catch(Exception ex)
+        {
+            await DisplayAlert("Error", ex.Message, "OK");
+        }
     }
 
     private async Task SetUpDb()
     {
-        if (_dbConnection == null)
+        try
         {
-            string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
-            _dbConnection = new SQLiteAsyncConnection(dbPath);
-            await _dbConnection.CreateTableAsync<Assets>();
-            await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
-            await _dbConnection.CreateTableAsync<DataSyncAudit>();
+            if (_dbConnection == null)
+            {
+                string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
+                _dbConnection = new SQLiteAsyncConnection(dbPath);
+                await _dbConnection.CreateTableAsync<Assets>();
+                await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
+                await _dbConnection.CreateTableAsync<DataSyncAudit>();
+            }
+        }
+        catch(Exception ex)
+        {
+            await DisplayAlert("Error", ex.Message, "OK");
         }
     }
 
@@ -110,13 +125,16 @@ public partial class ExpensePage : ContentPage
         }
         else //update
         {
+            int transId = Convert.ToInt32(txtTransactionId.Text);
+            var incExpResult = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionId == transId).FirstOrDefaultAsync();
             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
             {
-                TransactionId = Convert.ToInt32(txtTransactionId.Text),
+                TransactionId = transId,
                 Amount = Convert.ToDouble(entryExpenseAmount.Text),
                 TransactionType = "Expense",
                 Date = dpDateExpense.Date != DateTime.Now.Date ? dpDateExpense.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerExpenseCategory.SelectedItem),
+                Mode = incExpResult.Mode,
                 Remarks = entryExpenseRemarks.Text
             };
             await SetUpDb();
@@ -435,7 +453,7 @@ public partial class ExpensePage : ContentPage
             List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' and Mode='file_upload' order by Date desc Limit 1");
             if (expenses.Count > 0)
             {
-                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}. Do you wish to continue uploading the file?", "Yes", "No");
+                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n- au: Automobile,hs: Household Items,le: Leisure,ex: Others.\n- Upload only excel file with only a single sheet.\n- First column is date.\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
                 if (!userResponse)
                 {
                     return;
@@ -453,6 +471,7 @@ public partial class ExpensePage : ContentPage
 
             activityIndicator.IsRunning = true;
             int rowsAdded = 0;
+            List<IncomeExpenseModel> listIncomeExpenseModel = new List<IncomeExpenseModel>();
             DataSet dsexcelRecords = new DataSet();
             IExcelDataReader reader = null;
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
@@ -460,31 +479,42 @@ public partial class ExpensePage : ContentPage
             reader = ExcelReaderFactory.CreateOpenXmlReader(filestream);
             dsexcelRecords = reader.AsDataSet();
             reader.Close();
-            await SetUpDb();
-            await _dbConnection.DeleteAllAsync<Assets>(); // delete all records currenly present in the table
 
             if (dsexcelRecords != null && dsexcelRecords.Tables.Count > 0)
             {
                 DataTable dtStudentRecords = dsexcelRecords.Tables[0];
                 for (int i = 1; i < dtStudentRecords.Rows.Count; i++)
                 {
-                    string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]);
-                    if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
+                    string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]).Trim();
+                    //string transactionDateString = (dtStudentRecords.Rows[i][0]).ToString("MM/dd/yyyy");
+                    string[] dateArr = transactionDateString.Split(" ")[0].Split("/");
+                    if(dateArr.Count() == 3)
+                    //if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
                     {
                         //Delete if exists mode=file_upload on the specified date
                         await SetUpDb();
-                        string formattedDate = transactionDate.ToString("yyyy-MM-dd");
-                        string query = "Delete from IncomeExpenseModel where Mode='file_upload' and DATE(Date>='" + formattedDate + "')";
-                        var isDeleted = await _dbConnection.ExecuteAsync(query);
+
+                        DateTime transactionDate = new DateTime(Convert.ToInt32(dateArr[2]), Convert.ToInt32(dateArr[1]), Convert.ToInt32(dateArr[0]));
+                        DateTime date = transactionDate.Date;
+                        var recordsToBeDeleted = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.Mode == "file_upload" && i.TransactionType == "Expense" && i.Date >= date).ToListAsync();
+                        foreach(var record in recordsToBeDeleted)
+                        {
+                            await _dbConnection.DeleteAsync(record);
+                        }
                         //Delete if exists mode=file_upload on the specified date
                         break;
                     }
                 }
                 for (int i = 1; i < dtStudentRecords.Rows.Count; i++)
                 {
-                    string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]);
-                    if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
+                    string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]).Trim();
+                    string[] dateArr = transactionDateString.Split(" ")[0].Split("/");
+
+                    //if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
+                    if (dateArr.Count() == 3)
                     {
+                        DateTime transactionDate = new DateTime(Convert.ToInt32(dateArr[2]), Convert.ToInt32(dateArr[1]), Convert.ToInt32(dateArr[0]));
+                        DateTime date = transactionDate.Date;
                         bool addExpense = false;
                         string category = "";
                         double amount = 0;
@@ -516,36 +546,46 @@ public partial class ExpensePage : ContentPage
                             addExpense = true;
                             category = "Others";
                         }
-                        //add expense into database
+                        
                         if (addExpense)
-                        {                           
+                        {
                             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
                             {
                                 Amount = amount,
                                 TransactionType = "Expense",
-                                Date = transactionDate,
+                                Date = date,
                                 CategoryName = category,
                                 Remarks = "",
                                 Mode = "file_upload"
                             };
-                            rowsAdded = await _dbConnection.InsertAsync(objIncomeExpense);
+                            listIncomeExpenseModel.Add(objIncomeExpense);
                         }
-                        //add expense into database
                     }
                 }
             }
+            //add expense into database
+            if (listIncomeExpenseModel.Count > 0)
+            {
+                rowsAdded = rowsAdded + await _dbConnection.InsertAllAsync(listIncomeExpenseModel, true);
+                activityIndicator.IsRunning = false;
+            }
+            //add expense into database
             if (rowsAdded > 0)
             {
-                await DisplayAlert("Info", "File Processed Successfully", "OK");
+                await DisplayAlert("Info", $"File Processed Successfully\n\n{rowsAdded.ToString()} records added.", "OK");
                 activityIndicator.IsRunning = false;
                 await ShowCurrentMonthExpenses();
                 LoadExpensesInPage("Last5");
+            }
+            else
+            {
+                await DisplayAlert("Info", "Something went wrong. No records were added.", "OK");
             }
             activityIndicator.IsRunning = false;
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Alert - StackTrace", ex.Message.ToString(), "OK");
+            await DisplayAlert("Alert - StackTrace", $"{ex.Message.ToString()}\n\nNo records added.", "OK");
         }
 
     }

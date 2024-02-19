@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:AssetManagement.Models"
+             xmlns:viewModels="clr-namespace:AssetManagement.ViewModels"
+             x:DataType="viewModels:AssetListPageViewModel"
+             x:Class="AssetManagement.Views.AssetView.AssetCloudPage"
+            
+             Title="Tabbed Page" >
+
+    <ContentPage Title="Asset Details">
+        <ScrollView>
+            <VerticalStackLayout
+        Spacing="25"
+        Padding="30,0"
+        VerticalOptions="Center">
+                <ActivityIndicator x:Name="activityIndicator" IsVisible="False" WidthRequest="40" HeightRequest="40" IsRunning="False" Color="Blue"/>
+                <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+
+                    <Button
+                x:Name="PickFile"
+                Text="Pick File"
+                Clicked="PickFileClicked"
+                        FontSize="8"
+                        Margin="2"
+                HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
+
+                    <Button
+x:Name="btnUploadAssets"
+Text="Upload"
+Clicked="btnUploadAssets_Clicked"
+FontSize="8"
+Margin="2"
+HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
+
+                    <Button
+x:Name="btnDownloadAssets"
+Text="Download"
+Clicked="btnDownloadAssets_Clicked"
+FontSize="8"
+Margin="2"
+HorizontalOptions="Center" WidthRequest="80" HeightRequest="35" />
+
+                    <Button
+x:Name="btnDownloadAssetsExcel"
+Text="Dwnld xl"
+Clicked="btnDownloadAssetsExcel_Clicked"
+FontSize="8"
+Margin="2"
+HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
+
+                </StackLayout>
+
+                <Label
+            x:Name="lblBank"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+                <Label
+            x:Name="lblNCD"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+                <Label
+            x:Name="lblMLD"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblInsuranceMF"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblGold"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblOthers"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblPPF"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblEPF"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblMF"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblStocks"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
+            x:Name="lblNetAssetValue"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="20"
+            HorizontalOptions="Center" />
+                <Label
+            x:Name="lblProjectedAssetValue"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="20"
+            HorizontalOptions="Center" />
+
+                <Label Text="Matured/Maturing Soon" 
+         TextColor="Blue" 
+         FontAttributes="Bold" 
+         FontSize="25"/>
+
+                <Entry x:Name="entryDays"
+           Placeholder="Enter days left"
+           Keyboard="Numeric"
+           TextChanged="entryDays_TextChanged" />
+
+                <Label x:Name="lblMaturingAssetsTotalValue" Text="Total Value: "
+            TextColor="Green" 
+            FontAttributes="Bold"
+            FontSize="17"/>
+
+                <CollectionView ItemsSource="{Binding AssetDetails}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:MaturingAssets">
+                            <SwipeView>
+                                <SwipeView.LeftItems>
+                                    <SwipeItems>
+                                        <SwipeItemView>
+                                            <VerticalStackLayout  BackgroundColor="LightBlue">
+                                                <Label Text="Edit" 
+                                           HorizontalTextAlignment="Center" 
+                                           VerticalTextAlignment="Center" FontAttributes="Bold" TextColor="White" />
+                                            </VerticalStackLayout>
+                                        </SwipeItemView>
+                                        <SwipeItemView>
+                                            <VerticalStackLayout BackgroundColor="Red">
+                                                <Label Text="Delete" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontAttributes="Bold" TextColor="White" />
+                                            </VerticalStackLayout>
+                                        </SwipeItemView>
+                                    </SwipeItems>
+                                </SwipeView.LeftItems>
+                                <Frame Margin="10" Padding="10" BackgroundColor="Aqua">
+                                    <VerticalStackLayout>
+                                        <Label Text="{Binding InvestmentEntity}" FontSize="18" FontAttributes="Bold" />
+                                        <Label Text="{Binding MaturityDate,StringFormat='{0:MMMM dd, yyyy}'}" FontSize="18" FontAttributes="Bold" />
+                                        <Label Text="{Binding HolderName}" FontSize="17" />
+                                        <Label Text="{Binding Amount}" FontSize="15" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </SwipeView>
+
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </ContentPage>
+    <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:dg="clr-namespace:Maui.DataGrid;assembly=Maui.DataGrid"
+                 Title="Manage Asset">
+
+        <ScrollView>
+            <Grid RowSpacing="4" ColumnSpacing="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="400" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <BoxView Color="Green" />
+                <Label Text="Investment Entity"
+               HorizontalOptions="Start"
+               VerticalOptions="Center" />
+                <BoxView Grid.Column="1" Color="Orange" />
+                <Entry Grid.Column="1" x:Name="entEntityName" />
+                <Label x:Name="lblAssetId" IsVisible="False"/>
+
+                <BoxView Grid.Row="1" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="1" Grid.Column="0" Text="Type"
+           HorizontalOptions="Start"
+           VerticalOptions="Center" />
+                <BoxView Grid.Row="1" Grid.Column="1" Color="Orange" />
+                <!--<Entry Grid.Row="1" Grid.Column="1" x:Name="entType" />-->
+                <Picker Grid.Row="1" Grid.Column="1" x:Name="entType" SelectedIndexChanged="entType_SelectedIndexChanged" Title="Select type">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>Bank</x:String>
+                            <x:String>NCD</x:String>
+                            <x:String>SGB</x:String>
+                            <x:String>Gold</x:String>
+                            <x:String>MLD</x:String>
+                            <x:String>Insurance_MF</x:String>
+                            <x:String>PPF</x:String>
+                            <x:String>EPF</x:String>
+                            <x:String>MF</x:String>
+                            <x:String>Stocks</x:String>
+                            <x:String>Others</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
+
+                <BoxView Grid.Row="2" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="2" Grid.Column="0" Text="Amount"
+           HorizontalOptions="Start"
+           VerticalOptions="Center" />
+                <BoxView Grid.Row="2" Grid.Column="1" Color="Orange" />
+                <Entry Grid.Row="2" Grid.Column="1" x:Name="entAmount" Keyboard="Numeric" />
+
+                <BoxView Grid.Row="3" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="3" Grid.Column="0" Text="Interest Rate"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="3" Grid.Column="1" Color="Orange" />
+                <Entry Grid.Row="3" Grid.Column="1" x:Name="entInterestRate" Keyboard="Numeric" />
+
+                <BoxView Grid.Row="4" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="4" Grid.Column="0" Text="Interest Frequency"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="4" Grid.Column="1" Color="Orange" />
+                <!--<Entry Grid.Row="4" Grid.Column="1" x:Name="entInterestFrequency" />-->
+                <Picker Grid.Row="4" Grid.Column="1" x:Name="entInterestFrequency" Title="Select frequency">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>Monthly</x:String>
+                            <x:String>Quarterly</x:String>
+                            <x:String>Semi-Annually</x:String>
+                            <x:String>Yearly</x:String>
+                            <x:String>Cumulative</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
+
+                <BoxView Grid.Row="5" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="5" Grid.Column="0" Text="Holder"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="5" Grid.Column="1" Color="Orange" />
+                <Picker Grid.Row="5" Grid.Column="1" x:Name="entHolder" ItemDisplayBinding="{Binding InvestmentTypeName}" Title="Select holder">
+                    <!--<Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>Ben Joseph</x:String>
+                            <x:String>Ann Mary Joseph</x:String>
+                            <x:String>Deepa Jossy</x:String>
+                            <x:String>Jossy C Peter/Deepa Jossy</x:String>
+                            <x:String>Ouseph KK(Pappa)</x:String>
+                            <x:String>Ben Joseph/Ann Mary Joseph</x:String>
+                            <x:String>Ben Joseph/Ann Mary Joseph/Deepa Jossy</x:String>
+
+                            --><!--<x:String>Elsaba Jacob</x:String>
+                            <x:String>Deepu K Joseph</x:String>--><!--
+                        </x:Array>
+                    </Picker.ItemsSource>-->
+                </Picker>
+
+                <BoxView Grid.Row="6" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="6" Grid.Column="0" Text="Start Date"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="6" Grid.Column="1" Color="Orange" />
+                <DatePicker Grid.Row="6" Grid.Column="1" x:Name="entStartDate" />
+
+                <BoxView Grid.Row="7" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="7" Grid.Column="0" Text="Maturity Date"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="7" Grid.Column="1" Color="Orange" />
+                <DatePicker Grid.Row="7" Grid.Column="1" x:Name="entMaturityDate" />
+
+                <BoxView Grid.Row="8" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="8" Grid.Column="0" Text="As Of Date"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="8" Grid.Column="1" Color="Orange" />
+                <DatePicker Grid.Row="8" Grid.Column="1" x:Name="entAsOfDate" />
+
+                <BoxView Grid.Row="9" Grid.Column="0" Color="Green" />
+                <Label Grid.Row="9" Grid.Column="0" Text="Remarks"
+HorizontalOptions="Start"
+VerticalOptions="Center" />
+                <BoxView Grid.Row="9" Grid.Column="1" Color="Orange" />
+                <Entry Grid.Row="9" Grid.Column="1" x:Name="entRemarks" />
+
+                <!--Update and delete buttons-->
+                <BoxView Grid.Row="10" Grid.Column="0" Color="Orange" />
+                <Button Grid.Row="10" Grid.Column="0" x:Name="btnSave" Clicked="btnSave_Clicked" Text="Save"></Button>
+                <BoxView Grid.Row="10" Grid.Column="1" Color="Orange" />
+                <Button Grid.Row="10" Grid.Column="1" x:Name="btnDelete" Clicked="btnDelete_Clicked" Text="Delete"></Button>
+                <!--Update and delete buttons-->
+
+                <BoxView Grid.Row="11"
+     Grid.ColumnSpan="2"
+     Color="Orange" />
+                <Button x:Name="btnGetDetail" Text="Get Detail" Clicked="btnGetDetail_Clicked" Grid.Row="11" Grid.ColumnSpan="2"></Button>
+
+                <BoxView Grid.Row="12"
+Grid.ColumnSpan="2"
+Color="White" />
+                <Entry x:Name="entAssetSearch" TextChanged="entAssetSearch_TextChanged" Grid.Row="12" Grid.ColumnSpan="2" Placeholder="Search by name,amount,holder"/>
+
+                <BoxView Grid.Row="13"
+                 Grid.ColumnSpan="2"
+                 Color="Red" />
+                <dg:DataGrid Grid.Row="13" Grid.ColumnSpan="2"  ItemsSource="{Binding Assets}" SelectionEnabled="True" SelectedItem="{Binding SelectedAsset}"
+         RowHeight="70" HeaderHeight="50" PullToRefreshCommand="{Binding RefreshCommand}"
+         IsRefreshing="{Binding IsRefreshing}" HeaderBackground="Red" PaginationEnabled="{Binding PaginationEnabled}" PageSize="5">
+                    <dg:DataGrid.NoDataView>
+                        <Label Text="Nothing to see here 🙈" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </dg:DataGrid.NoDataView>
+                    <dg:DataGrid.Columns>
+                        <dg:DataGridColumn IsVisible="False" Title="Image" PropertyName="Image" Width="150" SortingEnabled="False">
+                            <dg:DataGridColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Source="{Binding}" HorizontalOptions="Center" VerticalOptions="Center"
+                   Aspect="AspectFit" HeightRequest="60" />
+                                </DataTemplate>
+                            </dg:DataGridColumn.CellTemplate>
+                        </dg:DataGridColumn>
+                        <dg:DataGridColumn Title="Investment Entity" PropertyName="InvestmentEntity"  />
+                        <dg:DataGridColumn Title="Amount" PropertyName="Amount"  />
+                        <dg:DataGridColumn Title="Maturity Date" PropertyName="MaturityDate"  />
+                        <dg:DataGridColumn Title="As Of Date" PropertyName="AsOfDate"  />
+                        <!--<dg:DataGridColumn Title="Longitude" PropertyName="Longitude" />
+                        <dg:DataGridColumn Title="Population" PropertyName="Population" />
+                        <dg:DataGridColumn Title="Details" PropertyName="Details" Width="0.5*" />-->
+                    </dg:DataGrid.Columns>
+                    <dg:DataGrid.RowsBackgroundColorPalette>
+                        <dg:PaletteCollection>
+                            <Color>#F2F2F2</Color>
+                            <Color>#FFFFFF</Color>
+                        </dg:PaletteCollection>
+                    </dg:DataGrid.RowsBackgroundColorPalette>
+
+                </dg:DataGrid>
+            </Grid>
+
+        </ScrollView>
+    </ContentPage>
+
+
+</TabbedPage>
