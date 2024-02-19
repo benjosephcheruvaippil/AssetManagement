@@ -453,7 +453,7 @@ public partial class ExpensePage : ContentPage
             List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' and Mode='file_upload' order by Date desc Limit 1");
             if (expenses.Count > 0)
             {
-                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n1.Upload only excel file with only a single sheet.\n2.First column is date.\n3.Third column is description.\n4.Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
+                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n- au: Automobile,hs: Household Items,le: Leisure,ex: Others.\n- Upload only excel file with only a single sheet.\n- First column is date.\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
                 if (!userResponse)
                 {
                     return;
@@ -471,6 +471,7 @@ public partial class ExpensePage : ContentPage
 
             activityIndicator.IsRunning = true;
             int rowsAdded = 0;
+            List<IncomeExpenseModel> listIncomeExpenseModel = new List<IncomeExpenseModel>();
             DataSet dsexcelRecords = new DataSet();
             IExcelDataReader reader = null;
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
@@ -493,7 +494,7 @@ public partial class ExpensePage : ContentPage
                         //Delete if exists mode=file_upload on the specified date
                         await SetUpDb();
 
-                        DateTime transactionDate = new DateTime(Convert.ToInt32(dateArr[2]), Convert.ToInt32(dateArr[0]), Convert.ToInt32(dateArr[1]));
+                        DateTime transactionDate = new DateTime(Convert.ToInt32(dateArr[2]), Convert.ToInt32(dateArr[1]), Convert.ToInt32(dateArr[0]));
                         DateTime date = transactionDate.Date;
                         var recordsToBeDeleted = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.Mode == "file_upload" && i.TransactionType == "Expense" && i.Date >= date).ToListAsync();
                         foreach(var record in recordsToBeDeleted)
@@ -512,7 +513,7 @@ public partial class ExpensePage : ContentPage
                     //if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
                     if (dateArr.Count() == 3)
                     {
-                        DateTime transactionDate = new DateTime(Convert.ToInt32(dateArr[2]), Convert.ToInt32(dateArr[0]), Convert.ToInt32(dateArr[1]));
+                        DateTime transactionDate = new DateTime(Convert.ToInt32(dateArr[2]), Convert.ToInt32(dateArr[1]), Convert.ToInt32(dateArr[0]));
                         DateTime date = transactionDate.Date;
                         bool addExpense = false;
                         string category = "";
@@ -545,7 +546,7 @@ public partial class ExpensePage : ContentPage
                             addExpense = true;
                             category = "Others";
                         }
-                        //add expense into database
+                        
                         if (addExpense)
                         {
                             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
@@ -557,12 +558,18 @@ public partial class ExpensePage : ContentPage
                                 Remarks = "",
                                 Mode = "file_upload"
                             };
-                            rowsAdded = rowsAdded + await _dbConnection.InsertAsync(objIncomeExpense);
+                            listIncomeExpenseModel.Add(objIncomeExpense);
                         }
-                        //add expense into database
                     }
                 }
             }
+            //add expense into database
+            if (listIncomeExpenseModel.Count > 0)
+            {
+                rowsAdded = rowsAdded + await _dbConnection.InsertAllAsync(listIncomeExpenseModel, true);
+                activityIndicator.IsRunning = false;
+            }
+            //add expense into database
             if (rowsAdded > 0)
             {
                 await DisplayAlert("Info", $"File Processed Successfully\n\n{rowsAdded.ToString()} records added.", "OK");
@@ -570,91 +577,16 @@ public partial class ExpensePage : ContentPage
                 await ShowCurrentMonthExpenses();
                 LoadExpensesInPage("Last5");
             }
+            else
+            {
+                await DisplayAlert("Info", "Something went wrong. No records were added.", "OK");
+            }
             activityIndicator.IsRunning = false;
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Alert - StackTrace", ex.Message.ToString(), "OK");
+            await DisplayAlert("Alert - StackTrace", $"{ex.Message.ToString()}\n\nNo records added.", "OK");
         }
 
     }
-
-    //private async void btnBackup_Clicked(object sender, EventArgs e)
-    //{
-    //    try
-    //    {
-    //        string sourceDatabasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
-    //        if (!File.Exists(sourceDatabasePath))
-    //        {
-    //            await DisplayAlert("Info", "File not found", "OK");
-    //            return;
-    //        }
-    //        //string destinationBackupPath = Path.Combine(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath, "Assets.db3");
-
-    //        //SetUpDb();
-    //        //string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
-    //        //_dbConnection = new SQLiteAsyncConnection(dbPath);
-    //        //await _dbConnection.BackupAsync(destinationBackupPath);
-
-    //        //trying new way of achieving it
-    //        byte[] fileBytes = File.ReadAllBytes(sourceDatabasePath);
-    //        var stream = new MemoryStream(fileBytes);
-    //        CancellationTokenSource Ctoken = new CancellationTokenSource();
-    //        string fileName = "Assets.db3";
-            
-    //        var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
-    //        if (fileSaverResult.IsSuccessful)
-    //        {
-    //            await DisplayAlert("Message", "Database saved in " + fileSaverResult.FilePath, "Ok");
-    //        }
-    //        //trying new way of achieving it
-
-    //        await DisplayAlert("Info", "Backup Successful", "OK");
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        await DisplayAlert("Error", ex.Message, "OK");
-    //    }
-    //}
-
-    //private async void btnRestoreDb_Clicked(object sender, EventArgs e)
-    //{
-    //    try
-    //    {
-    //        var result = await FilePicker.PickAsync(new PickOptions
-    //        {
-    //            PickerTitle = "Pick File Please"
-    //        });
-
-    //        if (result == null)
-    //            return;
-
-    //        Stream fileStream = await result.OpenReadAsync();
-
-    //        //SetUpDb();
-    //        string destinationFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
-    //        if (File.Exists(destinationFilePath))
-    //        {
-    //            File.Delete(destinationFilePath);
-    //        }
-
-    //        using (var destinationFileStream = File.Create(destinationFilePath))
-    //        {
-    //            fileStream.Seek(0, SeekOrigin.Begin);
-    //            fileStream.CopyTo(destinationFileStream);
-    //        }
-
-    //        //string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
-    //        _dbConnection = new SQLiteAsyncConnection(destinationFilePath);
-    //        await _dbConnection.CreateTableAsync<Assets>();
-    //        await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
-    //        await _dbConnection.CreateTableAsync<DataSyncAudit>();
-
-    //        await DisplayAlert("Info", "Database restored successfully", "OK");
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        await DisplayAlert("Error", ex.Message, "OK");
-    //    }
-    //}
 }

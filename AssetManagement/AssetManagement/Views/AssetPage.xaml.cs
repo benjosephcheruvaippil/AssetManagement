@@ -108,7 +108,14 @@ public partial class AssetPage : TabbedPage
 
     private async Task LoadAssets()
     {
-        await _viewModel.LoadAssets("");
+        try
+        {
+            await _viewModel.LoadAssets("");
+        }
+        catch
+        {
+            await DisplayAlert("Info", "Welcome to asset management!", "OK");
+        }
     }
 
     private async void btnGetDetail_Clicked(object sender, EventArgs e)

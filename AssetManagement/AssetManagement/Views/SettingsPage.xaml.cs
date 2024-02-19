@@ -85,10 +85,10 @@ public partial class SettingsPage : ContentPage
 
             //SetUpDb();
             string destinationFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
-            if (File.Exists(destinationFilePath))
-            {
-                File.Delete(destinationFilePath);
-            }
+            //if (File.Exists(destinationFilePath))
+            //{
+            //    File.Delete(destinationFilePath);
+            //}
 
             using (var destinationFileStream = File.Create(destinationFilePath))
             {

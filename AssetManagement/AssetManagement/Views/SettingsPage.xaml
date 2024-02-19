@@ -4,7 +4,7 @@
              x:Class="AssetManagement.Views.SettingsPage"
              Title="Settings">
     <VerticalStackLayout>
-        <Button x:Name="btnRestoreDb" Text="Restore Database" Clicked="btnRestoreDb_Clicked"  FontSize="8" Margin="2"/>
-        <Button x:Name="btnBackup" Text="Backup" Clicked="btnBackup_Clicked" FontSize="8" Margin="2"/>
+        <Button x:Name="btnRestoreDb" Text="Restore Database" Clicked="btnRestoreDb_Clicked" BackgroundColor="LightGreen" TextColor="Black" WidthRequest="200" Margin="4"/>
+        <Button x:Name="btnBackup" Text="Backup Database" Clicked="btnBackup_Clicked" BackgroundColor="LightGreen" TextColor="Black" WidthRequest="200" Margin="4"/>
     </VerticalStackLayout>
 </ContentPage>

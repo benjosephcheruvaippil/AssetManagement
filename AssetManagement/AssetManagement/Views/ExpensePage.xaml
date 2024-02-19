@@ -12,9 +12,6 @@ Clicked="pickexpensefile_Clicked"
         FontSize="8"
         Margin="2"
 HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
-            <!--<Button x:Name="btnRestoreDb" Text="Restore Database" Clicked="btnRestoreDb_Clicked"  FontSize="8" Margin="2"/>
-            <Button x:Name="btnBackup" Text="Backup" Clicked="btnBackup_Clicked" FontSize="8" Margin="2"/>-->
-            <Label>au: Automobile,hs: Household Items,le: Leisure,ex: Others</Label>
             <Entry x:Name="txtTransactionId"
            IsVisible="false" />
 
