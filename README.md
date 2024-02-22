@@ -18,3 +18,6 @@ SettingsPage.xaml - page where backup,restore database options are present
 
 #Popup Page Information
 AssetByCategoryPage.xaml, AssetsByHolder.xaml - popup page
+
+#Sqlite database
+datetime("Date"/10000000 - 62135596800, 'unixepoch') -> use this to convert big int date to readable date
