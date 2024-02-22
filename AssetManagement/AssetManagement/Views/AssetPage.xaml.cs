@@ -374,6 +374,17 @@ public partial class AssetPage : TabbedPage
 
         if (rowsAffected > 0)
         {
+            //add asset audit log
+            double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>("select SUM(Amount) from Assets");
+
+            AssetAuditLog objAssetAuditLog = new AssetAuditLog
+            {
+                LiquidAssetValue = netAssetValue,
+                NetAssetValue = netAssetValue,
+                CreatedDate = DateTime.Now
+            };
+            await _dbConnection.InsertAsync(objAssetAuditLog);
+            //add asset audit log
             await DisplayAlert("Message", "Asset Saved", "OK");
             await LoadAssets();
         }

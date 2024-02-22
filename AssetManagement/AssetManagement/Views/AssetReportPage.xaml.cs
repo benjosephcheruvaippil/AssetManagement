@@ -1,6 +1,8 @@
 using AssetManagement.Models;
+using Microcharts;
 using Mopups.Interfaces;
 using Mopups.Services;
+using SkiaSharp;
 using SQLite;
 using System.Data.Common;
 using System.Globalization;
@@ -19,6 +21,7 @@ public partial class AssetReportPage : ContentPage
         SetUpDb();
         SummaryByHolderName();
         ShowAssetsByEquityAndDebt();
+        ShowNetWorthChart();
     }
 
     private void SetUpDb()
@@ -100,5 +103,66 @@ public partial class AssetReportPage : ContentPage
         stackLayout.Add(lblDebt);
         stackLayout.Add(lblEquity);
         stackLayout.Add(lblGold);
+    }
+
+    public async void ShowNetWorthChart()
+    {
+        //ChartEntry[] entries = new[]
+        //{
+        //    new ChartEntry(212)
+        //    {
+        //        Label = "Windows",
+        //        ValueLabel = "112",
+        //        Color = SKColor.Parse("#2c3e50")
+        //    },
+        //    new ChartEntry(248)
+        //    {
+        //        Label = "Android",
+        //        ValueLabel = "648",
+        //        Color = SKColor.Parse("#77d065")
+        //    },
+        //    new ChartEntry(128)
+        //    {
+        //        Label = "iOS",
+        //        ValueLabel = "428",
+        //        Color = SKColor.Parse("#b455b6")
+        //    },
+        //    new ChartEntry(514)
+        //    {
+        //        Label = ".NET MAUI",
+        //        ValueLabel = "214",
+        //        Color = SKColor.Parse("#3498db")
+        //    }
+        //};
+
+        var assetLog = await _dbConnection.Table<AssetAuditLog>().OrderBy(o => o.CreatedDate).ToListAsync();
+
+        List<ChartEntry> listChartEntry = new List<ChartEntry>();
+        foreach(var log in assetLog)
+        {
+            int roundedAssetValue = (int)Math.Round((decimal)log.NetAssetValue);
+            double r = roundedAssetValue / 50000;
+            int chartParameter = (int)Math.Round(r);
+            ChartEntry chartEntry = new ChartEntry(chartParameter)
+            {
+                Label = log.CreatedDate.ToString("dd-MM-yyyy"),
+                ValueLabel = string.Format(new CultureInfo("en-IN"), "{0:C0}", roundedAssetValue),
+                Color = SKColor.Parse("#3498db")
+            };
+            listChartEntry.Add(chartEntry);
+        }
+
+        
+
+        chartView1.Chart = new LineChart
+        {
+            Entries = listChartEntry,
+            LabelTextSize = 70
+        };
+    }
+
+    public void ShowAssetAllocationChart()
+    {
+
     }
 }
