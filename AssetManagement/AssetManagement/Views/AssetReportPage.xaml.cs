@@ -1,4 +1,5 @@
 using AssetManagement.Models;
+using AssetManagement.Models.Reports;
 using Microcharts;
 using Mopups.Interfaces;
 using Mopups.Services;
@@ -107,56 +108,87 @@ public partial class AssetReportPage : ContentPage
 
     public async void ShowNetWorthChart()
     {
-        //ChartEntry[] entries = new[]
-        //{
-        //    new ChartEntry(212)
-        //    {
-        //        Label = "Windows",
-        //        ValueLabel = "112",
-        //        Color = SKColor.Parse("#2c3e50")
-        //    },
-        //    new ChartEntry(248)
-        //    {
-        //        Label = "Android",
-        //        ValueLabel = "648",
-        //        Color = SKColor.Parse("#77d065")
-        //    },
-        //    new ChartEntry(128)
-        //    {
-        //        Label = "iOS",
-        //        ValueLabel = "428",
-        //        Color = SKColor.Parse("#b455b6")
-        //    },
-        //    new ChartEntry(514)
-        //    {
-        //        Label = ".NET MAUI",
-        //        ValueLabel = "214",
-        //        Color = SKColor.Parse("#3498db")
-        //    }
-        //};
-
-        var assetLog = await _dbConnection.Table<AssetAuditLog>().OrderBy(o => o.CreatedDate).ToListAsync();
-
-        List<ChartEntry> listChartEntry = new List<ChartEntry>();
-        foreach(var log in assetLog)
+        ChartEntry[] entries = new[]
         {
-            int roundedAssetValue = (int)Math.Round((decimal)log.NetAssetValue);
-            double r = roundedAssetValue / 50000;
-            int chartParameter = (int)Math.Round(r);
-            ChartEntry chartEntry = new ChartEntry(chartParameter)
+            new ChartEntry(212)
             {
-                Label = log.CreatedDate.ToString("dd-MM-yyyy"),
-                ValueLabel = string.Format(new CultureInfo("en-IN"), "{0:C0}", roundedAssetValue),
+                Label = "Windows",
+                ValueLabel = "112",
+                Color = SKColor.Parse("#2c3e50")
+            },
+            new ChartEntry(248)
+            {
+                Label = "Android",
+                ValueLabel = "648",
+                Color = SKColor.Parse("#77d065")
+            },
+            new ChartEntry(128)
+            {
+                Label = "iOS",
+                ValueLabel = "428",
+                Color = SKColor.Parse("#b455b6")
+            },
+            new ChartEntry(514)
+            {
+                Label = ".NET MAUI",
+                ValueLabel = "214",
                 Color = SKColor.Parse("#3498db")
-            };
-            listChartEntry.Add(chartEntry);
-        }
+            }
+        };
 
-        
-
-        chartView1.Chart = new LineChart
+        var oldestLog = await _dbConnection.Table<AssetAuditLog>().OrderBy(o => o.CreatedDate).FirstOrDefaultAsync();
+        List<NetWorthChangeReport> listNetWorthChangeReport = new List<NetWorthChangeReport>();
+        if (oldestLog != null)
         {
-            Entries = listChartEntry,
+            int startYear = oldestLog.CreatedDate.Year;
+            //q1
+            DateTime fromDate= DateTime.Now;
+            DateTime toDate= DateTime.Now;
+            var Q1_List = await _dbConnection.Table<AssetAuditLog>().Where(a => a.CreatedDate >= fromDate && a.CreatedDate <= toDate).ToListAsync();
+            //find average amount
+            double? totalNetAssetValue = 0;
+            foreach (var log in Q1_List)
+            {
+                totalNetAssetValue = totalNetAssetValue + log.NetAssetValue;
+            }
+            int avgNetAssetValueForQ1 = (int)Math.Round((double)(totalNetAssetValue / Q1_List.Count));
+            NetWorthChangeReport objNetWorthChangeReport = new NetWorthChangeReport();
+            objNetWorthChangeReport.NetAssetValue = avgNetAssetValueForQ1;
+            objNetWorthChangeReport.DisplayLabel = "Jan-Mar " + startYear.ToString();
+        }
+        //q1
+        //q2
+        //q3
+        //q4
+
+        //List<ChartEntry> listChartEntry = new List<ChartEntry>();
+        //foreach(var log in assetLog)
+        //{
+        //    int roundedAssetValue = (int)Math.Round((decimal)log.NetAssetValue);
+        //    double r = roundedAssetValue / 50000;
+        //    int chartParameter = (int)Math.Round(r);
+        //    ChartEntry chartEntry = new ChartEntry(chartParameter)
+        //    {
+        //        Label = log.CreatedDate.ToString("dd-MM-yyyy"),
+        //        ValueLabel = string.Format(new CultureInfo("en-IN"), "{0:C0}", roundedAssetValue),
+        //        Color = SKColor.Parse("#3498db")
+        //    };
+        //    listChartEntry.Add(chartEntry);
+        //}
+
+
+
+        netWorthChangeChart.Chart = new LineChart
+        {
+            //Entries = listChartEntry,
+            Entries = entries,
+            LabelTextSize = 70
+        };
+
+        assetAllocationChart.Chart = new PieChart
+        {
+            //Entries = listChartEntry,
+            Entries = entries,
             LabelTextSize = 70
         };
     }

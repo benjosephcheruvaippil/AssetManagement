@@ -21,7 +21,8 @@
           StrokeThickness="5" /> <!--drawing a straight line-->
             <BoxView HeightRequest="20" Color="Transparent"/>
 
-            <micro:ChartView x:Name="chartView1" HeightRequest="500" />
+            <micro:ChartView x:Name="netWorthChangeChart" HeightRequest="500" />
+            <micro:ChartView x:Name="assetAllocationChart" HeightRequest="500" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
