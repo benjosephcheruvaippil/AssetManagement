@@ -104,97 +104,153 @@ public partial class AssetReportPage : ContentPage
         stackLayout.Add(lblDebt);
         stackLayout.Add(lblEquity);
         stackLayout.Add(lblGold);
+
+        //new report
+        List<AssetAllocationReport> assetAllocationReport = new List<AssetAllocationReport>();
+        AssetAllocationReport objAssetAllocationDebt = new AssetAllocationReport();
+        objAssetAllocationDebt.AssetType = "Debt";
+        objAssetAllocationDebt.Amount = debtPortfolioAmount[0].Amount.ToString();
+        objAssetAllocationDebt.PortfolioPercentage = debtPortfolioPercentage.ToString() + "%";
+        assetAllocationReport.Add(objAssetAllocationDebt);
+
+        AssetAllocationReport objAssetAllocationEquity = new AssetAllocationReport();
+        objAssetAllocationEquity.AssetType = "Equity";
+        objAssetAllocationEquity.Amount = equityPortfolioAmount[0].Amount.ToString();
+        objAssetAllocationEquity.PortfolioPercentage = equityPortfolioPercentage.ToString() + "%";
+        assetAllocationReport.Add(objAssetAllocationEquity);
+
+        AssetAllocationReport objAssetAllocationGold = new AssetAllocationReport();
+        objAssetAllocationGold.AssetType = "Gold";
+        objAssetAllocationGold.Amount = goldPortfolioAmount[0].Amount.ToString();
+        objAssetAllocationGold.PortfolioPercentage = goldPortfolioPercentage.ToString() + "%";
+        assetAllocationReport.Add(objAssetAllocationGold);
+        ShowAssetAllocationChart(assetAllocationReport);
     }
 
     public async void ShowNetWorthChart()
     {
-        ChartEntry[] entries = new[]
-        {
-            new ChartEntry(212)
-            {
-                Label = "Windows",
-                ValueLabel = "112",
-                Color = SKColor.Parse("#2c3e50")
-            },
-            new ChartEntry(248)
-            {
-                Label = "Android",
-                ValueLabel = "648",
-                Color = SKColor.Parse("#77d065")
-            },
-            new ChartEntry(128)
-            {
-                Label = "iOS",
-                ValueLabel = "428",
-                Color = SKColor.Parse("#b455b6")
-            },
-            new ChartEntry(514)
-            {
-                Label = ".NET MAUI",
-                ValueLabel = "214",
-                Color = SKColor.Parse("#3498db")
-            }
-        };
-
         var oldestLog = await _dbConnection.Table<AssetAuditLog>().OrderBy(o => o.CreatedDate).FirstOrDefaultAsync();
+        var latestLog = await _dbConnection.Table<AssetAuditLog>().OrderByDescending(o => o.CreatedDate).FirstOrDefaultAsync();
         List<NetWorthChangeReport> listNetWorthChangeReport = new List<NetWorthChangeReport>();
         if (oldestLog != null)
         {
             int startYear = oldestLog.CreatedDate.Year;
-            //q1
-            DateTime fromDate= DateTime.Now;
-            DateTime toDate= DateTime.Now;
-            var Q1_List = await _dbConnection.Table<AssetAuditLog>().Where(a => a.CreatedDate >= fromDate && a.CreatedDate <= toDate).ToListAsync();
-            //find average amount
-            double? totalNetAssetValue = 0;
-            foreach (var log in Q1_List)
+            int endYear = latestLog.CreatedDate.Year;
+            for (int year = startYear; year <= endYear; year++)
             {
-                totalNetAssetValue = totalNetAssetValue + log.NetAssetValue;
+                for (int j = 1; j <= 4; j++)
+                {
+                    string quarterName = "";
+                    int fromMonth = 0, toMonth = 0;
+
+                    if (j == 1)//q1 - january-march
+                    {
+                        quarterName = "Jan-Mar";
+                        fromMonth = 1;
+                        toMonth = 3;
+                    }
+                    else if (j == 2)//q2 - april-june
+                    {
+                        quarterName = "Apr-Jun";
+                        fromMonth = 4;
+                        toMonth = 6;
+                    }
+                    else if (j == 3)//q3 - july-sept
+                    {
+                        quarterName = "Jul-Sep";
+                        fromMonth = 7;
+                        toMonth = 9;
+                    }
+                    else if (j == 4)//q4 - oct-dec
+                    {
+                        quarterName = "Oct-Dec";
+                        fromMonth = 10;
+                        toMonth = 12;
+                    }
+
+                    DateTime fromDate = new DateTime(year, fromMonth, 1, 0, 0, 0);
+                    DateTime toDate = new DateTime(year, toMonth, DateTime.DaysInMonth(year, toMonth), 23, 59, 59);
+                    var quarter_list = await _dbConnection.Table<AssetAuditLog>().Where(a => a.CreatedDate >= fromDate && a.CreatedDate <= toDate).ToListAsync();
+                    //find average amount
+                    double? totalNetAssetValue = 0;
+                    foreach (var log in quarter_list)
+                    {
+                        totalNetAssetValue = totalNetAssetValue + log.NetAssetValue;
+                    }
+                    int avgNetAssetValue = 0;
+                    if (totalNetAssetValue != 0)
+                    {
+                        avgNetAssetValue = (int)Math.Round((double)(totalNetAssetValue / quarter_list.Count));
+                    }
+                    NetWorthChangeReport objNetWorthChangeReport = new NetWorthChangeReport();
+                    objNetWorthChangeReport.NetAssetValue = avgNetAssetValue;
+                    objNetWorthChangeReport.DisplayLabel = quarterName + " " + year.ToString();
+                    listNetWorthChangeReport.Add(objNetWorthChangeReport);
+                }
             }
-            int avgNetAssetValueForQ1 = (int)Math.Round((double)(totalNetAssetValue / Q1_List.Count));
-            NetWorthChangeReport objNetWorthChangeReport = new NetWorthChangeReport();
-            objNetWorthChangeReport.NetAssetValue = avgNetAssetValueForQ1;
-            objNetWorthChangeReport.DisplayLabel = "Jan-Mar " + startYear.ToString();
         }
-        //q1
-        //q2
-        //q3
-        //q4
 
-        //List<ChartEntry> listChartEntry = new List<ChartEntry>();
-        //foreach(var log in assetLog)
-        //{
-        //    int roundedAssetValue = (int)Math.Round((decimal)log.NetAssetValue);
-        //    double r = roundedAssetValue / 50000;
-        //    int chartParameter = (int)Math.Round(r);
-        //    ChartEntry chartEntry = new ChartEntry(chartParameter)
-        //    {
-        //        Label = log.CreatedDate.ToString("dd-MM-yyyy"),
-        //        ValueLabel = string.Format(new CultureInfo("en-IN"), "{0:C0}", roundedAssetValue),
-        //        Color = SKColor.Parse("#3498db")
-        //    };
-        //    listChartEntry.Add(chartEntry);
-        //}
-
-
+        List<ChartEntry> listChartEntry = new List<ChartEntry>();
+        listNetWorthChangeReport = listNetWorthChangeReport.Where(l => l.NetAssetValue > 0).ToList();
+        foreach (var log in listNetWorthChangeReport)
+        {
+            int roundedAssetValue = (int)Math.Round((decimal)log.NetAssetValue);
+            double ratio = roundedAssetValue / 10000;
+            int value = (int)Math.Round(ratio);
+            ChartEntry chartEntry = new ChartEntry(value)
+            {
+                Label = log.DisplayLabel,
+                ValueLabel = string.Format(new CultureInfo("en-IN"), "{0:C0}", roundedAssetValue),
+                Color = SKColor.Parse("#3498db")
+            };
+            listChartEntry.Add(chartEntry);
+        }
 
         netWorthChangeChart.Chart = new LineChart
         {
-            //Entries = listChartEntry,
-            Entries = entries,
+            Entries = listChartEntry,
+            //Entries = entries,
             LabelTextSize = 70
         };
 
-        assetAllocationChart.Chart = new PieChart
-        {
-            //Entries = listChartEntry,
-            Entries = entries,
-            LabelTextSize = 70
-        };
     }
 
-    public void ShowAssetAllocationChart()
+    public void ShowAssetAllocationChart(List<AssetAllocationReport> assetAllocation)
     {
+        List<ChartEntry> listChartEntry = new List<ChartEntry>();
+        foreach (var asset in assetAllocation)
+        {
+            decimal amount = Convert.ToDecimal(asset.Amount);
+            int value = (int)Math.Round(amount/1000);
+            string hexCode = "";
 
+
+            if (asset.AssetType == "Debt")
+            {
+                hexCode = "#0000FF";
+            }
+            else if (asset.AssetType == "Equity")
+            {
+                hexCode = "#00FF00";
+            }
+            else if (asset.AssetType == "Gold")
+            {
+                hexCode = "#FFFF00";
+            }
+            ChartEntry chartEntry = new ChartEntry(value)
+            {
+                Label = asset.AssetType,
+                ValueLabel = asset.Amount + "(" + asset.PortfolioPercentage + ")",
+                Color = SKColor.Parse(hexCode)
+            };
+            listChartEntry.Add(chartEntry);
+        }
+        assetAllocationChart.Chart = new PieChart
+        {
+            HoleRadius = 10,
+            Entries = listChartEntry,
+            LabelTextSize = 70
+            
+        };
     }
 }
