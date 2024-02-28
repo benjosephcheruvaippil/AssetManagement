@@ -209,7 +209,6 @@ public partial class AssetReportPage : ContentPage
         netWorthChangeChart.Chart = new LineChart
         {
             Entries = listChartEntry,
-            //Entries = entries,
             LabelTextSize = 70
         };
 
@@ -240,17 +239,19 @@ public partial class AssetReportPage : ContentPage
             ChartEntry chartEntry = new ChartEntry(value)
             {
                 Label = asset.AssetType,
-                ValueLabel = asset.Amount + "(" + asset.PortfolioPercentage + ")",
+                //ValueLabel = asset.Amount + "(" + asset.PortfolioPercentage + ")",
+                ValueLabel = "(" + asset.PortfolioPercentage + ")",
                 Color = SKColor.Parse(hexCode)
             };
             listChartEntry.Add(chartEntry);
         }
         assetAllocationChart.Chart = new PieChart
-        {
-            HoleRadius = 10,
+        {      
+            HoleRadius = 2,
             Entries = listChartEntry,
-            LabelTextSize = 70
-            
+            LabelTextSize = 30,
+            LabelMode=LabelMode.LeftAndRight,
+            GraphPosition=GraphPosition.AutoFill            
         };
     }
 }
