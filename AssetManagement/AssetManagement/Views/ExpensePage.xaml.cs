@@ -40,9 +40,10 @@ public partial class ExpensePage : ContentPage
             await ShowCurrentMonthExpenses();
             SetLastUploadedDate();
         }
-        catch(Exception ex)
+        catch(Exception)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            //await DisplayAlert("Error", ex.Message, "OK");
+            return;
         }
     }
 
