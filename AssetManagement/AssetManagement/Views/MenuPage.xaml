@@ -40,7 +40,7 @@
                 <Button 
                 x:Name="btnAssetPage"
                 x:FieldModifier="public"
-                Text="Asset Details"
+                Text="Assets"
                 BackgroundColor="White"
                 TextColor="Black"
                 FontAttributes="Bold"
