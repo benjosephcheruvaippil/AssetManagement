@@ -97,13 +97,6 @@ public partial class AssetPage : TabbedPage
             _popupNavigation.PushAsync(new AssetsByCategoryPage("Others", _assetService));
         };
         lblOthers.GestureRecognizers.Add(labelOthers);
-
-        var labelTaxEfficient = new TapGestureRecognizer();
-        labelTaxEfficient.Tapped += (s, e) =>
-        {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("EPF,PPF,NPS", _assetService));
-        };
-        lblTaxEfficient.GestureRecognizers.Add(labelTaxEfficient);
     }
 
     protected async override void OnNavigatedTo(NavigatedToEventArgs args)
@@ -279,12 +272,11 @@ public partial class AssetPage : TabbedPage
 
         decimal Insurance_MF = records.Where(b => b.Type == "Insurance_MF").Sum(s => s.Amount);
         decimal Gold = records.Where(b => b.Type == "Gold" || b.Type=="SGB").Sum(s => s.Amount);
-        //decimal PPF = records.Where(b => b.Type == "PPF").Sum(s => s.Amount);
-        //decimal EPF = records.Where(b => b.Type == "EPF").Sum(s => s.Amount);
+        decimal PPF = records.Where(b => b.Type == "PPF").Sum(s => s.Amount);
+        decimal EPF = records.Where(b => b.Type == "EPF").Sum(s => s.Amount);
         decimal MutualFunds = records.Where(b => b.Type == "MF").Sum(s => s.Amount);
         decimal Stocks = records.Where(b => b.Type == "Stocks").Sum(s => s.Amount);
         decimal Others = records.Where(b => b.Type == "Others").Sum(s => s.Amount);
-        decimal TaxEfficient = records.Where(b => b.Type == "PPF" || b.Type == "EPF" || b.Type == "NPS").Sum(s => s.Amount);
 
         lblBank.Text = "Bank Assets Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", BankAssets);
         lblNCD.Text = "Non Convertible Debentures: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", NCDAssets);
@@ -293,9 +285,8 @@ public partial class AssetPage : TabbedPage
         lblInsuranceMF.Text = "Insurance/MF: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Insurance_MF);
         lblGold.Text = "Gold: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Gold);
         lblOthers.Text = "Others: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Others);
-        lblTaxEfficient.Text = "Tax Efficient Investments: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", TaxEfficient);
-        //lblPPF.Text = "Public Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", PPF);
-        //lblEPF.Text = "Employee Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", EPF);
+        lblPPF.Text = "Public Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", PPF);
+        lblEPF.Text = "Employee Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", EPF);
         lblMF.Text = "Mutual Funds: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", MutualFunds);
         lblStocks.Text = "Stocks: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Stocks);     
 

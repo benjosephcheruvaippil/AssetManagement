@@ -20,37 +20,34 @@
                     <Button
                 x:Name="PickFile"
                 Text="Pick File"
-                        IsVisible="false"
                 Clicked="PickFileClicked"
                         FontSize="8"
                         Margin="2"
                 HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
 
                     <Button
-                x:Name="btnUploadAssets"
-                Text="Upload"
-                        IsVisible="false"
-                Clicked="btnUploadAssets_Clicked"
-                FontSize="8"
-                Margin="2"
-                HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
+x:Name="btnUploadAssets"
+Text="Upload"
+Clicked="btnUploadAssets_Clicked"
+FontSize="8"
+Margin="2"
+HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
 
                     <Button
-                x:Name="btnDownloadAssets"
-                Text="Download"
-                        IsVisible="false"
-                Clicked="btnDownloadAssets_Clicked"
-                FontSize="8"
-                Margin="2"
-                HorizontalOptions="Center" WidthRequest="80" HeightRequest="35" />
+x:Name="btnDownloadAssets"
+Text="Download"
+Clicked="btnDownloadAssets_Clicked"
+FontSize="8"
+Margin="2"
+HorizontalOptions="Center" WidthRequest="80" HeightRequest="35" />
 
                     <Button
-                x:Name="btnDownloadAssetsExcel"
-                Text="Download Excel"
-                Clicked="btnDownloadAssetsExcel_Clicked"
-                FontSize="10"
-                Margin="2"
-                HorizontalOptions="Center" WidthRequest="110" HeightRequest="35" />
+x:Name="btnDownloadAssetsExcel"
+Text="Dwnld xl"
+Clicked="btnDownloadAssetsExcel_Clicked"
+FontSize="8"
+Margin="2"
+HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
 
                 </StackLayout>
 
@@ -95,13 +92,6 @@
             HorizontalOptions="Center" />
 
                 <Label
-            x:Name="lblTaxEfficient"
-            Text=""
-            SemanticProperties.HeadingLevel="Level1"
-            FontSize="16"
-            HorizontalOptions="Center" />
-                
-                <!--<Label
             x:Name="lblPPF"
             Text=""
             SemanticProperties.HeadingLevel="Level1"
@@ -113,7 +103,7 @@
             Text=""
             SemanticProperties.HeadingLevel="Level1"
             FontSize="16"
-            HorizontalOptions="Center" />-->
+            HorizontalOptions="Center" />
 
                 <Label
             x:Name="lblMF"
@@ -246,7 +236,6 @@
                             <x:String>Insurance_MF</x:String>
                             <x:String>PPF</x:String>
                             <x:String>EPF</x:String>
-                            <x:String>NPS</x:String>
                             <x:String>MF</x:String>
                             <x:String>Stocks</x:String>
                             <x:String>Others</x:String>
