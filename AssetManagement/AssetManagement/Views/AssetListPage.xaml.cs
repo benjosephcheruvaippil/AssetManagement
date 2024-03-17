@@ -801,8 +801,8 @@ public partial class AssetListPage : TabbedPage
         }
     }
 
-    private void btnAssetReport_Clicked(object sender, EventArgs e)
+    private async void btnAssetReport_Clicked(object sender, EventArgs e)
     {
-        //await Navigation.PushAsync(new AssetReportPage(_popupNavigation));
+        await Navigation.PushAsync(new AssetReportPage(_popupNavigation));
     }
 }

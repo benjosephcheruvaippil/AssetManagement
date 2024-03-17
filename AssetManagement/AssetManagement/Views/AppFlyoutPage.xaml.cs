@@ -67,7 +67,7 @@ public partial class AppFlyoutPage : FlyoutPage
     {
         if (!((IFlyoutPageController)this).ShouldShowSplitMode)
             IsPresented = false;
-        Detail = new NavigationPage(new AssetReportPage(_popupNavigation, _viewModel, _assetService));
+        Detail = new NavigationPage(new AssetReportPage(_popupNavigation));
     }
 
     private void OpenSettingsPageClicked(object sender, EventArgs e)
