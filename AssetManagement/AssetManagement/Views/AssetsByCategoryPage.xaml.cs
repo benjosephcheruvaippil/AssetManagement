@@ -38,6 +38,18 @@ public partial class AssetsByCategoryPage
                 TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
             }).ToList();
         }
+        else if (_from.Contains("EPF"))
+        {
+            string[] type = _from.Split(',');
+            investmentEntity = records
+            .Where(w => type.Contains(w.Type))
+            .GroupBy(g => g.InvestmentEntity)
+            .Select(entity => new EntitywiseModel
+            {
+                InvestmentEntity = entity.First().InvestmentEntity,
+                TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
+            }).ToList();
+        }
         else
         {
             investmentEntity = records
