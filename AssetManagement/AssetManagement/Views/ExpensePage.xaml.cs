@@ -17,7 +17,7 @@ public partial class ExpensePage : ContentPage
     //private AssetListPageViewModel _viewModel;
     private SQLiteAsyncConnection _dbConnection;
     //private IPopupNavigation _popupNavigation;
-    //private readonly IAssetService _assetService;
+    ///private readonly IAssetService _assetService;
     public ExpensePage()
     {
         InitializeComponent();
