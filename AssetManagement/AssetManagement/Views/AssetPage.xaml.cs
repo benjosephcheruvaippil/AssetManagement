@@ -277,6 +277,7 @@ public partial class AssetPage : TabbedPage
         decimal MutualFunds = records.Where(b => b.Type == "MF").Sum(s => s.Amount);
         decimal Stocks = records.Where(b => b.Type == "Stocks").Sum(s => s.Amount);
         decimal Others = records.Where(b => b.Type == "Others").Sum(s => s.Amount);
+        decimal TaxEfficient = records.Where(b => b.Type == "PPF" || b.Type == "EPF" || b.Type == "NPS").Sum(s => s.Amount);
 
         lblBank.Text = "Bank Assets Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", BankAssets);
         lblNCD.Text = "Non Convertible Debentures: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", NCDAssets);
@@ -287,6 +288,7 @@ public partial class AssetPage : TabbedPage
         lblOthers.Text = "Others: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Others);
         lblPPF.Text = "Public Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", PPF);
         lblEPF.Text = "Employee Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", EPF);
+        lblTaxEfficient.Text = "Tax Efficient Investments: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", TaxEfficient);
         lblMF.Text = "Mutual Funds: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", MutualFunds);
         lblStocks.Text = "Stocks: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Stocks);     
 
@@ -343,7 +345,7 @@ public partial class AssetPage : TabbedPage
             Remarks = entRemarks.Text
         };
 
-        if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "MF" || objAsset.Type == "Stocks" || objAsset.Type == "Others")
+        if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "MF" || objAsset.Type == "Stocks" || objAsset.Type == "NPS" || objAsset.Type == "Others")
         {
             objAsset.AsOfDate = entAsOfDate.Date;
             objAsset.StartDate= Convert.ToDateTime("01-01-0001");
@@ -421,7 +423,7 @@ public partial class AssetPage : TabbedPage
     {
         string type = entType.SelectedItem.ToString();
 
-        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "MF" || type == "Stocks" || type == "Others")
+        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "MF" || type == "Stocks" || type == "NPS" || type == "Others")
         {
             entStartDate.Date = Convert.ToDateTime("01-01-0001");
             entMaturityDate.Date = Convert.ToDateTime("01-01-0001");

@@ -92,6 +92,13 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
             HorizontalOptions="Center" />
 
                 <Label
+            x:Name="lblTaxEfficient"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />
+
+                <Label
             x:Name="lblPPF"
             Text=""
             SemanticProperties.HeadingLevel="Level1"
@@ -236,6 +243,7 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
                             <x:String>Insurance_MF</x:String>
                             <x:String>PPF</x:String>
                             <x:String>EPF</x:String>
+                            <x:String>NPS</x:String>
                             <x:String>MF</x:String>
                             <x:String>Stocks</x:String>
                             <x:String>Others</x:String>
