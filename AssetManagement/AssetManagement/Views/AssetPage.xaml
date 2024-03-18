@@ -98,19 +98,19 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
             FontSize="16"
             HorizontalOptions="Center" />
 
-                <Label
+                <!--<Label
             x:Name="lblPPF"
             Text=""
             SemanticProperties.HeadingLevel="Level1"
             FontSize="16"
-            HorizontalOptions="Center" />
+            HorizontalOptions="Center" />-->
 
-                <Label
+                <!--<Label
             x:Name="lblEPF"
             Text=""
             SemanticProperties.HeadingLevel="Level1"
             FontSize="16"
-            HorizontalOptions="Center" />
+            HorizontalOptions="Center" />-->
 
                 <Label
             x:Name="lblMF"
