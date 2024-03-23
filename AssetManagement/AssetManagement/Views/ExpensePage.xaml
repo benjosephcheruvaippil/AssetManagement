@@ -34,6 +34,7 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
                             <x:String>Mobile/Net</x:String>
                             <x:String>Donations</x:String>
                             <x:String>Fuel</x:String>-->
+                            <x:String>Tax Liability</x:String>
                             <x:String>Others</x:String>
                     </x:Array>
                     </Picker.ItemsSource>
