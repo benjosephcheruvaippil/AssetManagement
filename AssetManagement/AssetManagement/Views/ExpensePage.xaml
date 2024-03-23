@@ -7,11 +7,11 @@
             <VerticalStackLayout>
             <Button
 x:Name="pickexpensefile"
-Text="Pick File"
+Text="Upload Expenses"
 Clicked="pickexpensefile_Clicked"
-        FontSize="8"
+        FontSize="10"
         Margin="2"
-HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
+HorizontalOptions="Center" WidthRequest="120" HeightRequest="40" />
             <Entry x:Name="txtTransactionId"
            IsVisible="false" />
 
@@ -78,12 +78,14 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
                 <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="End">
                     <Button
                 x:Name="btnUploadData"
+                        IsVisible="false"
                 Text="Upload"
                 Margin="0,0,5,0"
                 Clicked="btnUploadData_Clicked"/>
 
                     <Button
                 x:Name="btnDownloadData"
+                        IsVisible="false"
                 Text="Download"
                 Margin="5,0,0,0"
                 Clicked="btnDownloadData_Clicked"/>
