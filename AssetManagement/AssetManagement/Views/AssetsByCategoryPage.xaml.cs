@@ -38,7 +38,7 @@ public partial class AssetsByCategoryPage
                 TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
             }).ToList();
         }
-        else if (_from.Contains("EPF"))
+        else if (_from == "EPF,PPF,NPS")
         {
             string[] type = _from.Split(',');
             investmentEntity = records

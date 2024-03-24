@@ -20,9 +20,9 @@ public partial class AssetReportPage : ContentPage
     public AssetListPageViewModel _viewModel;
     public IAssetService _assetService;
     public AssetReportPage(IPopupNavigation popupNavigation, AssetListPageViewModel viewModel, IAssetService assetService)
-	{
-		InitializeComponent();
-        _popupNavigation=popupNavigation;
+    {
+        InitializeComponent();
+        _popupNavigation = popupNavigation;
         _viewModel = viewModel;
         _assetService = assetService;
         SetUpDb();
@@ -92,7 +92,7 @@ public partial class AssetReportPage : ContentPage
                 }
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             await DisplayAlert("Info", ex.Message, "Ok");
         }
@@ -155,7 +155,7 @@ public partial class AssetReportPage : ContentPage
                 ShowAssetAllocationChart(assetAllocationReport);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             await DisplayAlert("Info", ex.Message, "Ok");
         }
@@ -251,7 +251,7 @@ public partial class AssetReportPage : ContentPage
                 };
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             await DisplayAlert("Info", ex.Message, "Ok");
         }
@@ -299,7 +299,7 @@ public partial class AssetReportPage : ContentPage
                 GraphPosition = GraphPosition.AutoFill
             };
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             DisplayAlert("Info", ex.Message, "Ok");
         }

@@ -19,38 +19,38 @@
                     
                     <Button
                 x:Name="PickFile"
-                Text="Pick File"
                         IsVisible="false"
+                Text="Pick File"
                 Clicked="PickFileClicked"
                         FontSize="8"
                         Margin="2"
                 HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
 
                     <Button
-                x:Name="btnUploadAssets"
-                Text="Upload"
-                        IsVisible="false"
-                Clicked="btnUploadAssets_Clicked"
-                FontSize="8"
-                Margin="2"
-                HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
+x:Name="btnUploadAssets"
+IsVisible="false"
+Text="Upload"
+Clicked="btnUploadAssets_Clicked"
+FontSize="8"
+Margin="2"
+HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
 
                     <Button
-                x:Name="btnDownloadAssets"
-                Text="Download"
-                        IsVisible="false"
-                Clicked="btnDownloadAssets_Clicked"
-                FontSize="8"
-                Margin="2"
-                HorizontalOptions="Center" WidthRequest="80" HeightRequest="35" />
+x:Name="btnDownloadAssets"
+IsVisible="false"
+Text="Download"
+Clicked="btnDownloadAssets_Clicked"
+FontSize="8"
+Margin="2"
+HorizontalOptions="Center" WidthRequest="80" HeightRequest="35" />
 
                     <Button
-                x:Name="btnDownloadAssetsExcel"
-                Text="Download Excel"
-                Clicked="btnDownloadAssetsExcel_Clicked"
-                FontSize="10"
-                Margin="2"
-                HorizontalOptions="Center" WidthRequest="110" HeightRequest="35" />
+x:Name="btnDownloadAssetsExcel"
+Text="Download Excel"
+Clicked="btnDownloadAssetsExcel_Clicked"
+FontSize="10"
+Margin="2"
+HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
 
                 </StackLayout>
 
@@ -100,15 +100,15 @@
             SemanticProperties.HeadingLevel="Level1"
             FontSize="16"
             HorizontalOptions="Center" />
-                
+
                 <!--<Label
             x:Name="lblPPF"
             Text=""
             SemanticProperties.HeadingLevel="Level1"
             FontSize="16"
-            HorizontalOptions="Center" />
+            HorizontalOptions="Center" />-->
 
-                <Label
+                <!--<Label
             x:Name="lblEPF"
             Text=""
             SemanticProperties.HeadingLevel="Level1"
