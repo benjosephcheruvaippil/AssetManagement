@@ -234,4 +234,13 @@ public partial class IncomePage : ContentPage
             }
         }
     }
+
+    private async void pickerOwnerName_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if(pickerOwnerName.SelectedItem.ToString() == "Add New Owner")
+        {
+            await Navigation.PushAsync(new ManageUsersPage());
+        }
+        return;
+    }
 }
