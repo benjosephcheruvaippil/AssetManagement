@@ -155,6 +155,7 @@ public partial class AssetPage : TabbedPage
     {
         base.OnAppearing();
 
+        LoadOwnersInDropdown();
         lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", await _viewModel.GetAssetsList());
         await ShowPrimaryAssetDetails();
     }
@@ -169,6 +170,13 @@ public partial class AssetPage : TabbedPage
             await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
             await _dbConnection.CreateTableAsync<DataSyncAudit>();
         }
+    }
+
+    private async void LoadOwnersInDropdown()
+    {
+        await SetUpDb();
+        var owners = await _dbConnection.Table<Owners>().ToListAsync();
+        entHolder.ItemsSource = owners.Select(s => s.OwnerName).ToList();
     }
 
     private async void PickFileClicked(object sender, EventArgs e)
@@ -778,31 +786,32 @@ public partial class AssetPage : TabbedPage
 
     private async void dgAssetsDataTable_ItemSelected(object sender, SelectionChangedEventArgs e)
     {
-        Assets obj = _viewModel.GetSelectedRecordDetail();
-
-        if (obj.AssetId != 0)
+        if (e.CurrentSelection.Count > 0)
         {
+            Assets obj = _viewModel.GetSelectedRecordDetail();
 
-            entEntityName.Text = obj.InvestmentEntity;
-            entType.SelectedItem = obj.Type;
-            entAmount.Text = Convert.ToString(obj.Amount);
-            entInterestRate.Text = Convert.ToString(obj.InterestRate);
-            entInterestFrequency.SelectedItem = obj.InterestFrequency;
-            entHolder.SelectedItem = obj.Holder;
-            entStartDate.Date = obj.StartDate;
-            entMaturityDate.Date = obj.MaturityDate;
-            entAsOfDate.Date = obj.AsOfDate;
-            entRemarks.Text = obj.Remarks;
+            if (obj.AssetId != 0)
+            {
+                entEntityName.Text = obj.InvestmentEntity;
+                entType.SelectedItem = obj.Type;
+                entAmount.Text = Convert.ToString(obj.Amount);
+                entInterestRate.Text = Convert.ToString(obj.InterestRate);
+                entInterestFrequency.SelectedItem = obj.InterestFrequency;
+                entHolder.SelectedItem = obj.Holder;
+                entStartDate.Date = obj.StartDate;
+                entMaturityDate.Date = obj.MaturityDate;
+                entAsOfDate.Date = obj.AsOfDate;
+                entRemarks.Text = obj.Remarks;
 
-            lblAssetId.Text = Convert.ToString(obj.AssetId);
+                lblAssetId.Text = Convert.ToString(obj.AssetId);
 
-            //ScrollView scroll = new ScrollView();
-            await manageAssetsScroll.ScrollToAsync(0, 0, true);
+                //ScrollView scroll = new ScrollView();
+                await manageAssetsScroll.ScrollToAsync(0, 0, true);
+            }
+            else
+            {
+                await DisplayAlert("Message", "Please select an asset", "OK");
+            }
         }
-        else
-        {
-            await DisplayAlert("Message", "Please select an asset", "OK");
-        }
-        //await DisplayAlert("Info", "Item Selected", "OK");
     }
 }

@@ -109,4 +109,9 @@ public partial class SettingsPage : ContentPage
             await DisplayAlert("Error", ex.Message, "OK");
         }
     }
+
+    private async void btnManageOwners_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new ManageUsersPage());
+    }
 }

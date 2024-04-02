@@ -48,7 +48,7 @@ public partial class ManageUsersPage : ContentPage
 
     private async void btnSaveOwner_Clicked(object sender, EventArgs e)
     {
-        entryOwnerName.Text = entryOwnerName.Text.ToUpper();
+        entryOwnerName.Text = entryOwnerName.Text.Trim();
         if (string.IsNullOrEmpty(entryOwnerName.Text))
         {
             await DisplayAlert("Message", "Please input name", "OK");
@@ -60,15 +60,15 @@ public partial class ManageUsersPage : ContentPage
             //check if duplicate names exist
             if (!string.IsNullOrEmpty(entryOwnerName.Text))
             {
-                //string inputtedOwnerName = entryOwnerName.Text.ToLower().Trim();
-                string inputtedOwnerNameFormatted = Regex.Replace(entryOwnerName.Text.ToLower().Trim(), @"\s+", "");
+                string inputtedOwnerNameFormatted = entryOwnerName.Text;
+                //string inputtedOwnerNameFormatted = Regex.Replace(entryOwnerName.Text.ToLower().Trim(), @"\s+", "");
 
                 await SetUpDb();
                 var owners = await _dbConnection.Table<Owners>().ToListAsync();
-                foreach (var owner in owners)
-                {
-                    owner.OwnerName = Regex.Replace(owner.OwnerName.ToLower().Trim(), @"\s+", "");
-                }
+                //foreach (var owner in owners)
+                //{
+                //    owner.OwnerName = Regex.Replace(owner.OwnerName.ToLower().Trim(), @"\s+", "");
+                //}
                 if (owners.Where(o => o.OwnerName == inputtedOwnerNameFormatted).Count() > 0)
                 {
                     await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
@@ -99,15 +99,15 @@ public partial class ManageUsersPage : ContentPage
             //check if duplicate names exist
             if (!string.IsNullOrEmpty(entryOwnerName.Text))
             {
-                //string inputtedOwnerName = entryOwnerName.Text.ToLower().Trim();
-                string inputtedOwnerNameFormatted = Regex.Replace(entryOwnerName.Text.ToLower().Trim(), @"\s+", "");
+                string inputtedOwnerNameFormatted = entryOwnerName.Text.Trim();
+                //string inputtedOwnerNameFormatted = Regex.Replace(entryOwnerName.Text.ToLower().Trim(), @"\s+", "");
 
                 await SetUpDb();
                 var owners = await _dbConnection.Table<Owners>().ToListAsync();
-                foreach (var owner in owners)
-                {
-                    owner.OwnerName = Regex.Replace(owner.OwnerName.ToLower().Trim(), @"\s+", "");
-                }
+                //foreach (var owner in owners)
+                //{
+                //    owner.OwnerName = Regex.Replace(owner.OwnerName.ToLower().Trim(), @"\s+", "");
+                //}
                 if (owners.Where(o => o.OwnerName == inputtedOwnerNameFormatted).Count() > 1)
                 {
                     await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
@@ -177,37 +177,45 @@ public partial class ManageUsersPage : ContentPage
 
     private async void btnDeleteOwner_Clicked(object sender, EventArgs e)
     {
-        if (!string.IsNullOrEmpty(txtOwnerId.Text))
+        try
         {
-            bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
-            if (userResponse)
+            if (!string.IsNullOrEmpty(txtOwnerId.Text))
             {
-                //check if there is any transaction in IncomeExpenseModel and Assets table before deleting the owner
-                var incomeExpenseRecord = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.OwnerName == entryOwnerName.Text.Trim()).ToListAsync();
-                if (incomeExpenseRecord.Count > 0)
+                entryOwnerName.Text = entryOwnerName.Text.Trim();
+                bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
+                if (userResponse)
                 {
-                    await DisplayAlert("Info", "Cannot delete owner since there are records with this owner.", "Ok");
-                }
-                var assetsRecord = await _dbConnection.Table<Assets>().Where(a => a.Holder == entryOwnerName.Text.Trim()).ToListAsync();
-                if (assetsRecord.Count > 0)
-                {
-                    await DisplayAlert("Info", "Cannot delete owner since there are records with this owner.", "Ok");
-                }
-                //check if there is any transaction in IncomeExpenseModel and Assets table before deleting the owner
-                Owners objOwner = new Owners()
-                {
-                    OwnerId = Convert.ToInt32(txtOwnerId.Text)
-                };
+                    //check if there is any transaction in IncomeExpenseModel and Assets table before deleting the owner
+                    var incomeExpenseRecord = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.OwnerName == entryOwnerName.Text).ToListAsync();
+                    if (incomeExpenseRecord.Count > 0)
+                    {
+                        await DisplayAlert("Info", "Cannot delete owner since there are records with this owner.", "Ok");
+                    }
+                    var assetsRecord = await _dbConnection.Table<Assets>().Where(a => a.Holder == entryOwnerName.Text).ToListAsync();
+                    if (assetsRecord.Count > 0)
+                    {
+                        await DisplayAlert("Info", "Cannot delete owner since there are records with this owner.", "Ok");
+                    }
+                    //check if there is any transaction in IncomeExpenseModel and Assets table before deleting the owner
+                    Owners objOwner = new Owners()
+                    {
+                        OwnerId = Convert.ToInt32(txtOwnerId.Text)
+                    };
 
-                await SetUpDb();
-                int rowsAffected = await _dbConnection.DeleteAsync(objOwner);
-                ClearOwnersForm();
-                await LoadOwnersInPage();
+                    await SetUpDb();
+                    int rowsAffected = await _dbConnection.DeleteAsync(objOwner);
+                    ClearOwnersForm();
+                    await LoadOwnersInPage();
+                }
+            }
+            else
+            {
+                await DisplayAlert("Info", "Please select an owner to delete", "Ok");
             }
         }
-        else
+        catch(Exception ex)
         {
-            await DisplayAlert("Info", "Please select an owner to delete", "Ok");
+            await DisplayAlert("Error", "Something went wrong: " + ex.Message.ToString(), "Ok");
         }
     }
 

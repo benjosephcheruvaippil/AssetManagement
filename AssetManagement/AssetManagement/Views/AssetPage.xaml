@@ -294,13 +294,13 @@ VerticalOptions="Center" />
                 <Picker Grid.Row="5" Grid.Column="1" x:Name="entHolder" Title="Select holder">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
-                            <x:String>Ben Joseph</x:String>
+                            <!--<x:String>Ben Joseph</x:String>
                             <x:String>Ann Mary Joseph</x:String>
                             <x:String>Deepa Jossy</x:String>
                             <x:String>Jossy C Peter/Deepa Jossy</x:String>
                             <x:String>Ouseph KK(Pappa)</x:String>
                             <x:String>Ben Joseph/Ann Mary Joseph</x:String>
-                            <x:String>Ben Joseph/Ann Mary Joseph/Deepa Jossy</x:String>
+                            <x:String>Ben Joseph/Ann Mary Joseph/Deepa Jossy</x:String>-->
                             
                             <!--<x:String>Elsaba Jacob</x:String>
                             <x:String>Deepu K Joseph</x:String>-->

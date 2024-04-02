@@ -29,14 +29,14 @@
 
                 <DatePicker x:Name="dpDateIncome"/>
 
-            <Picker x:Name="pickerOwnerName" SelectedIndexChanged="pickerOwnerName_SelectedIndexChanged" Title="Select owner">
+            <Picker x:Name="pickerOwnerName" Title="Select owner">
                 <Picker.ItemsSource>
                     <x:Array Type="{x:Type x:String}">
-                        <x:String>Ben Joseph</x:String>
+                        <!--<x:String>Ben Joseph</x:String>
                         <x:String>Deepa Jossy</x:String>
                         <x:String>Ann Mary Joseph</x:String>
                         <x:String>Jossy C Peter</x:String>
-                        <x:String>Add New Owner</x:String>
+                        <x:String>Add New Owner</x:String>-->
                     </x:Array>
                 </Picker.ItemsSource>
             </Picker>

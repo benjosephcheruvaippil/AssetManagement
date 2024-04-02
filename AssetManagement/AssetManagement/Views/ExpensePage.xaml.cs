@@ -59,6 +59,7 @@ public partial class ExpensePage : ContentPage
                 await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
                 await _dbConnection.CreateTableAsync<DataSyncAudit>();
                 await _dbConnection.CreateTableAsync<AssetAuditLog>();
+                await _dbConnection.CreateTableAsync<Owners>();
             }
         }
         catch(Exception ex)

@@ -4,10 +4,6 @@
              x:Class="AssetManagement.Views.ManageUsersPage"
              Title="Manage Users/Owners">
     <VerticalStackLayout>
-        <Label 
-            Text="Page under development!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
         <Entry x:Name="txtOwnerId"
 IsVisible="false" />
         
