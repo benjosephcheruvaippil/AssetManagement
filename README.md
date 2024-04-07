@@ -15,6 +15,7 @@ AssetPage.xaml - where pick file option is there and here we can see the asset d
 IncomeExpenseReportsPage.xaml - report for income and expense
 AssetReportPage.xaml - report for asset details
 ManageUsersPage.xaml - page to add/update/delete owners
+ManageCategoriesPage.xaml - page to add/update/delete income expense categories
 SettingsPage.xaml - page where backup,restore database options are present
 
 #Popup Page Information

@@ -42,14 +42,13 @@ public partial class ManageCategoriesPage : ContentPage
     }
 
     private async void btnSaveCategory_Clicked(object sender, EventArgs e)
-    {
-        entryCategoryName.Text = entryCategoryName.Text.Trim();
+    {     
         if (string.IsNullOrEmpty(entryCategoryName.Text) || categoryTypePicker.SelectedIndex == -1)
         {
             await DisplayAlert("Message", "Please input category name and select category type", "OK");
             return;
         }
-
+        entryCategoryName.Text = entryCategoryName.Text.Trim();
         if (string.IsNullOrEmpty(txtIncomeExpenseCategoryId.Text))//insert
         {
             //check if duplicate names exist
