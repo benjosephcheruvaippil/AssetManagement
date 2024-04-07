@@ -24,6 +24,7 @@ public partial class IncomePage : ContentPage
         base.OnAppearing();
 
         LoadOwnersInDropdown();
+        LoadIncomeCategoriesInDropdown();
         LoadIncomeInPage("Last5");
         await ShowCurrentMonthIncome();
     }
@@ -59,6 +60,13 @@ public partial class IncomePage : ContentPage
         await SetUpDb();
         var owners = await _dbConnection.Table<Owners>().ToListAsync();
         pickerOwnerName.ItemsSource = owners.Select(s => s.OwnerName).ToList();
+    }
+
+    private async void LoadIncomeCategoriesInDropdown()
+    {
+        await SetUpDb();
+        var incomeCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Income").ToListAsync();
+        pickerIncomeCategory.ItemsSource = incomeCategories.Select(i => i.CategoryName).ToList();
     }
 
     private async void LoadIncomeInPage(string hint)

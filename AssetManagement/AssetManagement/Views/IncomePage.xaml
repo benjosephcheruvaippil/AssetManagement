@@ -20,9 +20,9 @@
             <Picker x:Name="pickerIncomeCategory" Title="Select category">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
-                            <x:String>Salary</x:String>
+                            <!--<x:String>Salary</x:String>
                             <x:String>Passive Income</x:String>
-                            <x:String>Business Income</x:String>
+                            <x:String>Business Income</x:String>-->
                         </x:Array>
                     </Picker.ItemsSource>
             </Picker>
