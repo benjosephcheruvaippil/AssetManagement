@@ -199,7 +199,7 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
              xmlns:dg="clr-namespace:Maui.DataGrid;assembly=Maui.DataGrid"
                  Title="Manage Asset">
 
-        <ScrollView>
+        <ScrollView x:Name="manageAssetsScroll">
             <Grid RowSpacing="4" ColumnSpacing="3">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50" />
@@ -214,7 +214,7 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
+                    <!--<RowDefinition Height="50" />-->
                     <RowDefinition Height="400" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -294,13 +294,13 @@ VerticalOptions="Center" />
                 <Picker Grid.Row="5" Grid.Column="1" x:Name="entHolder" Title="Select holder">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
-                            <x:String>Ben Joseph</x:String>
+                            <!--<x:String>Ben Joseph</x:String>
                             <x:String>Ann Mary Joseph</x:String>
                             <x:String>Deepa Jossy</x:String>
                             <x:String>Jossy C Peter/Deepa Jossy</x:String>
                             <x:String>Ouseph KK(Pappa)</x:String>
                             <x:String>Ben Joseph/Ann Mary Joseph</x:String>
-                            <x:String>Ben Joseph/Ann Mary Joseph/Deepa Jossy</x:String>
+                            <x:String>Ben Joseph/Ann Mary Joseph/Deepa Jossy</x:String>-->
                             
                             <!--<x:String>Elsaba Jacob</x:String>
                             <x:String>Deepu K Joseph</x:String>-->
@@ -343,21 +343,21 @@ VerticalOptions="Center" />
                 <Button Grid.Row="10" Grid.Column="1" x:Name="btnDelete" Clicked="btnDelete_Clicked" Text="Delete"></Button>
                 <!--Update and delete buttons-->
 
-                <BoxView Grid.Row="11"
+                <!--<BoxView Grid.Row="11"
      Grid.ColumnSpan="2"
-     Color="Orange" />
-                <Button x:Name="btnGetDetail" Text="Get Detail" Clicked="btnGetDetail_Clicked" Grid.Row="11" Grid.ColumnSpan="2"></Button>
+     Color="Orange" />-->
+                <!--<Button x:Name="btnGetDetail" IsVisible="false" Text="Get Detail" Clicked="btnGetDetail_Clicked" Grid.Row="11" Grid.ColumnSpan="2"></Button>-->
 
-                <BoxView Grid.Row="12"
+                <BoxView Grid.Row="11"
 Grid.ColumnSpan="2"
 Color="White" />
-                <Entry x:Name="entAssetSearch" TextChanged="entAssetSearch_TextChanged" Grid.Row="12" Grid.ColumnSpan="2" Placeholder="Search by name,amount,holder"/>
+                <Entry x:Name="entAssetSearch" TextChanged="entAssetSearch_TextChanged" Grid.Row="11" Grid.ColumnSpan="2" Placeholder="Search by name,amount,holder"/>
 
-                <BoxView Grid.Row="13"
+                <BoxView Grid.Row="12"
                  Grid.ColumnSpan="2"
                  Color="Red" />
-                <dg:DataGrid Grid.Row="13" Grid.ColumnSpan="2"  ItemsSource="{Binding Assets}" SelectionEnabled="True" SelectedItem="{Binding SelectedAsset}"
-         RowHeight="70" HeaderHeight="50" PullToRefreshCommand="{Binding RefreshCommand}"
+                <dg:DataGrid x:Name="dgAssetsDataTable" ItemSelected="dgAssetsDataTable_ItemSelected" Grid.Row="12" Grid.ColumnSpan="2"  ItemsSource="{Binding Assets}" SelectionEnabled="True" SelectedItem="{Binding SelectedAsset}"
+         RowHeight="58" HeaderHeight="50" PullToRefreshCommand="{Binding RefreshCommand}"
          IsRefreshing="{Binding IsRefreshing}" HeaderBackground="Red" PaginationEnabled="{Binding PaginationEnabled}" PageSize="5">
                     <dg:DataGrid.NoDataView>
                         <Label Text="Nothing to see here 🙈" HorizontalOptions="Center" VerticalOptions="Center" />

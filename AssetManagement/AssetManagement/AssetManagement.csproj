@@ -124,10 +124,13 @@
 	  <MauiXaml Update="Views\AssetsByHolder.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\AssetView\AssetCloudPage.xaml">
+	  <MauiXaml Update="Views\IncomePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\IncomePage.xaml">
+	  <MauiXaml Update="Views\ManageCategoriesPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\ManageUsersPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\MenuPage.xaml">

@@ -22,9 +22,9 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="40" />
                 <Picker x:Name="pickerExpenseCategory" Title="Select category">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
-                            <x:String>Household Items</x:String>
+                            <!--<x:String>Household Items</x:String>
                             <x:String>Automobile</x:String>
-                            <x:String>Leisure</x:String>
+                            <x:String>Leisure</x:String>-->
                             <!--<x:String>Medicine</x:String>
                             <x:String>Dialysis</x:String>
                             <x:String>Grocery</x:String>
@@ -34,8 +34,8 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="40" />
                             <x:String>Mobile/Net</x:String>
                             <x:String>Donations</x:String>
                             <x:String>Fuel</x:String>-->
-                            <x:String>Tax Liability</x:String>
-                            <x:String>Others</x:String>
+                            <!--<x:String>Tax Liability</x:String>
+                            <x:String>Others</x:String>-->
                     </x:Array>
                     </Picker.ItemsSource>
                 </Picker>

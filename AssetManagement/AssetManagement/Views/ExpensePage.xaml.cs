@@ -36,8 +36,9 @@ public partial class ExpensePage : ContentPage
         {
             base.OnAppearing();
 
-            LoadExpensesInPage("Last5");// show expenses in the expense tab
+            LoadExpensesInPage("Last5");// show expenses in the expense tab          
             await ShowCurrentMonthExpenses();
+            LoadExpenseCategoriesInDropdown();
             SetLastUploadedDate();
         }
         catch(Exception)
@@ -57,8 +58,10 @@ public partial class ExpensePage : ContentPage
                 _dbConnection = new SQLiteAsyncConnection(dbPath);
                 await _dbConnection.CreateTableAsync<Assets>();
                 await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
+                await _dbConnection.CreateTableAsync<IncomeExpenseCategories>();
                 await _dbConnection.CreateTableAsync<DataSyncAudit>();
                 await _dbConnection.CreateTableAsync<AssetAuditLog>();
+                await _dbConnection.CreateTableAsync<Owners>();              
             }
         }
         catch(Exception ex)
@@ -89,6 +92,20 @@ public partial class ExpensePage : ContentPage
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Expense" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
         var totalExpense = query.Sum(s => s.Amount);
         lblCurrentMonthExpenses.Text = currentMonth + ": " + string.Format(new CultureInfo("en-IN"), "{0:C0}", totalExpense);
+    }
+
+    private async void LoadExpenseCategoriesInDropdown()
+    {
+        try
+        {
+            await SetUpDb();
+            var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
+            pickerExpenseCategory.ItemsSource = expenseCategories.Select(i => i.CategoryName).ToList();
+        }
+        catch (Exception)
+        {
+            return;
+        }
     }
 
 

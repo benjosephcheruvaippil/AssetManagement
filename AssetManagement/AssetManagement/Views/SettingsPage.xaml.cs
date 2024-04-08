@@ -109,4 +109,14 @@ public partial class SettingsPage : ContentPage
             await DisplayAlert("Error", ex.Message, "OK");
         }
     }
+
+    private async void btnManageOwners_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new ManageUsersPage());
+    }
+
+    private async void btnManageIncomeExpenseCategories_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new ManageCategoriesPage());
+    }
 }

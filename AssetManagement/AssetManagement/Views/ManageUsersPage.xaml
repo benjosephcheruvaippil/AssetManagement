@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AssetManagement.Views.ManageUsersPage"
+             Title="Manage Users/Owners">
+    <VerticalStackLayout>
+        <Entry x:Name="txtOwnerId"
+IsVisible="false" />
+        
+        <Entry x:Name="entryOwnerName"
+Placeholder="Enter owner name" />
+        <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+            <Button
+x:Name="btnSaveOwner"
+Text="Save"
+Margin="0,0,5,0"
+Clicked="btnSaveOwner_Clicked"/>
+
+            <Button
+x:Name="btnDeleteOwner"
+Text="Delete"
+Margin="0,0,5,0"
+Clicked="btnDeleteOwner_Clicked"/>
+            
+        </StackLayout>
+        <TableView x:Name="tblviewOwners" Intent="Menu">
+            <TableRoot>
+                <TableSection x:Name="tblscOwners" Title="Owners List">
+                </TableSection>
+            </TableRoot>
+        </TableView>
+        <BoxView HeightRequest="40" Color="Transparent"/>
+        
+        
+    </VerticalStackLayout>
+</ContentPage>

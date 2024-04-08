@@ -23,6 +23,8 @@ public partial class IncomePage : ContentPage
     {
         base.OnAppearing();
 
+        LoadOwnersInDropdown();
+        LoadIncomeCategoriesInDropdown();
         LoadIncomeInPage("Last5");
         await ShowCurrentMonthIncome();
     }
@@ -51,6 +53,34 @@ public partial class IncomePage : ContentPage
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Income" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
         var totalIncome = query.Sum(s => s.Amount);
         lblCurrentMonthIncome.Text = currentMonth + ": " + string.Format(new CultureInfo("en-IN"), "{0:C0}", totalIncome);
+    }
+
+    private async void LoadOwnersInDropdown()
+    {
+        try
+        {
+            await SetUpDb();
+            var owners = await _dbConnection.Table<Owners>().ToListAsync();
+            pickerOwnerName.ItemsSource = owners.Select(s => s.OwnerName).ToList();
+        }
+        catch (Exception)
+        {
+            return;
+        }
+    }
+
+    private async void LoadIncomeCategoriesInDropdown()
+    {
+        try
+        {
+            await SetUpDb();
+            var incomeCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Income").ToListAsync();
+            pickerIncomeCategory.ItemsSource = incomeCategories.Select(i => i.CategoryName).ToList();
+        }
+        catch(Exception)
+        {
+            return;
+        }
     }
 
     private async void LoadIncomeInPage(string hint)
@@ -234,4 +264,20 @@ public partial class IncomePage : ContentPage
             }
         }
     }
+
+    //private async void pickerOwnerName_SelectedIndexChanged(object sender, EventArgs e)
+    //{
+    //    if(pickerOwnerName.SelectedIndex == -1)
+    //    {
+    //        return;
+    //    }
+
+    //    if(pickerOwnerName.SelectedItem.ToString() == "Add New Owner")
+    //    {
+            
+    //        await Navigation.PushAsync(new ManageUsersPage());
+    //        pickerOwnerName.SelectedIndex = -1;
+    //    }
+    //    return;
+    //}
 }

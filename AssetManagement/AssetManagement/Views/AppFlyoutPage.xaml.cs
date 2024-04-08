@@ -1,6 +1,5 @@
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
-using AssetManagement.Views.AssetView;
 using Mopups.Interfaces;
 using SQLite;
 
@@ -49,12 +48,12 @@ public partial class AppFlyoutPage : FlyoutPage
         Detail = new NavigationPage(new AssetPage(_viewModel, _popupNavigation, _assetService));
     }
 
-    private void OpenAssetCloudPageClicked(object sender, EventArgs e)
-    {
-        if (!((IFlyoutPageController)this).ShouldShowSplitMode)
-            IsPresented = false;
-        Detail = new NavigationPage(new AssetCloudPage(_viewModel, _popupNavigation, _assetService));
-    }
+    //private void OpenAssetCloudPageClicked(object sender, EventArgs e)
+    //{
+    //    if (!((IFlyoutPageController)this).ShouldShowSplitMode)
+    //        IsPresented = false;
+    //    Detail = new NavigationPage(new AssetCloudPage(_viewModel, _popupNavigation, _assetService));
+    //}
 
     private void OpenIncomeExpenseReportPageClicked(object sender, EventArgs e)
     {
