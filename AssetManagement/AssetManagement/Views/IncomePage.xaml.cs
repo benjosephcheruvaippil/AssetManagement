@@ -57,16 +57,30 @@ public partial class IncomePage : ContentPage
 
     private async void LoadOwnersInDropdown()
     {
-        await SetUpDb();
-        var owners = await _dbConnection.Table<Owners>().ToListAsync();
-        pickerOwnerName.ItemsSource = owners.Select(s => s.OwnerName).ToList();
+        try
+        {
+            await SetUpDb();
+            var owners = await _dbConnection.Table<Owners>().ToListAsync();
+            pickerOwnerName.ItemsSource = owners.Select(s => s.OwnerName).ToList();
+        }
+        catch (Exception)
+        {
+            return;
+        }
     }
 
     private async void LoadIncomeCategoriesInDropdown()
     {
-        await SetUpDb();
-        var incomeCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Income").ToListAsync();
-        pickerIncomeCategory.ItemsSource = incomeCategories.Select(i => i.CategoryName).ToList();
+        try
+        {
+            await SetUpDb();
+            var incomeCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Income").ToListAsync();
+            pickerIncomeCategory.ItemsSource = incomeCategories.Select(i => i.CategoryName).ToList();
+        }
+        catch(Exception)
+        {
+            return;
+        }
     }
 
     private async void LoadIncomeInPage(string hint)

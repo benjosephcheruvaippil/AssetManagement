@@ -96,9 +96,16 @@ public partial class ExpensePage : ContentPage
 
     private async void LoadExpenseCategoriesInDropdown()
     {
-        await SetUpDb();
-        var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
-        pickerExpenseCategory.ItemsSource = expenseCategories.Select(i => i.CategoryName).ToList();
+        try
+        {
+            await SetUpDb();
+            var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
+            pickerExpenseCategory.ItemsSource = expenseCategories.Select(i => i.CategoryName).ToList();
+        }
+        catch (Exception)
+        {
+            return;
+        }
     }
 
 
