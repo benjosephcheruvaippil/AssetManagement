@@ -101,6 +101,7 @@ public partial class ExpensePage : ContentPage
             await SetUpDb();
             var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
             pickerExpenseCategory.ItemsSource = expenseCategories.Select(i => i.CategoryName).ToList();
+            pickerExpenseCategory.SelectedIndex = 0;
         }
         catch (Exception)
         {
