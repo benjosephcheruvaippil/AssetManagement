@@ -101,6 +101,7 @@ public partial class ExpensePage : ContentPage
             await SetUpDb();
             var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
             pickerExpenseCategory.ItemsSource = expenseCategories.Select(i => i.CategoryName).ToList();
+            pickerExpenseCategory.SelectedIndex = 0;
         }
         catch (Exception)
         {
@@ -472,7 +473,7 @@ public partial class ExpensePage : ContentPage
             List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' and Mode='file_upload' order by Date desc Limit 1");
             if (expenses.Count > 0)
             {
-                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n- au: Automobile,hs: Household Items,le: Leisure,ex: Others.\n- Upload only excel file with only a single sheet.\n- First column is date.\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
+                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n- au: Automobile,hs: Household Items,le: Leisure,ex: Others.\n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
                 if (!userResponse)
                 {
                     return;
@@ -506,7 +507,7 @@ public partial class ExpensePage : ContentPage
                 {
                     string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]).Trim();
                     //string transactionDateString = (dtStudentRecords.Rows[i][0]).ToString("MM/dd/yyyy");
-                    string[] dateArr = transactionDateString.Split(" ")[0].Split("/");
+                    string[] dateArr = transactionDateString.Split("-");
                     if(dateArr.Count() == 3)
                     //if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
                     {
@@ -527,7 +528,7 @@ public partial class ExpensePage : ContentPage
                 for (int i = 1; i < dtStudentRecords.Rows.Count; i++)
                 {
                     string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]).Trim();
-                    string[] dateArr = transactionDateString.Split(" ")[0].Split("/");
+                    string[] dateArr = transactionDateString.Split("-");
 
                     //if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
                     if (dateArr.Count() == 3)

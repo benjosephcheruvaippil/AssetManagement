@@ -48,19 +48,19 @@
                     <Button
                 x:Name="btnSaveIncome"
                 Text="Save Income"
-                Margin="0,0,5,0"
+                Margin="0,0,0,0"
                 Clicked="btnSaveIncome_Clicked"/>
 
                     <Button
                 x:Name="btnDeleteIncome"
                 Text="Delete Income"
-                Margin="0,0,5,0"
+                Margin="7,0,0,0"
                 Clicked="btnDeleteIncome_Clicked"/>
 
                     <Button
                 x:Name="btnClearIncome"
                 Text="Clear"
-                Margin="5,0,0,0"
+                Margin="7,0,0,0"
                 Clicked="btnClearIncome_Clicked"/>
                 </StackLayout>
                 <TableView x:Name="tblviewIncome" Intent="Menu">
