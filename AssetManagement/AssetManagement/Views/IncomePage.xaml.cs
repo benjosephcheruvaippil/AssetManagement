@@ -7,6 +7,7 @@ namespace AssetManagement.Views;
 public partial class IncomePage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
+    AppTheme currentTheme = Application.Current.RequestedTheme;
     public IncomePage()
     {
         InitializeComponent();
@@ -118,6 +119,13 @@ public partial class IncomePage : ContentPage
             else
             {
                 objCell.Detail = Convert.ToString(item.Amount);
+            }
+
+            if (currentTheme == AppTheme.Dark)
+            {
+                //set to white color
+                tblscIncome.TextColor = Color.FromArgb("#FFFFFF");
+                objCell.TextColor = Color.FromArgb("#FFFFFF");
             }
 
             tblscIncome.Add(objCell);

@@ -16,6 +16,7 @@ public partial class ExpensePage : ContentPage
 {
     //private AssetListPageViewModel _viewModel;
     private SQLiteAsyncConnection _dbConnection;
+    AppTheme currentTheme = Application.Current.RequestedTheme;
     //private IPopupNavigation _popupNavigation;
     ///private readonly IAssetService _assetService;
     public ExpensePage()
@@ -238,6 +239,13 @@ public partial class ExpensePage : ContentPage
             else
             {
                 objCell.Detail = Convert.ToString(item.Amount);
+            }
+
+            if (currentTheme == AppTheme.Dark)
+            {
+                //set to white color
+                tblscExpenses.TextColor= Color.FromArgb("#FFFFFF");
+                objCell.TextColor = Color.FromArgb("#FFFFFF");
             }
 
             tblscExpenses.Add(objCell);
