@@ -4,6 +4,7 @@ using Microsoft.Maui.Controls.Shapes;
 using SQLite;
 using System.Drawing;
 using System.Globalization;
+using Color = Microsoft.Maui.Graphics.Color;
 
 namespace AssetManagement.Views;
 
@@ -11,6 +12,7 @@ public partial class AssetsByCategoryPage
 {
     private SQLiteAsyncConnection _dbConnection;
     private readonly IAssetService _assetService;
+    AppTheme currentTheme = Application.Current.RequestedTheme;
     private string _from;
     public AssetsByCategoryPage(string from, IAssetService assetService)
 	{
@@ -68,6 +70,11 @@ public partial class AssetsByCategoryPage
             name.Text = item.InvestmentEntity + " = " + item.TotalAmount;
             name.FontSize = 18;
             name.FontAttributes = FontAttributes.Bold;
+            if (currentTheme == AppTheme.Dark)
+            {
+                //set to black color
+                name.TextColor = Color.FromArgb("#000000");
+            }
             Line objLine = new Line
             {
                 X1 = 1,

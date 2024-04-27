@@ -10,6 +10,7 @@ public partial class AssetsByHolder
 {
     private string _holderName;
     private SQLiteAsyncConnection _dbConnection;
+    AppTheme currentTheme = Application.Current.RequestedTheme;
     public AssetsByHolder(string holderName)
 	{
 		InitializeComponent();
@@ -43,6 +44,11 @@ public partial class AssetsByHolder
             name.Text = item.InvestmentEntity + " = " + string.Format(new CultureInfo("en-IN"), "{0:C0}", item.Amount);
             name.FontSize = 18;
             name.FontAttributes = FontAttributes.Bold;
+            if (currentTheme == AppTheme.Dark)
+            {
+                //set to black color
+                name.TextColor = Color.FromArgb("#000000");
+            }
             Line objLine = new Line
             {
                 X1 = 1,
