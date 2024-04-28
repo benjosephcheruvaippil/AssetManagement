@@ -172,11 +172,32 @@ public partial class IncomePage : ContentPage
 
     private async void btnSaveIncome_Clicked(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(entryIncomeAmount.Text))
+        if (pickerIncomeCategory.Items.Count == 0)
+        {
+            await DisplayAlert("Message", "Please create income categories under Settings -> Manage Categories before adding expenses", "OK");
+            return;
+        }
+        else if (string.IsNullOrEmpty(entryIncomeAmount.Text))
         {
             await DisplayAlert("Message", "Please input required values", "OK");
             return;
         }
+        else if (pickerIncomeCategory.SelectedIndex == -1)
+        {
+            await DisplayAlert("Message", "Please select a category", "OK");
+            return;
+        }
+        else if (pickerOwnerName.Items.Count == 0)
+        {
+            await DisplayAlert("Message", "Please create owner/users under Settings -> Manage Owners/Users before adding income", "OK");
+            return;
+        }
+        else if (pickerOwnerName.SelectedIndex == -1)
+        {
+            await DisplayAlert("Message", "Please select an owner", "OK");
+            return;
+        }
+
         if (string.IsNullOrEmpty(txtIncomeTransactionId.Text))//insert
         {
             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
