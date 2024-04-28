@@ -7,6 +7,7 @@ namespace AssetManagement.Views;
 public partial class ManageUsersPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
+    AppTheme currentTheme = Application.Current.RequestedTheme;
     public string OldOwnerName = "";
     public ManageUsersPage()
 	{
@@ -151,6 +152,11 @@ public partial class ManageUsersPage : ContentPage
             {
                 TextCell objCell = new TextCell();
                 objCell.Text = item.OwnerName + " | " + item.OwnerId;
+                if (currentTheme == AppTheme.Dark)
+                {
+                    //set to white color
+                    objCell.TextColor = Color.FromArgb("#FFFFFF");
+                }
 
                 tblscOwners.Add(objCell);
 

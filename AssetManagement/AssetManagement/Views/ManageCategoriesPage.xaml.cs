@@ -6,6 +6,7 @@ namespace AssetManagement.Views;
 public partial class ManageCategoriesPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
+    AppTheme currentTheme = Application.Current.RequestedTheme;
     public string OldCategoryName = "";
     public ManageCategoriesPage()
 	{
@@ -137,6 +138,11 @@ public partial class ManageCategoriesPage : ContentPage
             {
                 TextCell objCell = new TextCell();
                 objCell.Text = item.CategoryName + " | " + item.IncomeExpenseCategoryId;
+                if (currentTheme == AppTheme.Dark)
+                {
+                    //set to white color
+                    objCell.TextColor = Color.FromArgb("#FFFFFF");
+                }
                 objCell.Detail = item.CategoryType;
 
                 tblscCategories.Add(objCell);

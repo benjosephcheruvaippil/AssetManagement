@@ -32,7 +32,7 @@ Clicked="btnDeleteCategory_Clicked"/>
         </StackLayout>
         <TableView x:Name="tblviewCategories" Intent="Menu">
             <TableRoot>
-                <TableSection x:Name="tblscCategories" Title="Category List">
+                <TableSection x:Name="tblscCategories" Title="Category List" TextColor="Red">
                 </TableSection>
             </TableRoot>
         </TableView>
