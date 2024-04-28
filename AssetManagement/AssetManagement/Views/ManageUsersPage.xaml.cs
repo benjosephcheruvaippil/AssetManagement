@@ -190,11 +190,13 @@ public partial class ManageUsersPage : ContentPage
                     if (incomeExpenseRecord.Count > 0)
                     {
                         await DisplayAlert("Info", "Cannot delete owner since there are records with this owner.", "Ok");
+                        return;
                     }
                     var assetsRecord = await _dbConnection.Table<Assets>().Where(a => a.Holder == entryOwnerName.Text).ToListAsync();
                     if (assetsRecord.Count > 0)
                     {
                         await DisplayAlert("Info", "Cannot delete owner since there are records with this owner.", "Ok");
+                        return;
                     }
                     //check if there is any transaction in IncomeExpenseModel and Assets table before deleting the owner
                     Owners objOwner = new Owners()

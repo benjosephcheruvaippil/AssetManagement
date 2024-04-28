@@ -177,6 +177,7 @@ public partial class ManageCategoriesPage : ContentPage
                     if (incomeExpenseRecord.Count > 0)
                     {
                         await DisplayAlert("Info", "Cannot delete category since there are records with this category.", "Ok");
+                        return;
                     }
                     //check if there is any transaction in IncomeExpenseModel and Assets table before deleting the owner
                     IncomeExpenseCategories objIncomeExpenseCat = new IncomeExpenseCategories()
