@@ -16,8 +16,9 @@ public partial class ExpensePage : ContentPage
 {
     //private AssetListPageViewModel _viewModel;
     private SQLiteAsyncConnection _dbConnection;
+    AppTheme currentTheme = Application.Current.RequestedTheme;
     //private IPopupNavigation _popupNavigation;
-    //private readonly IAssetService _assetService;
+    ///private readonly IAssetService _assetService;
     public ExpensePage()
     {
         InitializeComponent();
@@ -36,13 +37,15 @@ public partial class ExpensePage : ContentPage
         {
             base.OnAppearing();
 
-            LoadExpensesInPage("Last5");// show expenses in the expense tab
+            LoadExpensesInPage("Last5");// show expenses in the expense tab          
             await ShowCurrentMonthExpenses();
+            LoadExpenseCategoriesInDropdown();
             SetLastUploadedDate();
         }
-        catch(Exception ex)
+        catch(Exception)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            //await DisplayAlert("Error", ex.Message, "OK");
+            return;
         }
     }
 
@@ -56,7 +59,10 @@ public partial class ExpensePage : ContentPage
                 _dbConnection = new SQLiteAsyncConnection(dbPath);
                 await _dbConnection.CreateTableAsync<Assets>();
                 await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
+                await _dbConnection.CreateTableAsync<IncomeExpenseCategories>();
                 await _dbConnection.CreateTableAsync<DataSyncAudit>();
+                await _dbConnection.CreateTableAsync<AssetAuditLog>();
+                await _dbConnection.CreateTableAsync<Owners>();              
             }
         }
         catch(Exception ex)
@@ -89,14 +95,40 @@ public partial class ExpensePage : ContentPage
         lblCurrentMonthExpenses.Text = currentMonth + ": " + string.Format(new CultureInfo("en-IN"), "{0:C0}", totalExpense);
     }
 
+    private async void LoadExpenseCategoriesInDropdown()
+    {
+        try
+        {
+            await SetUpDb();
+            var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
+            pickerExpenseCategory.ItemsSource = expenseCategories.Select(i => i.CategoryName).ToList();
+            pickerExpenseCategory.SelectedIndex = 0;
+        }
+        catch (Exception)
+        {
+            return;
+        }
+    }
+
 
     private async void btnSaveExpense_Clicked(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(entryExpenseAmount.Text))
+        if (pickerExpenseCategory.Items.Count == 0)
+        {
+            await DisplayAlert("Message", "Please create categories under Settings -> Manage Categories before adding expenses", "OK");
+            return;
+        }
+        else if (string.IsNullOrEmpty(entryExpenseAmount.Text))
         {
             await DisplayAlert("Message", "Please input required values", "OK");
             return;
         }
+        else if (pickerExpenseCategory.SelectedIndex == -1)
+        {
+            await DisplayAlert("Message", "Please select a category", "OK");
+            return;
+        }       
+
         if (string.IsNullOrEmpty(txtTransactionId.Text))//insert
         {
 
@@ -218,6 +250,13 @@ public partial class ExpensePage : ContentPage
             else
             {
                 objCell.Detail = Convert.ToString(item.Amount);
+            }
+
+            if (currentTheme == AppTheme.Dark)
+            {
+                //set to white color
+                tblscExpenses.TextColor= Color.FromArgb("#FFFFFF");
+                objCell.TextColor = Color.FromArgb("#FFFFFF");
             }
 
             tblscExpenses.Add(objCell);
@@ -453,7 +492,7 @@ public partial class ExpensePage : ContentPage
             List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' and Mode='file_upload' order by Date desc Limit 1");
             if (expenses.Count > 0)
             {
-                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n- au: Automobile,hs: Household Items,le: Leisure,ex: Others.\n- Upload only excel file with only a single sheet.\n- First column is date.\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
+                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n- au: Automobile,hs: Household Items,le: Leisure,ex: Others.\n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
                 if (!userResponse)
                 {
                     return;
@@ -487,7 +526,7 @@ public partial class ExpensePage : ContentPage
                 {
                     string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]).Trim();
                     //string transactionDateString = (dtStudentRecords.Rows[i][0]).ToString("MM/dd/yyyy");
-                    string[] dateArr = transactionDateString.Split(" ")[0].Split("/");
+                    string[] dateArr = transactionDateString.Split("-");
                     if(dateArr.Count() == 3)
                     //if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
                     {
@@ -508,7 +547,7 @@ public partial class ExpensePage : ContentPage
                 for (int i = 1; i < dtStudentRecords.Rows.Count; i++)
                 {
                     string transactionDateString = Convert.ToString(dtStudentRecords.Rows[i][0]).Trim();
-                    string[] dateArr = transactionDateString.Split(" ")[0].Split("/");
+                    string[] dateArr = transactionDateString.Split("-");
 
                     //if (DateTime.TryParse(transactionDateString, out DateTime transactionDate))
                     if (dateArr.Count() == 3)

@@ -3,6 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AssetManagement.Views.MenuPage"
              Title="MenuPage">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Button" x:Key="buttonStyle">
+                <Setter Property="TextColor" Value="{AppThemeBinding Light=Black,Dark=White}"/>
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=White,Dark=Black}"/>
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <ScrollView>
         <VerticalStackLayout VerticalOptions="Start"
                          HorizontalOptions="Center">
@@ -13,11 +21,10 @@
                 x:Name="btnExpensePage"
                 x:FieldModifier="public"
                 Text="Expense"
-                BackgroundColor="White"
-                TextColor="Black"
                 FontAttributes="Bold"
                 VerticalOptions="Start" 
-                HorizontalOptions="Center"/>
+                HorizontalOptions="Center"
+                Style="{StaticResource buttonStyle}"/>
             </FlexLayout>
 
             <BoxView HeightRequest="20" Color="Transparent"></BoxView>
@@ -27,11 +34,10 @@
                 x:Name="btnIncomePage"
                 x:FieldModifier="public"
                 Text="Income"
-                BackgroundColor="White"
-                TextColor="Black"
                 FontAttributes="Bold"
                 VerticalOptions="Start" 
-                HorizontalOptions="Center"/>
+                HorizontalOptions="Center"
+                Style="{StaticResource buttonStyle}"/>
             </FlexLayout>
             
             <BoxView HeightRequest="20" Color="Transparent"></BoxView>
@@ -40,12 +46,11 @@
                 <Button 
                 x:Name="btnAssetPage"
                 x:FieldModifier="public"
-                Text="Asset Details"
-                BackgroundColor="White"
-                TextColor="Black"
+                Text="Assets"
                 FontAttributes="Bold"
                 VerticalOptions="Start" 
-                HorizontalOptions="Center"/>
+                HorizontalOptions="Center"
+                Style="{StaticResource buttonStyle}"/>
             </FlexLayout>
 
             <!--<BoxView HeightRequest="20" Color="Transparent"></BoxView>
@@ -69,11 +74,10 @@
                 x:Name="btnIncomeExpenseReport"
                 x:FieldModifier="public"
                 Text="Income Expense Report"
-                BackgroundColor="White"
-                TextColor="Black"
                 FontAttributes="Bold"
                 VerticalOptions="Start" 
-                HorizontalOptions="Center"/>
+                HorizontalOptions="Center"
+                Style="{StaticResource buttonStyle}"/>
             </FlexLayout>
            
             <BoxView HeightRequest="20" Color="Transparent"></BoxView>
@@ -83,11 +87,10 @@
                 x:Name="btnAssetReport"
                 x:FieldModifier="public"
                 Text="Asset Report"
-                BackgroundColor="White"
-                TextColor="Black"
                 FontAttributes="Bold"
                 VerticalOptions="Start" 
-                HorizontalOptions="Center"/>
+                HorizontalOptions="Center"
+                Style="{StaticResource buttonStyle}"/>
             </FlexLayout>
 
             <BoxView HeightRequest="20" Color="Transparent"></BoxView>
@@ -97,11 +100,10 @@
                 x:Name="btnSettings"
                 x:FieldModifier="public"
                 Text="Settings"
-                BackgroundColor="White"
-                TextColor="Black"
                 FontAttributes="Bold"
                 VerticalOptions="Start" 
-                HorizontalOptions="Center"/>
+                HorizontalOptions="Center"
+                Style="{StaticResource buttonStyle}"/>
             </FlexLayout>
 
         </VerticalStackLayout>

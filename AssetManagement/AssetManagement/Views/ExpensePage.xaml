@@ -7,11 +7,11 @@
             <VerticalStackLayout>
             <Button
 x:Name="pickexpensefile"
-Text="Pick File"
+Text="Upload Expenses"
 Clicked="pickexpensefile_Clicked"
-        FontSize="8"
+        FontSize="10"
         Margin="2"
-HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
+HorizontalOptions="Center" WidthRequest="120" HeightRequest="40" />
             <Entry x:Name="txtTransactionId"
            IsVisible="false" />
 
@@ -22,9 +22,9 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
                 <Picker x:Name="pickerExpenseCategory" Title="Select category">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
-                            <x:String>Household Items</x:String>
+                            <!--<x:String>Household Items</x:String>
                             <x:String>Automobile</x:String>
-                            <x:String>Leisure</x:String>
+                            <x:String>Leisure</x:String>-->
                             <!--<x:String>Medicine</x:String>
                             <x:String>Dialysis</x:String>
                             <x:String>Grocery</x:String>
@@ -34,7 +34,8 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
                             <x:String>Mobile/Net</x:String>
                             <x:String>Donations</x:String>
                             <x:String>Fuel</x:String>-->
-                            <x:String>Others</x:String>
+                            <!--<x:String>Tax Liability</x:String>
+                            <x:String>Others</x:String>-->
                     </x:Array>
                     </Picker.ItemsSource>
                 </Picker>
@@ -48,19 +49,19 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
                     <Button
                 x:Name="btnSaveExpense"
                 Text="Save Expense"
-                Margin="0,0,5,0"
+                Margin="0,0,0,0"
                 Clicked="btnSaveExpense_Clicked"/>
 
                     <Button
                 x:Name="btnDeleteExpense"
                 Text="Delete Expense"
-                Margin="0,0,5,0"
+                Margin="7,0,0,0"
                 Clicked="btnDeleteExpense_Clicked"/>
 
                     <Button
                 x:Name="btnClearExpense"
                 Text="Clear"
-                Margin="5,0,0,0"
+                Margin="7,0,0,0"
                 Clicked="btnClearExpense_Clicked"/>
                 </StackLayout>
                 <TableView x:Name="tblviewExpenses" Intent="Menu">
@@ -73,16 +74,18 @@ HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
                 <BoxView HeightRequest="50" Color="Transparent"/>
                 <Label x:Name="lblCurrentMonthExpenses" FontSize="Large" Text="" HorizontalOptions="CenterAndExpand"></Label>
                 <ActivityIndicator x:Name="activityIndicator" IsRunning="False" Color="Blue"/>
-                <Label x:Name="lblLastUploaded" Text="" HorizontalOptions="CenterAndExpand"></Label>
+                <Label x:Name="lblLastUploaded" IsVisible="false" Text="" HorizontalOptions="CenterAndExpand"></Label>
                 <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="End">
                     <Button
                 x:Name="btnUploadData"
+                        IsVisible="false"
                 Text="Upload"
                 Margin="0,0,5,0"
                 Clicked="btnUploadData_Clicked"/>
 
                     <Button
                 x:Name="btnDownloadData"
+                        IsVisible="false"
                 Text="Download"
                 Margin="5,0,0,0"
                 Clicked="btnDownloadData_Clicked"/>

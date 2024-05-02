@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AssetManagement.Views.ManageCategoriesPage"
+             Title="Manage Income Expense Categories">
+    <VerticalStackLayout>
+        <Entry x:Name="txtIncomeExpenseCategoryId"
+IsVisible="false" />
+        <Entry x:Name="entryCategoryName"
+Placeholder="Enter category name" />
+        <Picker x:Name="categoryTypePicker" Title="Select income or expense">
+            <Picker.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>Income</x:String>
+                    <x:String>Expense</x:String>
+                </x:Array>
+            </Picker.ItemsSource>
+        </Picker>
+        <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+            <Button
+x:Name="btnSaveCategory"
+Text="Save"
+Margin="0,0,5,0"
+Clicked="btnSaveCategory_Clicked"/>
+
+            <Button
+x:Name="btnDeleteCategory"
+Text="Delete"
+Margin="0,0,5,0"
+Clicked="btnDeleteCategory_Clicked"/>
+
+        </StackLayout>
+        <TableView x:Name="tblviewCategories" Intent="Menu">
+            <TableRoot>
+                <TableSection x:Name="tblscCategories" Title="Category List" TextColor="Red">
+                </TableSection>
+            </TableRoot>
+        </TableView>
+        <BoxView HeightRequest="40" Color="Transparent"/>
+    </VerticalStackLayout>
+</ContentPage>

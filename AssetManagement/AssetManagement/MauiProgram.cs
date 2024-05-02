@@ -3,6 +3,7 @@ using AssetManagement.ViewModels;
 using AssetManagement.Views;
 using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Storage;
+using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
 using Mopups.Hosting;
 using Mopups.Interfaces;
@@ -19,6 +20,7 @@ public static class MauiProgram
 			.UseMauiApp<App>()
 			.UseMauiCommunityToolkit()
 			.ConfigureMopups()
+			.UseMicrocharts()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

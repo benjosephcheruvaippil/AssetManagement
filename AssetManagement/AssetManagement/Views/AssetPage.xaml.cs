@@ -26,9 +26,7 @@ public partial class AssetPage : TabbedPage
     private SQLiteAsyncConnection _dbConnection;
     private IPopupNavigation _popupNavigation;
     private readonly IAssetService _assetService;
-
     private readonly HttpClient httpClient = new();
-
     public bool IsRefreshing { get; set; }
     public ObservableCollection<Assets> Assets { get; set; } = new();
     public Command RefreshCommand { get; set; }
@@ -97,6 +95,13 @@ public partial class AssetPage : TabbedPage
             _popupNavigation.PushAsync(new AssetsByCategoryPage("Others", _assetService));
         };
         lblOthers.GestureRecognizers.Add(labelOthers);
+
+        var labelTaxEfficient = new TapGestureRecognizer();
+        labelTaxEfficient.Tapped += (s, e) =>
+        {
+            _popupNavigation.PushAsync(new AssetsByCategoryPage("EPF,PPF,NPS", _assetService));
+        };
+        lblTaxEfficient.GestureRecognizers.Add(labelTaxEfficient);
     }
 
     protected async override void OnNavigatedTo(NavigatedToEventArgs args)
@@ -150,6 +155,7 @@ public partial class AssetPage : TabbedPage
     {
         base.OnAppearing();
 
+        LoadOwnersInDropdown();
         lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", await _viewModel.GetAssetsList());
         await ShowPrimaryAssetDetails();
     }
@@ -164,6 +170,13 @@ public partial class AssetPage : TabbedPage
             await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
             await _dbConnection.CreateTableAsync<DataSyncAudit>();
         }
+    }
+
+    private async void LoadOwnersInDropdown()
+    {
+        await SetUpDb();
+        var owners = await _dbConnection.Table<Owners>().ToListAsync();
+        entHolder.ItemsSource = owners.Select(s => s.OwnerName).ToList();
     }
 
     private async void PickFileClicked(object sender, EventArgs e)
@@ -272,11 +285,12 @@ public partial class AssetPage : TabbedPage
 
         decimal Insurance_MF = records.Where(b => b.Type == "Insurance_MF").Sum(s => s.Amount);
         decimal Gold = records.Where(b => b.Type == "Gold" || b.Type=="SGB").Sum(s => s.Amount);
-        decimal PPF = records.Where(b => b.Type == "PPF").Sum(s => s.Amount);
-        decimal EPF = records.Where(b => b.Type == "EPF").Sum(s => s.Amount);
+        //decimal PPF = records.Where(b => b.Type == "PPF").Sum(s => s.Amount);
+        //decimal EPF = records.Where(b => b.Type == "EPF").Sum(s => s.Amount);
         decimal MutualFunds = records.Where(b => b.Type == "MF").Sum(s => s.Amount);
         decimal Stocks = records.Where(b => b.Type == "Stocks").Sum(s => s.Amount);
         decimal Others = records.Where(b => b.Type == "Others").Sum(s => s.Amount);
+        decimal TaxEfficient = records.Where(b => b.Type == "PPF" || b.Type == "EPF" || b.Type == "NPS").Sum(s => s.Amount);
 
         lblBank.Text = "Bank Assets Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", BankAssets);
         lblNCD.Text = "Non Convertible Debentures: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", NCDAssets);
@@ -285,8 +299,9 @@ public partial class AssetPage : TabbedPage
         lblInsuranceMF.Text = "Insurance/MF: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Insurance_MF);
         lblGold.Text = "Gold: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Gold);
         lblOthers.Text = "Others: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Others);
-        lblPPF.Text = "Public Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", PPF);
-        lblEPF.Text = "Employee Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", EPF);
+        //lblPPF.Text = "Public Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", PPF);
+        //lblEPF.Text = "Employee Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", EPF);
+        lblTaxEfficient.Text = "Tax Efficient Investments: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", TaxEfficient);
         lblMF.Text = "Mutual Funds: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", MutualFunds);
         lblStocks.Text = "Stocks: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Stocks);     
 
@@ -343,7 +358,7 @@ public partial class AssetPage : TabbedPage
             Remarks = entRemarks.Text
         };
 
-        if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "MF" || objAsset.Type == "Stocks" || objAsset.Type == "Others")
+        if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "MF" || objAsset.Type == "Stocks" || objAsset.Type == "NPS" || objAsset.Type == "Others")
         {
             objAsset.AsOfDate = entAsOfDate.Date;
             objAsset.StartDate= Convert.ToDateTime("01-01-0001");
@@ -374,6 +389,17 @@ public partial class AssetPage : TabbedPage
 
         if (rowsAffected > 0)
         {
+            //add asset audit log
+            double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>("select SUM(Amount) from Assets");
+
+            AssetAuditLog objAssetAuditLog = new AssetAuditLog
+            {
+                LiquidAssetValue = netAssetValue,
+                NetAssetValue = netAssetValue,
+                CreatedDate = DateTime.Now
+            };
+            await _dbConnection.InsertAsync(objAssetAuditLog);
+            //add asset audit log
             await DisplayAlert("Message", "Asset Saved", "OK");
             await LoadAssets();
         }
@@ -410,7 +436,7 @@ public partial class AssetPage : TabbedPage
     {
         string type = entType.SelectedItem.ToString();
 
-        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "MF" || type == "Stocks" || type == "Others")
+        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "MF" || type == "Stocks" || type == "NPS" || type == "Others")
         {
             entStartDate.Date = Convert.ToDateTime("01-01-0001");
             entMaturityDate.Date = Convert.ToDateTime("01-01-0001");
@@ -755,6 +781,37 @@ public partial class AssetPage : TabbedPage
         {
             await DisplayAlert("Error", ex.Message, "Ok");
             await DisplayAlert("Error", ex.InnerException.ToString(), "Ok");
+        }
+    }
+
+    private async void dgAssetsDataTable_ItemSelected(object sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.Count > 0)
+        {
+            Assets obj = _viewModel.GetSelectedRecordDetail();
+
+            if (obj.AssetId != 0)
+            {
+                entEntityName.Text = obj.InvestmentEntity;
+                entType.SelectedItem = obj.Type;
+                entAmount.Text = Convert.ToString(obj.Amount);
+                entInterestRate.Text = Convert.ToString(obj.InterestRate);
+                entInterestFrequency.SelectedItem = obj.InterestFrequency;
+                entHolder.SelectedItem = obj.Holder;
+                entStartDate.Date = obj.StartDate;
+                entMaturityDate.Date = obj.MaturityDate;
+                entAsOfDate.Date = obj.AsOfDate;
+                entRemarks.Text = obj.Remarks;
+
+                lblAssetId.Text = Convert.ToString(obj.AssetId);
+
+                //ScrollView scroll = new ScrollView();
+                await manageAssetsScroll.ScrollToAsync(0, 0, true);
+            }
+            else
+            {
+                await DisplayAlert("Message", "Please select an asset", "OK");
+            }
         }
     }
 }

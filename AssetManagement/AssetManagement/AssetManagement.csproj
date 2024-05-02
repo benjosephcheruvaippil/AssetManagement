@@ -12,15 +12,15 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 
 		<!-- Display name -->
-		<ApplicationTitle>Asset Management</ApplicationTitle>
+		<ApplicationTitle>Portfolio Pulse</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.assetmanagement</ApplicationId>
 		<ApplicationIdGuid>e44d9f3a-6397-4876-bf13-6606255cdef8</ApplicationIdGuid>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.5</ApplicationDisplayVersion>
-		<ApplicationVersion>4</ApplicationVersion>
+		<ApplicationDisplayVersion>1.9</ApplicationDisplayVersion>
+		<ApplicationVersion>5</ApplicationVersion>
 		<!--<PublishTrimmed>true</PublishTrimmed>-->
 		<AndroidLinkResources>false</AndroidLinkResources>
 
@@ -36,10 +36,10 @@
 	<ItemGroup>
 		<!-- App Icon -->
 		<!-- ForegroundFile="Resources\AppIcon\appiconfg.svg" -->
-		<MauiIcon Include="Resources\AppIcon\financialservicesicon.svg" Color="#ADD8E6" BaseSize="40,40" />
+		<MauiIcon Include="Resources\AppIcon\asseticon.svg" Color="#66ffff" ForegroundScale="0.55" />
 
 		<!-- Splash Screen -->
-		<!--<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />-->
+		<MauiSplashScreen Include="Resources\Splash\splashimage.svg" Color="#512BD4" BaseSize="128,128" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
@@ -79,6 +79,7 @@
 		<PackageReference Include="EPPlus" Version="6.2.9" />
 		<PackageReference Include="ExcelDataReader.DataSet" Version="3.6.0" />
 		<PackageReference Include="Google.Cloud.Firestore" Version="3.3.0" />
+		<PackageReference Include="Microcharts.Maui" Version="1.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
 		<PackageReference Include="Mopups" Version="1.1.1" />
 		<PackageReference Include="SQLite" Version="3.13.0" />
@@ -123,10 +124,13 @@
 	  <MauiXaml Update="Views\AssetsByHolder.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\AssetView\AssetCloudPage.xaml">
+	  <MauiXaml Update="Views\IncomePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\IncomePage.xaml">
+	  <MauiXaml Update="Views\ManageCategoriesPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\ManageUsersPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\MenuPage.xaml">
@@ -146,5 +150,13 @@
 	<ItemGroup>
 	  <Folder Include="Models\Api\Request\" />
 	</ItemGroup>
+	
+	<PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Release'">
+		<AndroidKeyStore>True</AndroidKeyStore>
+		<AndroidSigningKeyStore>..\key.keystore</AndroidSigningKeyStore>
+		<AndroidSigningStorePass>benjoseph</AndroidSigningStorePass>
+		<AndroidSigningKeyAlias>MauiAlias</AndroidSigningKeyAlias>
+		<AndroidSigningKeyPass>benjoseph</AndroidSigningKeyPass>
+	</PropertyGroup>
 
 </Project>

@@ -7,6 +7,7 @@ namespace AssetManagement.Views;
 public partial class IncomePage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
+    AppTheme currentTheme = Application.Current.RequestedTheme;
     public IncomePage()
     {
         InitializeComponent();
@@ -23,6 +24,8 @@ public partial class IncomePage : ContentPage
     {
         base.OnAppearing();
 
+        LoadOwnersInDropdown();
+        LoadIncomeCategoriesInDropdown();
         LoadIncomeInPage("Last5");
         await ShowCurrentMonthIncome();
     }
@@ -51,6 +54,34 @@ public partial class IncomePage : ContentPage
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Income" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
         var totalIncome = query.Sum(s => s.Amount);
         lblCurrentMonthIncome.Text = currentMonth + ": " + string.Format(new CultureInfo("en-IN"), "{0:C0}", totalIncome);
+    }
+
+    private async void LoadOwnersInDropdown()
+    {
+        try
+        {
+            await SetUpDb();
+            var owners = await _dbConnection.Table<Owners>().ToListAsync();
+            pickerOwnerName.ItemsSource = owners.Select(s => s.OwnerName).ToList();
+        }
+        catch (Exception)
+        {
+            return;
+        }
+    }
+
+    private async void LoadIncomeCategoriesInDropdown()
+    {
+        try
+        {
+            await SetUpDb();
+            var incomeCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Income").ToListAsync();
+            pickerIncomeCategory.ItemsSource = incomeCategories.Select(i => i.CategoryName).ToList();
+        }
+        catch(Exception)
+        {
+            return;
+        }
     }
 
     private async void LoadIncomeInPage(string hint)
@@ -88,6 +119,13 @@ public partial class IncomePage : ContentPage
             else
             {
                 objCell.Detail = Convert.ToString(item.Amount);
+            }
+
+            if (currentTheme == AppTheme.Dark)
+            {
+                //set to white color
+                tblscIncome.TextColor = Color.FromArgb("#FFFFFF");
+                objCell.TextColor = Color.FromArgb("#FFFFFF");
             }
 
             tblscIncome.Add(objCell);
@@ -134,11 +172,32 @@ public partial class IncomePage : ContentPage
 
     private async void btnSaveIncome_Clicked(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(entryIncomeAmount.Text))
+        if (pickerIncomeCategory.Items.Count == 0)
+        {
+            await DisplayAlert("Message", "Please create income categories under Settings -> Manage Categories before adding expenses", "OK");
+            return;
+        }
+        else if (string.IsNullOrEmpty(entryIncomeAmount.Text))
         {
             await DisplayAlert("Message", "Please input required values", "OK");
             return;
         }
+        else if (pickerIncomeCategory.SelectedIndex == -1)
+        {
+            await DisplayAlert("Message", "Please select a category", "OK");
+            return;
+        }
+        else if (pickerOwnerName.Items.Count == 0)
+        {
+            await DisplayAlert("Message", "Please create owner/users under Settings -> Manage Owners/Users before adding income", "OK");
+            return;
+        }
+        else if (pickerOwnerName.SelectedIndex == -1)
+        {
+            await DisplayAlert("Message", "Please select an owner", "OK");
+            return;
+        }
+
         if (string.IsNullOrEmpty(txtIncomeTransactionId.Text))//insert
         {
             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
@@ -234,4 +293,20 @@ public partial class IncomePage : ContentPage
             }
         }
     }
+
+    //private async void pickerOwnerName_SelectedIndexChanged(object sender, EventArgs e)
+    //{
+    //    if(pickerOwnerName.SelectedIndex == -1)
+    //    {
+    //        return;
+    //    }
+
+    //    if(pickerOwnerName.SelectedItem.ToString() == "Add New Owner")
+    //    {
+            
+    //        await Navigation.PushAsync(new ManageUsersPage());
+    //        pickerOwnerName.SelectedIndex = -1;
+    //    }
+    //    return;
+    //}
 }

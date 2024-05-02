@@ -16,6 +16,7 @@ namespace AssetManagement.Views;
 public partial class IncomeExpenseReportsPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
+    AppTheme currentTheme = Application.Current.RequestedTheme;
     private bool onLoad = false;
     public IncomeExpenseReportsPage()
     {
@@ -91,6 +92,11 @@ public partial class IncomeExpenseReportsPage : ContentPage
         {
             TextCell objCell = new TextCell();
             objCell.Text = item.Month;
+            if (currentTheme == AppTheme.Dark)
+            {
+                //set to white color
+                objCell.TextColor = Color.FromArgb("#FFFFFF");
+            }
             objCell.Detail = "Expense: " + item.ExpenseAmount + " | " + "Income: " + item.IncomeAmount + " | " + "Balance: " + item.BalanceAmount;
             objCell.Height = 40;
             tblscIncomeExpenseReport.Add(objCell);
@@ -211,7 +217,11 @@ public partial class IncomeExpenseReportsPage : ContentPage
             //new code
             TextCell objCategory = new TextCell();
             objCategory.Text = category.CategoryName;
-            objCategory.TextColor = Colors.DarkBlue;
+            if (currentTheme == AppTheme.Dark)
+            {
+                //set to white color
+                objCategory.TextColor = Color.FromArgb("#FFFFFF");
+            }
             objCategory.Detail = string.Format(new CultureInfo("en-IN"), "{0:C0}", total);
             objCategory.Height = 40;
             tblscCategoryWiseReport.Add(objCategory);

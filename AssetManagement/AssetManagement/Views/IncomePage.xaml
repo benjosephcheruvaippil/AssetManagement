@@ -20,9 +20,9 @@
             <Picker x:Name="pickerIncomeCategory" Title="Select category">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
-                            <x:String>Salary</x:String>
+                            <!--<x:String>Salary</x:String>
                             <x:String>Passive Income</x:String>
-                            <x:String>Business Income</x:String>
+                            <x:String>Business Income</x:String>-->
                         </x:Array>
                     </Picker.ItemsSource>
             </Picker>
@@ -32,13 +32,11 @@
             <Picker x:Name="pickerOwnerName" Title="Select owner">
                 <Picker.ItemsSource>
                     <x:Array Type="{x:Type x:String}">
-                        <x:String>Ben Joseph</x:String>
+                        <!--<x:String>Ben Joseph</x:String>
                         <x:String>Deepa Jossy</x:String>
                         <x:String>Ann Mary Joseph</x:String>
                         <x:String>Jossy C Peter</x:String>
-                        
-                        <!--<x:String>Elsaba Jacob</x:String>
-                        <x:String>Deepu K Joseph</x:String>-->
+                        <x:String>Add New Owner</x:String>-->
                     </x:Array>
                 </Picker.ItemsSource>
             </Picker>
@@ -50,19 +48,19 @@
                     <Button
                 x:Name="btnSaveIncome"
                 Text="Save Income"
-                Margin="0,0,5,0"
+                Margin="0,0,0,0"
                 Clicked="btnSaveIncome_Clicked"/>
 
                     <Button
                 x:Name="btnDeleteIncome"
                 Text="Delete Income"
-                Margin="0,0,5,0"
+                Margin="7,0,0,0"
                 Clicked="btnDeleteIncome_Clicked"/>
 
                     <Button
                 x:Name="btnClearIncome"
                 Text="Clear"
-                Margin="5,0,0,0"
+                Margin="7,0,0,0"
                 Clicked="btnClearIncome_Clicked"/>
                 </StackLayout>
                 <TableView x:Name="tblviewIncome" Intent="Menu">
