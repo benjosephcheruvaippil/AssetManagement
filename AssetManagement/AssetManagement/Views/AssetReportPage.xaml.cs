@@ -19,6 +19,7 @@ public partial class AssetReportPage : ContentPage
     private IPopupNavigation _popupNavigation;
     public AssetListPageViewModel _viewModel;
     public IAssetService _assetService;
+    AppTheme currentTheme = Application.Current.RequestedTheme;
     public AssetReportPage(IPopupNavigation popupNavigation, AssetListPageViewModel viewModel, IAssetService assetService)
     {
         InitializeComponent();
@@ -72,7 +73,11 @@ public partial class AssetReportPage : ContentPage
                     //TapGestureRecognizer textCell = new TapGestureRecognizer();
                     TextCell objHolder = new TextCell();
                     objHolder.Text = holder.Holder;
-                    objHolder.TextColor = Colors.DarkBlue;
+                    if (currentTheme == AppTheme.Dark)
+                    {
+                        //set to white color
+                        objHolder.TextColor = Color.FromArgb("#FFFFFF");
+                    }
                     objHolder.Detail = string.Format(new CultureInfo("en-IN"), "{0:C0}", holder.Amount);
                     objHolder.Height = 40;
                     objHolder.Tapped += (sender, args) =>

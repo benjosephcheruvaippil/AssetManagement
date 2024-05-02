@@ -16,6 +16,7 @@ public partial class ExpensePage : ContentPage
 {
     //private AssetListPageViewModel _viewModel;
     private SQLiteAsyncConnection _dbConnection;
+    AppTheme currentTheme = Application.Current.RequestedTheme;
     //private IPopupNavigation _popupNavigation;
     ///private readonly IAssetService _assetService;
     public ExpensePage()
@@ -112,11 +113,22 @@ public partial class ExpensePage : ContentPage
 
     private async void btnSaveExpense_Clicked(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(entryExpenseAmount.Text))
+        if (pickerExpenseCategory.Items.Count == 0)
+        {
+            await DisplayAlert("Message", "Please create categories under Settings -> Manage Categories before adding expenses", "OK");
+            return;
+        }
+        else if (string.IsNullOrEmpty(entryExpenseAmount.Text))
         {
             await DisplayAlert("Message", "Please input required values", "OK");
             return;
         }
+        else if (pickerExpenseCategory.SelectedIndex == -1)
+        {
+            await DisplayAlert("Message", "Please select a category", "OK");
+            return;
+        }       
+
         if (string.IsNullOrEmpty(txtTransactionId.Text))//insert
         {
 
@@ -238,6 +250,13 @@ public partial class ExpensePage : ContentPage
             else
             {
                 objCell.Detail = Convert.ToString(item.Amount);
+            }
+
+            if (currentTheme == AppTheme.Dark)
+            {
+                //set to white color
+                tblscExpenses.TextColor= Color.FromArgb("#FFFFFF");
+                objCell.TextColor = Color.FromArgb("#FFFFFF");
             }
 
             tblscExpenses.Add(objCell);

@@ -7,6 +7,7 @@ namespace AssetManagement.Views;
 public partial class ManageUsersPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
+    AppTheme currentTheme = Application.Current.RequestedTheme;
     public string OldOwnerName = "";
     public ManageUsersPage()
 	{
@@ -151,6 +152,11 @@ public partial class ManageUsersPage : ContentPage
             {
                 TextCell objCell = new TextCell();
                 objCell.Text = item.OwnerName + " | " + item.OwnerId;
+                if (currentTheme == AppTheme.Dark)
+                {
+                    //set to white color
+                    objCell.TextColor = Color.FromArgb("#FFFFFF");
+                }
 
                 tblscOwners.Add(objCell);
 
@@ -190,11 +196,13 @@ public partial class ManageUsersPage : ContentPage
                     if (incomeExpenseRecord.Count > 0)
                     {
                         await DisplayAlert("Info", "Cannot delete owner since there are records with this owner.", "Ok");
+                        return;
                     }
                     var assetsRecord = await _dbConnection.Table<Assets>().Where(a => a.Holder == entryOwnerName.Text).ToListAsync();
                     if (assetsRecord.Count > 0)
                     {
                         await DisplayAlert("Info", "Cannot delete owner since there are records with this owner.", "Ok");
+                        return;
                     }
                     //check if there is any transaction in IncomeExpenseModel and Assets table before deleting the owner
                     Owners objOwner = new Owners()

@@ -6,6 +6,7 @@ namespace AssetManagement.Views;
 public partial class ManageCategoriesPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
+    AppTheme currentTheme = Application.Current.RequestedTheme;
     public string OldCategoryName = "";
     public ManageCategoriesPage()
 	{
@@ -137,6 +138,11 @@ public partial class ManageCategoriesPage : ContentPage
             {
                 TextCell objCell = new TextCell();
                 objCell.Text = item.CategoryName + " | " + item.IncomeExpenseCategoryId;
+                if (currentTheme == AppTheme.Dark)
+                {
+                    //set to white color
+                    objCell.TextColor = Color.FromArgb("#FFFFFF");
+                }
                 objCell.Detail = item.CategoryType;
 
                 tblscCategories.Add(objCell);
@@ -177,6 +183,7 @@ public partial class ManageCategoriesPage : ContentPage
                     if (incomeExpenseRecord.Count > 0)
                     {
                         await DisplayAlert("Info", "Cannot delete category since there are records with this category.", "Ok");
+                        return;
                     }
                     //check if there is any transaction in IncomeExpenseModel and Assets table before deleting the owner
                     IncomeExpenseCategories objIncomeExpenseCat = new IncomeExpenseCategories()

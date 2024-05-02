@@ -25,7 +25,7 @@ Clicked="btnDeleteOwner_Clicked"/>
         </StackLayout>
         <TableView x:Name="tblviewOwners" Intent="Menu">
             <TableRoot>
-                <TableSection x:Name="tblscOwners" Title="Owners List">
+                <TableSection x:Name="tblscOwners" Title="Owners List" TextColor="Red">
                 </TableSection>
             </TableRoot>
         </TableView>
