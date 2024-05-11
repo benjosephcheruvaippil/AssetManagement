@@ -82,7 +82,8 @@ public partial class AssetReportPage : ContentPage
                     objHolder.Height = 40;
                     objHolder.Tapped += (sender, args) =>
                     {
-                        _popupNavigation.PushAsync(new AssetsByHolder(holder.Holder));
+                        //_popupNavigation.PushAsync(new AssetsByHolder(holder.Holder));
+                        ShowAssetsByHolder(holder.Holder);
                     };
 
                     tblscHolderWiseReport.Add(objHolder);
@@ -101,6 +102,22 @@ public partial class AssetReportPage : ContentPage
         {
             await DisplayAlert("Info", ex.Message, "Ok");
         }
+    }
+
+    public async void ShowAssetsByHolder(string holderName)
+    {
+        string displayText = "";
+        SetUpDb();
+        string query = "select InvestmentEntity,Sum(Amount) as Amount from Assets where Holder='" + holderName + "' group by InvestmentEntity " +
+            "order by InvestmentEntity ASC";
+        var investmentEntity = await _dbConnection.QueryAsync<Assets>(query);
+
+        foreach (var item in investmentEntity)
+        {
+            displayText = displayText + item.InvestmentEntity + ": " + string.Format(new CultureInfo("en-IN"), "{0:C0}", item.Amount) + "\n";
+        }
+
+        await DisplayAlert("Asset Info", displayText, "Ok");
     }
 
     public async void ShowAssetsByEquityAndDebt()

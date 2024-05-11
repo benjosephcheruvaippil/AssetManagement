@@ -57,51 +57,107 @@ public partial class AssetPage : TabbedPage
         var labelBank = new TapGestureRecognizer();
         labelBank.Tapped += (s, e) =>
         {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("Bank", _assetService));
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("Bank", _assetService));
+            ShowBankAssetsPopup("Bank");
         };
         lblBank.GestureRecognizers.Add(labelBank);
 
         var labelNCD = new TapGestureRecognizer();
         labelNCD.Tapped += (s, e) =>
         {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("NCD", _assetService));
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("NCD", _assetService));
+            ShowBankAssetsPopup("NCD");
         };
         lblNCD.GestureRecognizers.Add(labelNCD);
 
         var labelMLD = new TapGestureRecognizer();
         labelMLD.Tapped += (s, e) =>
         {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("MLD", _assetService));
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("MLD", _assetService));
+            ShowBankAssetsPopup("MLD");
         };
         lblMLD.GestureRecognizers.Add(labelMLD);
 
         var labelInsurance_MF = new TapGestureRecognizer();
         labelInsurance_MF.Tapped += (s, e) =>
         {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("Insurance_MF", _assetService));
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("Insurance_MF", _assetService));
+            ShowBankAssetsPopup("Insurance_MF");
         };
         lblInsuranceMF.GestureRecognizers.Add(labelInsurance_MF);
 
         var labelGold = new TapGestureRecognizer();
         labelGold.Tapped += (s, e) =>
         {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("Gold,SGB", _assetService));
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("Gold,SGB", _assetService));
+            ShowBankAssetsPopup("Gold,SGB");
         };
         lblGold.GestureRecognizers.Add(labelGold);
 
         var labelOthers = new TapGestureRecognizer();
         labelOthers.Tapped += (s, e) =>
         {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("Others", _assetService));
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("Others", _assetService));
+            ShowBankAssetsPopup("Others");
         };
         lblOthers.GestureRecognizers.Add(labelOthers);
 
         var labelTaxEfficient = new TapGestureRecognizer();
         labelTaxEfficient.Tapped += (s, e) =>
         {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("EPF,PPF,NPS", _assetService));
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("EPF,PPF,NPS", _assetService));
+            ShowBankAssetsPopup("EPF,PPF,NPS");
         };
         lblTaxEfficient.GestureRecognizers.Add(labelTaxEfficient);
+    }
+
+    public async Task ShowBankAssetsPopup(string labelText)
+    {
+        string displayText = "";
+        List<EntitywiseModel> investmentEntity;
+        List<Assets> records = await _assetService.GetAssetsList();
+        if (labelText.Contains("Gold"))
+        {
+            string[] type = labelText.Split(',');
+            investmentEntity = records
+            .Where(w => type.Contains(w.Type))
+            .GroupBy(g => g.InvestmentEntity)
+            .Select(entity => new EntitywiseModel
+            {
+                InvestmentEntity = entity.First().InvestmentEntity,
+                TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
+            }).ToList();
+        }
+        else if (labelText == "EPF,PPF,NPS")
+        {
+            string[] type = labelText.Split(',');
+            investmentEntity = records
+            .Where(w => type.Contains(w.Type))
+            .GroupBy(g => g.InvestmentEntity)
+            .Select(entity => new EntitywiseModel
+            {
+                InvestmentEntity = entity.First().InvestmentEntity,
+                TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
+            }).ToList();
+        }
+        else
+        {
+            investmentEntity = records
+                .Where(w => w.Type == labelText)
+                .GroupBy(g => g.InvestmentEntity)
+                .Select(entity => new EntitywiseModel
+                {
+                    InvestmentEntity = entity.First().InvestmentEntity,
+                    TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
+                }).ToList();
+        }
+
+        foreach (var item in investmentEntity)
+        {
+            displayText = displayText + item.InvestmentEntity + ": " + item.TotalAmount + "\n";
+        }
+
+        await DisplayAlert("Asset Info", displayText, "Ok");
     }
 
     protected async override void OnNavigatedTo(NavigatedToEventArgs args)
