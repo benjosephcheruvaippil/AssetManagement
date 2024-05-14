@@ -8,7 +8,7 @@ using ExcelDataReader;
 using Google.Cloud.Firestore;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
-using Mopups.Interfaces;
+//using Mopups.Interfaces;
 using Newtonsoft.Json;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -24,7 +24,7 @@ public partial class AssetPage : TabbedPage
 {
     private AssetListPageViewModel _viewModel;
     private SQLiteAsyncConnection _dbConnection;
-    private IPopupNavigation _popupNavigation;
+    //private IPopupNavigation _popupNavigation;
     private readonly IAssetService _assetService;
     private readonly HttpClient httpClient = new();
     public bool IsRefreshing { get; set; }
@@ -32,7 +32,7 @@ public partial class AssetPage : TabbedPage
     public Command RefreshCommand { get; set; }
     public Assets SelectedAsset { get; set; }
     public bool PaginationEnabled { get; set; } = true;
-    public AssetPage(AssetListPageViewModel viewModel, IPopupNavigation popupNavigation, IAssetService assetService)
+    public AssetPage(AssetListPageViewModel viewModel, IAssetService assetService)
     {
         RefreshCommand = new Command(async () =>
         {
@@ -50,7 +50,7 @@ public partial class AssetPage : TabbedPage
         InitializeComponent();
         _viewModel = viewModel;
         this.BindingContext = _viewModel;
-        _popupNavigation = popupNavigation;
+        //_popupNavigation = popupNavigation;
         _assetService = assetService;
 
         //tap gesture added for different labels

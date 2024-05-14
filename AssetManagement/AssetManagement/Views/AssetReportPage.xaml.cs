@@ -3,8 +3,8 @@ using AssetManagement.Models.Reports;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using Microcharts;
-using Mopups.Interfaces;
-using Mopups.Services;
+//using Mopups.Interfaces;
+//using Mopups.Services;
 using SkiaSharp;
 using SQLite;
 using System.Data.Common;
@@ -16,14 +16,14 @@ namespace AssetManagement.Views;
 public partial class AssetReportPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
-    private IPopupNavigation _popupNavigation;
+    //private IPopupNavigation _popupNavigation;
     public AssetListPageViewModel _viewModel;
     public IAssetService _assetService;
     AppTheme currentTheme = Application.Current.RequestedTheme;
-    public AssetReportPage(IPopupNavigation popupNavigation, AssetListPageViewModel viewModel, IAssetService assetService)
+    public AssetReportPage(AssetListPageViewModel viewModel, IAssetService assetService)
     {
         InitializeComponent();
-        _popupNavigation = popupNavigation;
+        //_popupNavigation = popupNavigation;
         _viewModel = viewModel;
         _assetService = assetService;
         SetUpDb();
@@ -94,7 +94,7 @@ public partial class AssetReportPage : ContentPage
                 await DisplayAlert("Info", "Add assets to see reports here!", "Ok");
                 if (Application.Current.MainPage is FlyoutPage flyoutPage)
                 {
-                    flyoutPage.Detail = new NavigationPage(new AssetPage(_viewModel, _popupNavigation, _assetService));
+                    flyoutPage.Detail = new NavigationPage(new AssetPage(_viewModel, _assetService));
                 }
             }
         }

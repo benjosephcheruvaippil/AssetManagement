@@ -6,7 +6,7 @@ using AssetManagement.ViewModels;
 using ExcelDataReader;
 using Google.Cloud.Firestore;
 using Microsoft.Maui.Graphics;
-using Mopups.Interfaces;
+//using Mopups.Interfaces;
 using Newtonsoft.Json;
 using SQLite;
 using System.Data;
@@ -21,14 +21,14 @@ public partial class AssetListPage : TabbedPage
 {
     private AssetListPageViewModel _viewModel;
     private SQLiteAsyncConnection _dbConnection;
-    private IPopupNavigation _popupNavigation;
+    //private IPopupNavigation _popupNavigation;
     private readonly IAssetService _assetService;
-    public AssetListPage(AssetListPageViewModel viewModel, IPopupNavigation popupNavigation, IAssetService assetService)
+    public AssetListPage(AssetListPageViewModel viewModel, IAssetService assetService)
     {
         InitializeComponent();
         _viewModel = viewModel;
         this.BindingContext = _viewModel;
-        _popupNavigation = popupNavigation;
+        //_popupNavigation = popupNavigation;
         _assetService = assetService;
 
         CurrentPageChanged += AssetListPage_CurrentPageChanged;
@@ -37,28 +37,28 @@ public partial class AssetListPage : TabbedPage
         var labelBank = new TapGestureRecognizer();
         labelBank.Tapped += (s, e) =>
         {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("Bank", _assetService));
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("Bank", _assetService));
         };
         lblBank.GestureRecognizers.Add(labelBank);
 
         var labelNCD = new TapGestureRecognizer();
         labelNCD.Tapped += (s, e) =>
         {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("NCD", _assetService));
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("NCD", _assetService));
         };
         lblNCD.GestureRecognizers.Add(labelNCD);
 
         var labelMLD = new TapGestureRecognizer();
         labelMLD.Tapped += (s, e) =>
         {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("MLD", _assetService));
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("MLD", _assetService));
         };
         lblMLD.GestureRecognizers.Add(labelMLD);
 
         var labelInsurance_MF = new TapGestureRecognizer();
         labelInsurance_MF.Tapped += (s, e) =>
         {
-            _popupNavigation.PushAsync(new AssetsByCategoryPage("Insurance_MF", _assetService));
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("Insurance_MF", _assetService));
         };
         lblInsuranceMF.GestureRecognizers.Add(labelInsurance_MF);
     }

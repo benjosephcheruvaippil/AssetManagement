@@ -5,9 +5,9 @@ using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Storage;
 using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
-using Mopups.Hosting;
-using Mopups.Interfaces;
-using Mopups.Services;
+//using Mopups.Hosting;
+//using Mopups.Interfaces;
+//using Mopups.Services;
 
 namespace AssetManagement;
 
@@ -19,7 +19,7 @@ public static class MauiProgram
 		builder
 			.UseMauiApp<App>()
 			.UseMauiCommunityToolkit()
-			.ConfigureMopups()
+			//.ConfigureMopups()
 			.UseMicrocharts()
 			.ConfigureFonts(fonts =>
 			{
@@ -29,10 +29,10 @@ public static class MauiProgram
 
 		builder.Services.AddSingleton<IFileSaver>(FileSaver.Default);
         builder.Services.AddSingleton<IAssetService, AssetService>();
-		builder.Services.AddSingleton<IPopupNavigation>(MopupService.Instance);
+		//builder.Services.AddSingleton<IPopupNavigation>(MopupService.Instance);
 
         builder.Services.AddSingleton<AssetListPage>();
-        builder.Services.AddSingleton<AssetsByCategoryPage>();
+        //builder.Services.AddSingleton<AssetsByCategoryPage>();
 
         builder.Services.AddSingleton<AssetListPageViewModel>();
 
