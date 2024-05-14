@@ -1,6 +1,6 @@
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
-using Mopups.Interfaces;
+//using Mopups.Interfaces;
 using SQLite;
 
 namespace AssetManagement.Views;
@@ -8,14 +8,14 @@ namespace AssetManagement.Views;
 public partial class AppFlyoutPage : FlyoutPage
 {
     public AssetListPageViewModel _viewModel;
-    public IPopupNavigation _popupNavigation;
+    //public IPopupNavigation _popupNavigation;
     public IAssetService _assetService;
-    public AppFlyoutPage(AssetListPageViewModel viewModel, IPopupNavigation popupNavigation, IAssetService assetService)
+    public AppFlyoutPage(AssetListPageViewModel viewModel, IAssetService assetService)
 	{
 		InitializeComponent();
         
         _viewModel = viewModel;
-        _popupNavigation = popupNavigation;
+        //_popupNavigation = popupNavigation;
         _assetService = assetService;
 
         flyoutPage.btnExpensePage.Clicked += OpenExpensePageClicked;
@@ -45,7 +45,7 @@ public partial class AppFlyoutPage : FlyoutPage
     {
         if (!((IFlyoutPageController)this).ShouldShowSplitMode)
             IsPresented = false;
-        Detail = new NavigationPage(new AssetPage(_viewModel, _popupNavigation, _assetService));
+        Detail = new NavigationPage(new AssetPage(_viewModel, _assetService));
     }
 
     //private void OpenAssetCloudPageClicked(object sender, EventArgs e)
@@ -66,7 +66,7 @@ public partial class AppFlyoutPage : FlyoutPage
     {
         if (!((IFlyoutPageController)this).ShouldShowSplitMode)
             IsPresented = false;
-        Detail = new NavigationPage(new AssetReportPage(_popupNavigation, _viewModel, _assetService));
+        Detail = new NavigationPage(new AssetReportPage(_viewModel, _assetService));
     }
 
     private void OpenSettingsPageClicked(object sender, EventArgs e)

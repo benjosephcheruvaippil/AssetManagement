@@ -3,8 +3,8 @@ using AssetManagement.Models.Reports;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using Microcharts;
-using Mopups.Interfaces;
-using Mopups.Services;
+//using Mopups.Interfaces;
+//using Mopups.Services;
 using SkiaSharp;
 using SQLite;
 using System.Data.Common;
@@ -16,14 +16,14 @@ namespace AssetManagement.Views;
 public partial class AssetReportPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
-    private IPopupNavigation _popupNavigation;
+    //private IPopupNavigation _popupNavigation;
     public AssetListPageViewModel _viewModel;
     public IAssetService _assetService;
     AppTheme currentTheme = Application.Current.RequestedTheme;
-    public AssetReportPage(IPopupNavigation popupNavigation, AssetListPageViewModel viewModel, IAssetService assetService)
+    public AssetReportPage(AssetListPageViewModel viewModel, IAssetService assetService)
     {
         InitializeComponent();
-        _popupNavigation = popupNavigation;
+        //_popupNavigation = popupNavigation;
         _viewModel = viewModel;
         _assetService = assetService;
         SetUpDb();
@@ -82,7 +82,8 @@ public partial class AssetReportPage : ContentPage
                     objHolder.Height = 40;
                     objHolder.Tapped += (sender, args) =>
                     {
-                        _popupNavigation.PushAsync(new AssetsByHolder(holder.Holder));
+                        //_popupNavigation.PushAsync(new AssetsByHolder(holder.Holder));
+                        ShowAssetsByHolder(holder.Holder);
                     };
 
                     tblscHolderWiseReport.Add(objHolder);
@@ -93,7 +94,7 @@ public partial class AssetReportPage : ContentPage
                 await DisplayAlert("Info", "Add assets to see reports here!", "Ok");
                 if (Application.Current.MainPage is FlyoutPage flyoutPage)
                 {
-                    flyoutPage.Detail = new NavigationPage(new AssetPage(_viewModel, _popupNavigation, _assetService));
+                    flyoutPage.Detail = new NavigationPage(new AssetPage(_viewModel, _assetService));
                 }
             }
         }
@@ -101,6 +102,22 @@ public partial class AssetReportPage : ContentPage
         {
             await DisplayAlert("Info", ex.Message, "Ok");
         }
+    }
+
+    public async void ShowAssetsByHolder(string holderName)
+    {
+        string displayText = "";
+        SetUpDb();
+        string query = "select InvestmentEntity,Sum(Amount) as Amount from Assets where Holder='" + holderName + "' group by InvestmentEntity " +
+            "order by InvestmentEntity ASC";
+        var investmentEntity = await _dbConnection.QueryAsync<Assets>(query);
+
+        foreach (var item in investmentEntity)
+        {
+            displayText = displayText + item.InvestmentEntity + ": " + string.Format(new CultureInfo("en-IN"), "{0:C0}", item.Amount) + "\n";
+        }
+
+        await DisplayAlert("Asset Info", displayText, "Ok");
     }
 
     public async void ShowAssetsByEquityAndDebt()
