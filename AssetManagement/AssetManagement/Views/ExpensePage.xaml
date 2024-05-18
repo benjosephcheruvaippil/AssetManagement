@@ -19,7 +19,7 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="40" />
            Placeholder="Enter amount"
            Keyboard="Numeric" />
 
-                <Picker x:Name="pickerExpenseCategory" Title="Select category">
+                <Picker x:Name="pickerExpenseCategory" Title="Select category" SelectedIndexChanged="pickerExpenseCategory_SelectedIndexChanged">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
                             <!--<x:String>Household Items</x:String>
