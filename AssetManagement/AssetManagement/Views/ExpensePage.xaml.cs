@@ -101,8 +101,18 @@ public partial class ExpensePage : ContentPage
         {
             await SetUpDb();
             var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
+            IncomeExpenseCategories objCategories = new IncomeExpenseCategories
+            {
+                IncomeExpenseCategoryId = 0,
+                CategoryName = Constants.AddNewCategoryOption,
+                CategoryType = "Expense"
+            };
+            expenseCategories.Add(objCategories);
             pickerExpenseCategory.ItemsSource = expenseCategories.Select(i => i.CategoryName).ToList();
-            pickerExpenseCategory.SelectedIndex = 0;
+            if (expenseCategories.Count > 1)
+            {
+                pickerExpenseCategory.SelectedIndex = 0;
+            }
         }
         catch (Exception)
         {
@@ -627,5 +637,16 @@ public partial class ExpensePage : ContentPage
             await DisplayAlert("Alert - StackTrace", $"{ex.Message.ToString()}\n\nNo records added.", "OK");
         }
 
+    }
+
+    private void pickerExpenseCategory_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (pickerExpenseCategory.SelectedItem != null)
+        {
+            if (pickerExpenseCategory.SelectedItem.ToString() == Constants.AddNewCategoryOption)
+            {
+                Navigation.PushAsync(new ManageCategoriesPage());
+            }
+        }
     }
 }

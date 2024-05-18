@@ -1,4 +1,5 @@
 using AssetManagement.Models;
+using AssetManagement.Models.Constants;
 using SQLite;
 using System.Globalization;
 
@@ -62,6 +63,12 @@ public partial class IncomePage : ContentPage
         {
             await SetUpDb();
             var owners = await _dbConnection.Table<Owners>().ToListAsync();
+            Owners objOwner = new Owners
+            {
+                OwnerId = 0,
+                OwnerName = Constants.AddNewOwnerOption
+            };
+            owners.Add(objOwner);
             pickerOwnerName.ItemsSource = owners.Select(s => s.OwnerName).ToList();
         }
         catch (Exception)
@@ -76,6 +83,13 @@ public partial class IncomePage : ContentPage
         {
             await SetUpDb();
             var incomeCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Income").ToListAsync();
+            IncomeExpenseCategories objCategories = new IncomeExpenseCategories
+            {
+                IncomeExpenseCategoryId = 0,
+                CategoryName = Constants.AddNewCategoryOption,
+                CategoryType = "Income"
+            };
+            incomeCategories.Add(objCategories);
             pickerIncomeCategory.ItemsSource = incomeCategories.Select(i => i.CategoryName).ToList();
         }
         catch(Exception)
@@ -294,6 +308,29 @@ public partial class IncomePage : ContentPage
         }
     }
 
+    private void pickerIncomeCategory_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (pickerIncomeCategory.SelectedItem != null)
+        {
+            if (pickerIncomeCategory.SelectedItem.ToString() == Constants.AddNewCategoryOption)
+            {
+                Navigation.PushAsync(new ManageCategoriesPage());
+            }
+        }
+    }
+
+    private void pickerOwnerName_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (pickerOwnerName.SelectedItem != null)
+        {
+            if (pickerOwnerName.SelectedItem.ToString() == Constants.AddNewOwnerOption)
+            {
+
+                Navigation.PushAsync(new ManageUsersPage());
+            }
+        }
+    }
+
     //private async void pickerOwnerName_SelectedIndexChanged(object sender, EventArgs e)
     //{
     //    if(pickerOwnerName.SelectedIndex == -1)
@@ -303,7 +340,7 @@ public partial class IncomePage : ContentPage
 
     //    if(pickerOwnerName.SelectedItem.ToString() == "Add New Owner")
     //    {
-            
+
     //        await Navigation.PushAsync(new ManageUsersPage());
     //        pickerOwnerName.SelectedIndex = -1;
     //    }
