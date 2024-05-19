@@ -159,6 +159,7 @@ public partial class ExpensePage : ContentPage
             {
 
                 LoadExpensesInPage("Last5");
+                await ShowCurrentMonthExpenses();
             }
             else
             {
@@ -189,6 +190,7 @@ public partial class ExpensePage : ContentPage
             {
 
                 LoadExpensesInPage("Last5");
+                await ShowCurrentMonthExpenses();
             }
             else
             {
