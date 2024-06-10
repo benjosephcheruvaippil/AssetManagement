@@ -27,23 +27,23 @@ public partial class AssetPage : TabbedPage
     //private IPopupNavigation _popupNavigation;
     private readonly IAssetService _assetService;
     private readonly HttpClient httpClient = new();
-    public bool IsRefreshing { get; set; }
-    public ObservableCollection<Assets> Assets { get; set; } = new();
-    public Command RefreshCommand { get; set; }
-    public Assets SelectedAsset { get; set; }
-    public bool PaginationEnabled { get; set; } = true;
+    //public bool IsRefreshing { get; set; } = true;
+    //public ObservableCollection<Assets> Assets { get; set; } = new();
+    //public Command RefreshCommand { get; set; }
+    //public Assets SelectedAsset { get; set; }
+    //public bool PaginationEnabled { get; set; } = true;
     public AssetPage(AssetListPageViewModel viewModel, IAssetService assetService)
     {
-        RefreshCommand = new Command(async () =>
-        {
-            // Simulate delay
-            await Task.Delay(2000);
+        //RefreshCommand = new Command(async () =>
+        //{
+        //    // Simulate delay
+        //    await Task.Delay(2000);
 
-            await LoadAssets();
+        //    await LoadAssets();
 
-            IsRefreshing = false;
-            OnPropertyChanged(nameof(IsRefreshing));
-        });
+        //    IsRefreshing = true;
+        //    OnPropertyChanged(nameof(IsRefreshing));
+        //});
 
         //BindingContext = this;
 
