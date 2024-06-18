@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net7.0-android</TargetFrameworks>
+		<TargetFrameworks>net8.0-android</TargetFrameworks>
 		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>-->
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net7.0-tizen</TargetFrameworks> -->
@@ -39,7 +39,7 @@
 		<MauiIcon Include="Resources\AppIcon\asseticon.svg" Color="#66ffff" ForegroundScale="0.55" />
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\splashimage.svg" Color="#512BD4" BaseSize="128,128" />
+		<MauiSplashScreen Include="Resources\Splash\splashimage.svg" Color="#512BD4" BaseSize="256,256" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
@@ -81,6 +81,7 @@
 		<PackageReference Include="Google.Cloud.Firestore" Version="3.3.0" />
 		<PackageReference Include="Microcharts.Maui" Version="1.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
+		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="2.88.8" />
 		<PackageReference Include="SQLite" Version="3.13.0" />
 		<PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
 		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.6" />

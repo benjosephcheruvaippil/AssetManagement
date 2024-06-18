@@ -6,7 +6,7 @@
              x:DataType="viewModels:AssetListPageViewModel"
              x:Class="AssetManagement.Views.AssetPage"
             
-             Title="Tabbed Page" >
+             Title="Assets" >
 
     <ContentPage Title="Asset Details">
         <ScrollView>

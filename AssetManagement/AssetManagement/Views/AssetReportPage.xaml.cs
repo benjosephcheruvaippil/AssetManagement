@@ -27,9 +27,9 @@ public partial class AssetReportPage : ContentPage
         _viewModel = viewModel;
         _assetService = assetService;
         SetUpDb();
-        SummaryByHolderName();
-        ShowAssetsByEquityAndDebt();
-        ShowNetWorthChart();
+        //SummaryByHolderName();
+        //ShowAssetsByEquityAndDebt();
+        //ShowNetWorthChart();
     }
 
     private void SetUpDb()
@@ -41,15 +41,39 @@ public partial class AssetReportPage : ContentPage
         }
     }
 
-    public async void SummaryByHolderName()
+    protected override void OnAppearing()
     {
+        base.OnAppearing();
+
+        //Device.BeginInvokeOnMainThread(async () =>
+        //{
+        //    await DisplayAlert("Welcome", "The secondary page has opened!", "OK");
+        //});
+        Task.Run(async () => { await CheckIfAssetsPresent(); });
+        
+    }
+    public async Task CheckIfAssetsPresent()
+    {
+        await MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            if (await SummaryByHolderName())
+            {
+                ShowAssetsByEquityAndDebt();
+                ShowNetWorthChart();
+            }
+        });
+    }
+
+    public async Task<bool> SummaryByHolderName()
+    {
+        bool dataExists = false;
         try
         {
             var holders = await _dbConnection.QueryAsync<Assets>("select Holder from Assets Group By Holder");
-
             List<Assets> holderDetailList = new List<Assets>();
             if (holders.Count > 0)
             {
+                dataExists = true;
                 foreach (var holder in holders)
                 {
                     if (!string.IsNullOrEmpty(holder.Holder))
@@ -102,6 +126,7 @@ public partial class AssetReportPage : ContentPage
         {
             await DisplayAlert("Info", ex.Message, "Ok");
         }
+        return dataExists;
     }
 
     public async void ShowAssetsByHolder(string holderName)
