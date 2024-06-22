@@ -491,6 +491,7 @@ public partial class ExpensePage : ContentPage
                 int rowsAffected = await _dbConnection.DeleteAsync(objExpense);
                 ClearExpense();
                 LoadExpensesInPage("Last5");
+                await ShowCurrentMonthExpenses();
             }
         }
     }
