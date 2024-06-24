@@ -1,4 +1,5 @@
-﻿using AssetManagement.Services;
+﻿using AssetManagement.Models.Constants;
+using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using AssetManagement.Views;
 //using Mopups.Interfaces;
@@ -23,7 +24,7 @@ public partial class App : Application
 
         if (isFirstLaunch)
         {
-            MainPage = new NavigationPage(new AppLaunchPage(_viewModel, _assetService,"LaunchPage"));
+            MainPage = new NavigationPage(new AppLaunchPage(_viewModel, _assetService,Constants.FromLaunchPage));
             Preferences.Set("IsFirstLaunch", false);
         }
         else

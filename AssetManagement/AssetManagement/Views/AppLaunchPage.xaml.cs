@@ -21,7 +21,7 @@ public partial class AppLaunchPage : ContentPage
 
     private void Button_Clicked(object sender, EventArgs e)
     {
-        if (_from == "LaunchPage")
+        if (_from == Constants.FromLaunchPage)
         {
             Constants.SetCurrency("en-US");
             Application.Current.MainPage = new AppFlyoutPage(_viewModel, _assetService);

@@ -14,6 +14,9 @@ namespace AssetManagement.Models.Constants
         public const string AddNewCategoryOption = "Add New Category";
         public const string AddNewOwnerOption = "Add New Owner";
 
+        public const string FromLaunchPage = "LaunchPage";
+        public const string FromSettingsPage = "SettingsPage";
+
         public static string _currency = "en-IN";
         public static string GetCurrency()
         {

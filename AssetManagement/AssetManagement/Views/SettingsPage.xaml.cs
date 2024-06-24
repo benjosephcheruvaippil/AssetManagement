@@ -1,4 +1,5 @@
 using AssetManagement.Models;
+using AssetManagement.Models.Constants;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using CommunityToolkit.Maui.Storage;
@@ -128,6 +129,6 @@ public partial class SettingsPage : ContentPage
 
     private async void btnSelectCurrency_Clicked(object sender, EventArgs e)
     {
-        await Navigation.PushAsync(new AppLaunchPage(_viewModel, _assetService, "SettingsPage"));
+        await Navigation.PushAsync(new AppLaunchPage(_viewModel, _assetService, Constants.FromSettingsPage));
     }
 }
