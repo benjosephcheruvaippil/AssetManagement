@@ -92,7 +92,7 @@ public partial class ExpensePage : ContentPage
         await SetUpDb();
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Expense" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
         var totalExpense = query.Sum(s => s.Amount);
-        lblCurrentMonthExpenses.Text = currentMonth + ": " + string.Format(new CultureInfo("en-IN"), "{0:C0}", totalExpense);
+        lblCurrentMonthExpenses.Text = currentMonth + ": " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalExpense);
     }
 
     private async void LoadExpenseCategoriesInDropdown()
