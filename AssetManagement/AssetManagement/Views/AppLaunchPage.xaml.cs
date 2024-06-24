@@ -10,16 +10,21 @@ public partial class AppLaunchPage : ContentPage
     private AssetListPageViewModel _viewModel;
     //private IPopupNavigation _popupNavigation;
     private readonly IAssetService _assetService;
-    public AppLaunchPage(AssetListPageViewModel viewModel, IAssetService assetService)
+    public readonly string _from;
+    public AppLaunchPage(AssetListPageViewModel viewModel, IAssetService assetService,string from)
 	{
 		InitializeComponent();
         _viewModel = viewModel;
         _assetService = assetService;
+        _from = from;
     }
 
     private void Button_Clicked(object sender, EventArgs e)
     {
-        Constants.SetCurrency("en-US");
-        Application.Current.MainPage = new AppFlyoutPage(_viewModel, _assetService);
+        if (_from == "LaunchPage")
+        {
+            Constants.SetCurrency("en-US");
+            Application.Current.MainPage = new AppFlyoutPage(_viewModel, _assetService);
+        }
     }
 }

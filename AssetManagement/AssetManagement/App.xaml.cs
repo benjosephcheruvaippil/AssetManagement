@@ -23,7 +23,7 @@ public partial class App : Application
 
         if (isFirstLaunch)
         {
-            MainPage = new NavigationPage(new AppLaunchPage(_viewModel, _assetService));
+            MainPage = new NavigationPage(new AppLaunchPage(_viewModel, _assetService,"LaunchPage"));
             Preferences.Set("IsFirstLaunch", false);
         }
         else

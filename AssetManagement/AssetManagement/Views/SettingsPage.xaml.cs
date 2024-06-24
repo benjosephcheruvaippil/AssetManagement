@@ -1,4 +1,6 @@
 using AssetManagement.Models;
+using AssetManagement.Services;
+using AssetManagement.ViewModels;
 using CommunityToolkit.Maui.Storage;
 using SQLite;
 
@@ -7,10 +9,14 @@ namespace AssetManagement.Views;
 public partial class SettingsPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
-    public SettingsPage()
+    private AssetListPageViewModel _viewModel;
+    private readonly IAssetService _assetService;
+    public SettingsPage(AssetListPageViewModel viewModel, IAssetService assetService)
 	{
 		InitializeComponent();
-	}
+        _viewModel = viewModel;
+        _assetService = assetService;
+    }
 
     //private async Task SetUpDb()
     //{
@@ -118,5 +124,10 @@ public partial class SettingsPage : ContentPage
     private async void btnManageIncomeExpenseCategories_Clicked(object sender, EventArgs e)
     {
         await Navigation.PushAsync(new ManageCategoriesPage());
+    }
+
+    private async void btnSelectCurrency_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new AppLaunchPage(_viewModel, _assetService, "SettingsPage"));
     }
 }
