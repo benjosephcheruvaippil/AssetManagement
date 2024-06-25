@@ -87,26 +87,30 @@ public partial class AppLaunchPage : ContentPage
 
     private async void Done_Clicked(object sender, EventArgs e)
     {
+        //add user currency into table
+        await SetUpDb();
+        await _dbConnection.ExecuteAsync("DELETE FROM UserCurrency");
+        if (pickerCurrencyList.SelectedItem is CurrencyDTO selectedItem)
+        {
+            int id = selectedItem.CurrencyId;
+            var currencyDetails = await _dbConnection.Table<Currency>().Where(c => c.CurrencyId == id).FirstOrDefaultAsync();
+            UserCurrency userCurrency = new UserCurrency
+            {
+                Country = currencyDetails.Country,
+                CurrencyName = currencyDetails.CurrencyName,
+                CurrencyCode = currencyDetails.CurrencyCode
+            };
+            await _dbConnection.InsertAsync(userCurrency);
+            //Constants.SetCurrency(userCurrency.CurrencyCode);
+        }
+        //add user currency into table
         if (_from == Constants.FromLaunchPage)
         {
-            //add user currency into table
-            await SetUpDb();
-            if(pickerCurrencyList.SelectedItem is CurrencyDTO selectedItem)
-            {
-                int id= selectedItem.CurrencyId;
-                var currencyDetails = await _dbConnection.Table<Currency>().Where(c => c.CurrencyId == id).FirstOrDefaultAsync();
-                UserCurrency userCurrency = new UserCurrency
-                {
-                    Country = currencyDetails.Country,
-                    CurrencyName = currencyDetails.CurrencyName,
-                    CurrencyCode = currencyDetails.CurrencyCode
-                };
-                await _dbConnection.InsertAsync(userCurrency);
-                //Constants.SetCurrency(userCurrency.CurrencyCode);
-            }          
-            //add user currency into table
-            
             Application.Current.MainPage = new AppFlyoutPage(_viewModel, _assetService);
+        }
+        else if (_from == Constants.FromSettingsPage)
+        {
+            await DisplayAlert("Message", "Saved", "Ok");
         }
     }
 

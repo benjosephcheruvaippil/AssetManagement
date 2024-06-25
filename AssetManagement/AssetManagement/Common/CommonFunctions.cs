@@ -59,7 +59,8 @@ namespace AssetManagement.Common
                new Currency { Country="Germany",CurrencyName = "Euro",CurrencyCode="en-IE" },
                new Currency { Country="Japan",CurrencyName = "JPY",CurrencyCode="en-JP" },
                new Currency { Country="United Kingdom",CurrencyName = "GBP",CurrencyCode="en-GB" },
-               new Currency { Country="Australia",CurrencyName = "AUD",CurrencyCode="en-AU" }
+               new Currency { Country="Australia",CurrencyName = "AUD",CurrencyCode="en-AU" },
+               new Currency { Country="India",CurrencyName = "INR",CurrencyCode="en-IN" }
             };
 
             await _dbConnection.InsertAllAsync(currencyList);

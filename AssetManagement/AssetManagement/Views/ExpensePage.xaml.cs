@@ -90,6 +90,17 @@ public partial class ExpensePage : ContentPage
         DateTime endOfMonth = new DateTime(currentDate.Year, currentDate.Month, lastDayOfMonth, 23, 59, 59);
 
         await SetUpDb();
+        //set user currency
+        var userCurrency=await _dbConnection.Table<UserCurrency>().FirstOrDefaultAsync();
+        if (userCurrency == null)
+        {
+            Constants.SetCurrency("en-IN"); //Set INR as Default
+        }
+        else
+        {
+            Constants.SetCurrency(userCurrency.CurrencyCode);
+        }
+        //set user currency
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Expense" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
         var totalExpense = query.Sum(s => s.Amount);
         lblCurrentMonthExpenses.Text = currentMonth + ": " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalExpense);
