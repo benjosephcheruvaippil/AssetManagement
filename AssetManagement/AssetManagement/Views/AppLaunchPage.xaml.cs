@@ -2,6 +2,7 @@ using AndroidX.Lifecycle;
 using AssetManagement.Common;
 using AssetManagement.Models;
 using AssetManagement.Models.Constants;
+using AssetManagement.Models.DataTransferObject;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using SQLite;
@@ -22,15 +23,15 @@ public partial class AppLaunchPage : ContentPage
         _from = from;
     }
 
-    protected override void OnAppearing()
+    protected async override void OnAppearing()
     {
         try
         {
             base.OnAppearing();
 
             CommonFunctions objCommon = new CommonFunctions();
-            objCommon.CommonDataForDefaults();
-            LoadCurrenctListInDropdown();
+            await objCommon.CommonDataForDefaults();
+            await LoadCurrenctListInDropdown();
         }
         catch (Exception)
         {
@@ -63,24 +64,20 @@ public partial class AppLaunchPage : ContentPage
         }
     }
 
-    private async void LoadCurrenctListInDropdown()
+    private async Task LoadCurrenctListInDropdown()
     {
         try
         {
             await SetUpDb();
             var currencyList = await _dbConnection.Table<Currency>().ToListAsync();
-            //IncomeExpenseCategories objCategories = new IncomeExpenseCategories
-            //{
-            //    IncomeExpenseCategoryId = 0,
-            //    CategoryName = Constants.AddNewCategoryOption,
-            //    CategoryType = "Expense"
-            //};
-            //expenseCategories.Add(objCategories);
-            pickerCurrencyList.ItemsSource = currencyList.Select(c => c.CurrencyName).ToList();
-            //if (expenseCategories.Count > 1)
-            //{
-            //    pickerExpenseCategory.SelectedIndex = 0;
-            //}
+            var currenctListOrdered = currencyList.OrderBy(x => x.Country).Select(s => new CurrencyDTO
+            {
+                CurrencyId = s.CurrencyId,
+                DisplayText = s.Country + " - " + s.CurrencyName
+            }).ToList();
+
+            pickerCurrencyList.ItemsSource = currenctListOrdered;
+            pickerCurrencyList.ItemDisplayBinding = new Binding("DisplayText");
         }
         catch (Exception)
         {
@@ -94,18 +91,21 @@ public partial class AppLaunchPage : ContentPage
         {
             //add user currency into table
             await SetUpDb();
-            UserCurrency userCurrency = new UserCurrency
+            if(pickerCurrencyList.SelectedItem is CurrencyDTO selectedItem)
             {
-                Country = "",
-                CurrencyName = "",
-                CurrencyCode = ""
-            };
-            await _dbConnection.InsertAsync(userCurrency);
+                int id= selectedItem.CurrencyId;
+                var currencyDetails = await _dbConnection.Table<Currency>().Where(c => c.CurrencyId == id).FirstOrDefaultAsync();
+                UserCurrency userCurrency = new UserCurrency
+                {
+                    Country = currencyDetails.Country,
+                    CurrencyName = currencyDetails.CurrencyName,
+                    CurrencyCode = currencyDetails.CurrencyCode
+                };
+                await _dbConnection.InsertAsync(userCurrency);
+                //Constants.SetCurrency(userCurrency.CurrencyCode);
+            }          
             //add user currency into table
-
-           
-
-            //Constants.SetCurrency("en-US");
+            
             Application.Current.MainPage = new AppFlyoutPage(_viewModel, _assetService);
         }
     }

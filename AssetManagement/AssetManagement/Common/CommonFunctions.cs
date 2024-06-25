@@ -11,32 +11,61 @@ namespace AssetManagement.Common
     public class CommonFunctions
     {
         private SQLiteAsyncConnection _dbConnection;
-        public void CommonDataForDefaults()
+        public CommonFunctions()
         {
-            AddIncomeExpenseCategoryDefaults();
-            AddCurrencyListDefaults();
-            AddUserCurrencyDefault();
+                
         }
-        public void AddIncomeExpenseCategoryDefaults()
+        private async Task SetUpDb()
+        {
+            try
+            {
+                if (_dbConnection == null)
+                {
+                    string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
+                    _dbConnection = new SQLiteAsyncConnection(dbPath);
+                    await _dbConnection.CreateTableAsync<Assets>();
+                    await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
+                    await _dbConnection.CreateTableAsync<IncomeExpenseCategories>();
+                    await _dbConnection.CreateTableAsync<DataSyncAudit>();
+                    await _dbConnection.CreateTableAsync<AssetAuditLog>();
+                    await _dbConnection.CreateTableAsync<Owners>();
+                    await _dbConnection.CreateTableAsync<UserCurrency>();
+                    await _dbConnection.CreateTableAsync<Currency>();
+                }
+            }
+            catch (Exception)
+            {
+              
+            }
+        }
+
+        public async Task CommonDataForDefaults()
+        {
+            await AddIncomeExpenseCategoryDefaults();
+            await AddCurrencyListDefaults();
+            await AddUserCurrencyDefault();
+        }
+        public async Task AddIncomeExpenseCategoryDefaults()
         {
 
         }
 
-        public async void AddCurrencyListDefaults()
+        public async Task AddCurrencyListDefaults()
         {
+            await SetUpDb();
             List<Currency> currencyList = new List<Currency>
             {
-               new Currency { Country="India",CurrencyName = "INR",CurrencyCode="" },
-               new Currency { Country="United States",CurrencyName = "USD",CurrencyCode="" },
-               new Currency { Country="England",CurrencyName = "GBP",CurrencyCode="" },
-               new Currency { Country="Germany",CurrencyName = "UERO",CurrencyCode="" },
-               new Currency { Country="Singapore",CurrencyName = "SGD",CurrencyCode="" }
+               new Currency { Country="United States",CurrencyName = "USD",CurrencyCode="en-US" },
+               new Currency { Country="Germany",CurrencyName = "Euro",CurrencyCode="en-IE" },
+               new Currency { Country="Japan",CurrencyName = "JPY",CurrencyCode="en-JP" },
+               new Currency { Country="United Kingdom",CurrencyName = "GBP",CurrencyCode="en-GB" },
+               new Currency { Country="Australia",CurrencyName = "AUD",CurrencyCode="en-AU" }
             };
 
             await _dbConnection.InsertAllAsync(currencyList);
         }
 
-        public void AddUserCurrencyDefault()
+        public async Task AddUserCurrencyDefault()
         {
 
         }
