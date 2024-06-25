@@ -8,6 +8,16 @@
             Text="Welcome to .NET MAUI!"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
-        <Button Text="Done" x:Name="btnDone" Clicked="Button_Clicked"></Button>
+        <Picker x:Name="pickerCurrencyList" Title="Select currency" SelectedIndexChanged="pickerCurrencyList_SelectedIndexChanged">
+            <Picker.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>Automobile</x:String>
+                    <x:String>Leisure</x:String>
+                    <x:String>Others</x:String>
+                </x:Array>
+            </Picker.ItemsSource>
+        </Picker>
+
+        <Button Text="Ok" x:Name="btnDone" Clicked="Done_Clicked"></Button>
     </VerticalStackLayout>
 </ContentPage>
