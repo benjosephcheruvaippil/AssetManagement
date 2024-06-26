@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using CommunityToolkit.Maui.Storage;
+using AssetManagement.Models.Constants;
 //using static Android.Content.ClipData;
 
 namespace AssetManagement.Views;
@@ -168,7 +169,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
         var fileUploadExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && e.Mode == "file_upload" && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
         var totalFileUploadExpenses = fileUploadExpenseList.Select(s => s.Amount).Sum();
 
-        string displayText = $"Expense Manually Added: {string.Format(new CultureInfo("en-IN"), "{0:C0}", totalManualAddedExpenses)}\nExpense File Upload: {string.Format(new CultureInfo("en-IN"), "{0:C0}", totalFileUploadExpenses)}";
+        string displayText = $"Expense Manually Added: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalManualAddedExpenses)}\nExpense File Upload: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalFileUploadExpenses)}";
         await DisplayAlert("Info", displayText, "Ok");
     }
 
@@ -222,7 +223,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
                 //set to white color
                 objCategory.TextColor = Color.FromArgb("#FFFFFF");
             }
-            objCategory.Detail = string.Format(new CultureInfo("en-IN"), "{0:C0}", total);
+            objCategory.Detail = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", total);
             objCategory.Height = 40;
             tblscCategoryWiseReport.Add(objCategory);
         }

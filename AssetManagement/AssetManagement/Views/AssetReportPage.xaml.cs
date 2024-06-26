@@ -1,4 +1,5 @@
 using AssetManagement.Models;
+using AssetManagement.Models.Constants;
 using AssetManagement.Models.Reports;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
@@ -102,7 +103,7 @@ public partial class AssetReportPage : ContentPage
                         //set to white color
                         objHolder.TextColor = Color.FromArgb("#FFFFFF");
                     }
-                    objHolder.Detail = string.Format(new CultureInfo("en-IN"), "{0:C0}", holder.Amount);
+                    objHolder.Detail = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", holder.Amount);
                     objHolder.Height = 40;
                     objHolder.Tapped += (sender, args) =>
                     {
@@ -139,7 +140,7 @@ public partial class AssetReportPage : ContentPage
 
         foreach (var item in investmentEntity)
         {
-            displayText = displayText + item.InvestmentEntity + ": " + string.Format(new CultureInfo("en-IN"), "{0:C0}", item.Amount) + "\n";
+            displayText = displayText + item.InvestmentEntity + ": " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", item.Amount) + "\n";
         }
 
         await DisplayAlert("Asset Info", displayText, "Ok");
@@ -156,7 +157,7 @@ public partial class AssetReportPage : ContentPage
                     ",'NCD','MLD','PPF','EPF')");
                 decimal debtPortfolioPercentage = Math.Round((debtPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
                 Label lblDebt = new Label();
-                lblDebt.Text = "Debt/Fixed Income: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", debtPortfolioAmount[0].Amount) + " (" + debtPortfolioPercentage + "%)";
+                lblDebt.Text = "Debt/Fixed Income: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", debtPortfolioAmount[0].Amount) + " (" + debtPortfolioPercentage + "%)";
                 lblDebt.FontSize = 18;
                 lblDebt.FontAttributes = FontAttributes.Bold;
 
@@ -164,7 +165,7 @@ public partial class AssetReportPage : ContentPage
                     ",'MF','Stocks')");
                 decimal equityPortfolioPercentage = Math.Round((equityPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
                 Label lblEquity = new Label();
-                lblEquity.Text = "Equity: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", equityPortfolioAmount[0].Amount) + " (" + equityPortfolioPercentage + "%)";
+                lblEquity.Text = "Equity: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", equityPortfolioAmount[0].Amount) + " (" + equityPortfolioPercentage + "%)";
                 lblEquity.FontSize = 18;
                 lblEquity.FontAttributes = FontAttributes.Bold;
 
@@ -172,7 +173,7 @@ public partial class AssetReportPage : ContentPage
                     ",'Gold')");
                 decimal goldPortfolioPercentage = Math.Round((goldPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
                 Label lblGold = new Label();
-                lblGold.Text = "Gold: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", goldPortfolioAmount[0].Amount) + " (" + goldPortfolioPercentage + "%)";
+                lblGold.Text = "Gold: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", goldPortfolioAmount[0].Amount) + " (" + goldPortfolioPercentage + "%)";
                 lblGold.FontSize = 18;
                 lblGold.FontAttributes = FontAttributes.Bold;
 
@@ -285,7 +286,7 @@ public partial class AssetReportPage : ContentPage
                     ChartEntry chartEntry = new ChartEntry(value)
                     {
                         Label = log.DisplayLabel,
-                        ValueLabel = string.Format(new CultureInfo("en-IN"), "{0:C0}", roundedAssetValue),
+                        ValueLabel = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", roundedAssetValue),
                         Color = SKColor.Parse("#3498db")
                     };
                     listChartEntry.Add(chartEntry);

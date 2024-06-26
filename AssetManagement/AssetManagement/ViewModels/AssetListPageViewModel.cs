@@ -1,4 +1,5 @@
 ﻿using AssetManagement.Models;
+using AssetManagement.Models.Constants;
 using AssetManagement.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -119,7 +120,7 @@ namespace AssetManagement.ViewModels
                         decimal amount = Convert.ToDecimal(asset.Amount);
                         MaturingAssetsTotalValue = MaturingAssetsTotalValue + amount;
                         asset.HolderName = asset.HolderName;
-                        asset.Amount = string.Format(new CultureInfo("en-IN"), "{0:C0}", amount);
+                        asset.Amount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", amount);
                         AssetDetails.Add(asset);
                     }
                 }
@@ -151,7 +152,7 @@ namespace AssetManagement.ViewModels
                         decimal amount = Convert.ToDecimal(asset.Amount);
                         MaturingAssetsTotalValue = MaturingAssetsTotalValue + amount;
                         asset.HolderName = asset.HolderName;
-                        asset.Amount = string.Format(new CultureInfo("en-IN"), "{0:C0}", amount);
+                        asset.Amount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", amount);
                         AssetDetails.Add(asset);
                     }
                 }
