@@ -79,11 +79,14 @@ public partial class AppLaunchPage : ContentPage
             pickerCurrencyList.ItemsSource = currenctListOrdered;
             pickerCurrencyList.ItemDisplayBinding = new Binding("DisplayText");
             //check if user currency is already saved
-            var userCurrency = await _dbConnection.Table<UserCurrency>().FirstOrDefaultAsync();
-            if (userCurrency != null)
+            if (_from == Constants.FromSettingsPage)
             {
-                string displayText = userCurrency.Country + " - " + userCurrency.CurrencyName;
-                pickerCurrencyList.SelectedItem = currenctListOrdered.FirstOrDefault(c => c.DisplayText == displayText);
+                var userCurrency = await _dbConnection.Table<UserCurrency>().FirstOrDefaultAsync();
+                if (userCurrency != null)
+                {
+                    string displayText = userCurrency.Country + " - " + userCurrency.CurrencyName;
+                    pickerCurrencyList.SelectedItem = currenctListOrdered.FirstOrDefault(c => c.DisplayText == displayText);
+                }
             }
             //check if user currency is already saved
         }
@@ -95,6 +98,11 @@ public partial class AppLaunchPage : ContentPage
 
     private async void Done_Clicked(object sender, EventArgs e)
     {
+        if (pickerCurrencyList.SelectedIndex == -1)
+        {
+            await DisplayAlert("Message", "Please select a currency to continue", "Ok");
+            return;
+        }
         //add user currency into table
         await SetUpDb();
         await _dbConnection.ExecuteAsync("DELETE FROM UserCurrency");

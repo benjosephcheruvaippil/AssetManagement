@@ -64,11 +64,11 @@ public partial class SettingsPage : ContentPage
             var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
             if (fileSaverResult.IsSuccessful)
             {
-                await DisplayAlert("Message", "Database saved in " + fileSaverResult.FilePath, "Ok");
+                await DisplayAlert("Message", "Backup file saved in " + fileSaverResult.FilePath, "Ok");
             }
             //trying new way of achieving it
 
-            await DisplayAlert("Info", "Backup Successful", "OK");
+            //await DisplayAlert("Info", "Backup Successful", "OK");
         }
         catch (Exception ex)
         {

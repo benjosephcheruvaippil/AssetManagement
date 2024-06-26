@@ -2,12 +2,12 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AssetManagement.Views.AppLaunchPage"
-             Title="Select Preferences">
+             Title="Select Currency">
     <VerticalStackLayout>
-        <Label 
+        <!--<Label 
             Text="Welcome to .NET MAUI!"
             VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+            HorizontalOptions="Center" />-->
         <Picker x:Name="pickerCurrencyList" Title="Select currency" SelectedIndexChanged="pickerCurrencyList_SelectedIndexChanged">
             <!--<Picker.ItemsSource>
                 <x:Array Type="{x:Type x:String}">
@@ -17,7 +17,12 @@
                 </x:Array>
             </Picker.ItemsSource>-->
         </Picker>
+        <Button Text="Click To Continue" x:Name="btnDone" Clicked="Done_Clicked"></Button>
 
-        <Button Text="Ok" x:Name="btnDone" Clicked="Done_Clicked"></Button>
+        <BoxView HeightRequest="50" Color="Transparent"/>
+        <Label Text="* Your data doesn't leave your device. 100% local storage. Backup data at times to local storage or to the cloud if needed." FontSize="20" BackgroundColor="GreenYellow"/>
+        <Label Text="* No ads and no subscription." FontSize="20" BackgroundColor="GreenYellow"/>
+        <Label Text="* Software is like sex. Its better when it's free." FontSize="20" BackgroundColor="GreenYellow"/>
+
     </VerticalStackLayout>
 </ContentPage>
