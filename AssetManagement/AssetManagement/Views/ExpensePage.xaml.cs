@@ -1,4 +1,5 @@
 //using AndroidX.Lifecycle;
+using AssetManagement.Common;
 using AssetManagement.Models;
 using AssetManagement.Models.Constants;
 using AssetManagement.Models.FirestoreModel;
@@ -37,6 +38,8 @@ public partial class ExpensePage : ContentPage
         {
             base.OnAppearing();
 
+            CommonFunctions objCommon = new CommonFunctions();
+            await objCommon.SetUserCurrencyGlobally();
             LoadExpensesInPage("Last5");// show expenses in the expense tab          
             await ShowCurrentMonthExpenses();
             LoadExpenseCategoriesInDropdown();
@@ -82,7 +85,7 @@ public partial class ExpensePage : ContentPage
             lblLastUploaded.Text = "Last Uploaded: " + lastUploadedDate[0].Date.ToString("dd-MM-yyyy hh:mm tt");
         }
     }
-
+    
     public async Task ShowCurrentMonthExpenses()
     {
         try
@@ -93,25 +96,14 @@ public partial class ExpensePage : ContentPage
             int lastDayOfMonth = DateTime.DaysInMonth(currentDate.Year, currentDate.Month);
             DateTime endOfMonth = new DateTime(currentDate.Year, currentDate.Month, lastDayOfMonth, 23, 59, 59);
 
-            await SetUpDb();
-            //set user currency
-            var userCurrency = await _dbConnection.Table<UserCurrency>().FirstOrDefaultAsync();
-            if (userCurrency == null)
-            {
-                Constants.SetCurrency("en-IN"); //Set INR as Default
-            }
-            else
-            {
-                Constants.SetCurrency(userCurrency.CurrencyCode);
-            }
-            //set user currency
+            await SetUpDb();            
             var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Expense" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
             var totalExpense = query.Sum(s => s.Amount);
             lblCurrentMonthExpenses.Text = currentMonth + ": " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalExpense);
         }
-        catch(Exception ex)
+        catch(Exception)
         {
-
+            return;
         }
     }
 

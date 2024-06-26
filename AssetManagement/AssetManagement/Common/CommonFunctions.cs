@@ -1,4 +1,5 @@
 ﻿using AssetManagement.Models;
+using AssetManagement.Models.Constants;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -78,9 +79,9 @@ namespace AssetManagement.Common
                 }
                 //add income default
             }
-            catch(Exception ex)
+            catch (Exception)
             {
-                
+
             }
         }
 
@@ -97,6 +98,11 @@ namespace AssetManagement.Common
                    new Currency { Country="Japan",CurrencyName = "JPY",CurrencyCode="en-JP" },
                    new Currency { Country="United Kingdom",CurrencyName = "GBP",CurrencyCode="en-GB" },
                    new Currency { Country="Australia",CurrencyName = "AUD",CurrencyCode="en-AU" },
+                    new Currency { Country="Canada",CurrencyName = "CAD",CurrencyCode="en-CA" },
+                        new Currency { Country="Switzerland",CurrencyName = "CHF",CurrencyCode="de-CH" },
+                        new Currency { Country="China",CurrencyName = "CNY",CurrencyCode="zh-CN" },
+                        new Currency { Country="Sweden",CurrencyName = "SEK",CurrencyCode="sv-SE" },
+                        new Currency { Country="New Zealand",CurrencyName = "NZD",CurrencyCode="en-NZ" },
                    new Currency { Country="India",CurrencyName = "INR",CurrencyCode="en-IN" }
                 };
 
@@ -118,6 +124,22 @@ namespace AssetManagement.Common
                 };
                 await _dbConnection.InsertAsync(objUserCurrency);
             }
+        }
+
+        public async Task SetUserCurrencyGlobally()
+        {
+            //set user currency
+            await SetUpDb();
+            var userCurrency =  await _dbConnection.Table<UserCurrency>().FirstOrDefaultAsync();
+            if (userCurrency == null)
+            {
+                Constants.SetCurrency("en-IN"); //Set INR as Default
+            }
+            else
+            {
+                Constants.SetCurrency(userCurrency.CurrencyCode);
+            }
+            //set user currency
         }
     }
 }

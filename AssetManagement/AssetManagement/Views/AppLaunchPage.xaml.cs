@@ -78,6 +78,14 @@ public partial class AppLaunchPage : ContentPage
 
             pickerCurrencyList.ItemsSource = currenctListOrdered;
             pickerCurrencyList.ItemDisplayBinding = new Binding("DisplayText");
+            //check if user currency is already saved
+            var userCurrency = await _dbConnection.Table<UserCurrency>().FirstOrDefaultAsync();
+            if (userCurrency != null)
+            {
+                string displayText = userCurrency.Country + " - " + userCurrency.CurrencyName;
+                pickerCurrencyList.SelectedItem = currenctListOrdered.FirstOrDefault(c => c.DisplayText == displayText);
+            }
+            //check if user currency is already saved
         }
         catch (Exception)
         {
@@ -101,7 +109,7 @@ public partial class AppLaunchPage : ContentPage
                 CurrencyCode = currencyDetails.CurrencyCode
             };
             await _dbConnection.InsertAsync(userCurrency);
-            //Constants.SetCurrency(userCurrency.CurrencyCode);
+            Constants.SetCurrency(userCurrency.CurrencyCode);
         }
         //add user currency into table
         if (_from == Constants.FromLaunchPage)
