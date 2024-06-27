@@ -16,9 +16,16 @@
         <Button Text="Click To Continue" x:Name="btnDone" Clicked="Done_Clicked"></Button>
         <StackLayout x:Name="layoutGeneralInfo">
             <BoxView HeightRequest="50" Color="Transparent"/>
-            <Label Text="* Your data doesn't leave your device. 100% local storage. Backup data at times to local storage or to the cloud if needed." FontSize="20" BackgroundColor="GreenYellow"/>
-            <Label Text="* No ads and no subscription." FontSize="20" BackgroundColor="GreenYellow"/>
-            <Label Text="* Software is like sex. Its better when it's free." FontSize="20" BackgroundColor="GreenYellow"/>
+            <Label FontSize="20" BackgroundColor="GreenYellow">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="* " />
+                        <Span Text="Your data doesn't leave your device" FontAttributes="Bold" />
+                        <Span Text=" (Safe and Secure). Backup data at times to local storage or to the cloud if needed." />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+            <Label Text="* No ads or subscription." FontSize="20" BackgroundColor="GreenYellow"/>
         </StackLayout>
 
     </VerticalStackLayout>
