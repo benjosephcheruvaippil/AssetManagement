@@ -155,5 +155,9 @@
 		<AndroidSigningKeyAlias>MauiAlias</AndroidSigningKeyAlias>
 		<AndroidSigningKeyPass>benjoseph</AndroidSigningKeyPass>
 	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
+	  <AndroidLinkTool>r8</AndroidLinkTool>
+	</PropertyGroup>
 
 </Project>
