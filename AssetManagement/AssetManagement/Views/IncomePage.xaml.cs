@@ -212,6 +212,8 @@ public partial class IncomePage : ContentPage
             return;
         }
 
+        entryTaxAmount.Text = "0";
+
         if (string.IsNullOrEmpty(txtIncomeTransactionId.Text))//insert
         {
             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
@@ -282,6 +284,7 @@ public partial class IncomePage : ContentPage
     {
         txtIncomeTransactionId.Text = "";
         entryIncomeAmount.Text = "";
+        entryTaxAmount.Text = "";
         pickerIncomeCategory.SelectedIndex = -1;
         entryIncomeRemarks.Text = "";
         dpDateIncome.Date = DateTime.Now;

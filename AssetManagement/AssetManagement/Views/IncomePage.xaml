@@ -13,9 +13,8 @@
            Keyboard="Numeric" />
                 
             <Entry x:Name="entryTaxAmount"
-            Placeholder="Enter tax amount"
-            Keyboard="Numeric" 
-                   Text="0" />
+            Placeholder="Enter TDS(tax) amount"
+            Keyboard="Numeric" />
 
             <Picker x:Name="pickerIncomeCategory" Title="Select category" SelectedIndexChanged="pickerIncomeCategory_SelectedIndexChanged">
                     <Picker.ItemsSource>
