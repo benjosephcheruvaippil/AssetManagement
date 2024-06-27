@@ -21,6 +21,11 @@ public partial class AppLaunchPage : ContentPage
         _viewModel = viewModel;
         _assetService = assetService;
         _from = from;
+        if (_from == Constants.FromSettingsPage)
+        {
+            btnDone.Text = "Save";
+            layoutGeneralInfo.IsVisible = false;
+        }
     }
 
     protected async override void OnAppearing()

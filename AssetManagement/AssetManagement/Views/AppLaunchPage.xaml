@@ -4,10 +4,6 @@
              x:Class="AssetManagement.Views.AppLaunchPage"
              Title="Select Currency">
     <VerticalStackLayout>
-        <!--<Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />-->
         <Picker x:Name="pickerCurrencyList" Title="Select currency" SelectedIndexChanged="pickerCurrencyList_SelectedIndexChanged">
             <!--<Picker.ItemsSource>
                 <x:Array Type="{x:Type x:String}">
@@ -18,11 +14,12 @@
             </Picker.ItemsSource>-->
         </Picker>
         <Button Text="Click To Continue" x:Name="btnDone" Clicked="Done_Clicked"></Button>
-
-        <BoxView HeightRequest="50" Color="Transparent"/>
-        <Label Text="* Your data doesn't leave your device. 100% local storage. Backup data at times to local storage or to the cloud if needed." FontSize="20" BackgroundColor="GreenYellow"/>
-        <Label Text="* No ads and no subscription." FontSize="20" BackgroundColor="GreenYellow"/>
-        <Label Text="* Software is like sex. Its better when it's free." FontSize="20" BackgroundColor="GreenYellow"/>
+        <StackLayout x:Name="layoutGeneralInfo">
+            <BoxView HeightRequest="50" Color="Transparent"/>
+            <Label Text="* Your data doesn't leave your device. 100% local storage. Backup data at times to local storage or to the cloud if needed." FontSize="20" BackgroundColor="GreenYellow"/>
+            <Label Text="* No ads and no subscription." FontSize="20" BackgroundColor="GreenYellow"/>
+            <Label Text="* Software is like sex. Its better when it's free." FontSize="20" BackgroundColor="GreenYellow"/>
+        </StackLayout>
 
     </VerticalStackLayout>
 </ContentPage>
