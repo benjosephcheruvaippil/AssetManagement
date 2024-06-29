@@ -212,7 +212,10 @@ public partial class IncomePage : ContentPage
             return;
         }
 
-        entryTaxAmount.Text = "0";
+        if (string.IsNullOrEmpty(entryTaxAmount.Text))
+        {
+            entryTaxAmount.Text = "0";
+        }
 
         if (string.IsNullOrEmpty(txtIncomeTransactionId.Text))//insert
         {
