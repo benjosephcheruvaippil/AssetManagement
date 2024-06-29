@@ -1,4 +1,7 @@
 using AssetManagement.Models;
+using AssetManagement.Models.Constants;
+using AssetManagement.Services;
+using AssetManagement.ViewModels;
 using CommunityToolkit.Maui.Storage;
 using SQLite;
 
@@ -7,10 +10,14 @@ namespace AssetManagement.Views;
 public partial class SettingsPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
-    public SettingsPage()
+    private AssetListPageViewModel _viewModel;
+    private readonly IAssetService _assetService;
+    public SettingsPage(AssetListPageViewModel viewModel, IAssetService assetService)
 	{
 		InitializeComponent();
-	}
+        _viewModel = viewModel;
+        _assetService = assetService;
+    }
 
     //private async Task SetUpDb()
     //{
@@ -57,11 +64,11 @@ public partial class SettingsPage : ContentPage
             var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
             if (fileSaverResult.IsSuccessful)
             {
-                await DisplayAlert("Message", "Database saved in " + fileSaverResult.FilePath, "Ok");
+                await DisplayAlert("Message", "Backup file saved in " + fileSaverResult.FilePath, "Ok");
             }
             //trying new way of achieving it
 
-            await DisplayAlert("Info", "Backup Successful", "OK");
+            //await DisplayAlert("Info", "Backup Successful", "OK");
         }
         catch (Exception ex)
         {
@@ -118,5 +125,10 @@ public partial class SettingsPage : ContentPage
     private async void btnManageIncomeExpenseCategories_Clicked(object sender, EventArgs e)
     {
         await Navigation.PushAsync(new ManageCategoriesPage());
+    }
+
+    private async void btnSelectCurrency_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new AppLaunchPage(_viewModel, _assetService, Constants.FromSettingsPage));
     }
 }

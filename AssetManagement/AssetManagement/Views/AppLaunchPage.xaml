@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AssetManagement.Views.AppLaunchPage"
+             Title="Select Preferences">
+    <VerticalStackLayout>
+        <Entry x:Name="entryOwnerName" Placeholder="Your name"/>
+        <Picker x:Name="pickerCurrencyList" Title="Select currency" SelectedIndexChanged="pickerCurrencyList_SelectedIndexChanged">
+            <!--<Picker.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>Automobile</x:String>
+                    <x:String>Leisure</x:String>
+                    <x:String>Others</x:String>
+                </x:Array>
+            </Picker.ItemsSource>-->
+        </Picker>
+        <Button Text="Click To Continue" x:Name="btnDone" Clicked="Done_Clicked"></Button>
+        <StackLayout x:Name="layoutGeneralInfo">
+            <BoxView HeightRequest="50" Color="Transparent"/>
+            <Label FontSize="20" BackgroundColor="GreenYellow">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="* " />
+                        <Span Text="Your data doesn't leave your device" FontAttributes="Bold" />
+                        <Span Text=" (Safe and Secure). Backup data at times to local storage or to the cloud if needed." />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+            <Label Text="* No ads or subscription." FontSize="20" BackgroundColor="GreenYellow"/>
+        </StackLayout>
+
+    </VerticalStackLayout>
+</ContentPage>

@@ -54,7 +54,7 @@ public partial class IncomePage : ContentPage
         await SetUpDb();
         var query = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionType == "Income" && d.Date >= startOfMonth && d.Date <= endOfMonth).ToListAsync();
         var totalIncome = query.Sum(s => s.Amount);
-        lblCurrentMonthIncome.Text = currentMonth + ": " + string.Format(new CultureInfo("en-IN"), "{0:C0}", totalIncome);
+        lblCurrentMonthIncome.Text = currentMonth + ": " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalIncome);
     }
 
     private async void LoadOwnersInDropdown()
@@ -212,6 +212,8 @@ public partial class IncomePage : ContentPage
             return;
         }
 
+        entryTaxAmount.Text = "0";
+
         if (string.IsNullOrEmpty(txtIncomeTransactionId.Text))//insert
         {
             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
@@ -282,6 +284,7 @@ public partial class IncomePage : ContentPage
     {
         txtIncomeTransactionId.Text = "";
         entryIncomeAmount.Text = "";
+        entryTaxAmount.Text = "";
         pickerIncomeCategory.SelectedIndex = -1;
         entryIncomeRemarks.Text = "";
         dpDateIncome.Date = DateTime.Now;

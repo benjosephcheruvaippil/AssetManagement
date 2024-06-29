@@ -6,6 +6,7 @@
     <VerticalStackLayout>
         <Button x:Name="btnManageOwners" Text="Manage Owners/Users" Clicked="btnManageOwners_Clicked" BackgroundColor="LightGreen" TextColor="Black" WidthRequest="200" Margin="4"/>
         <Button x:Name="btnManageIncomeExpenseCategories" Text="Manage Categories" Clicked="btnManageIncomeExpenseCategories_Clicked" BackgroundColor="LightGreen" TextColor="Black" WidthRequest="200" Margin="4"/>
+        <Button x:Name="btnSelectCurrency" Text="Change Currency" Clicked="btnSelectCurrency_Clicked" BackgroundColor="LightGreen" TextColor="Black" WidthRequest="200" Margin="4"/>
         <Button x:Name="btnRestoreDb" Text="Restore Database" Clicked="btnRestoreDb_Clicked" BackgroundColor="LightGreen" TextColor="Black" WidthRequest="200" Margin="4"/>
         <Button x:Name="btnBackup" Text="Backup Database" Clicked="btnBackup_Clicked" BackgroundColor="LightGreen" TextColor="Black" WidthRequest="200" Margin="4"/>
     </VerticalStackLayout>

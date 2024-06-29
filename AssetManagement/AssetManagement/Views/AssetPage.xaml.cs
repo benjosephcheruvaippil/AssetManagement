@@ -125,7 +125,7 @@ public partial class AssetPage : TabbedPage
             .Select(entity => new EntitywiseModel
             {
                 InvestmentEntity = entity.First().InvestmentEntity,
-                TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
+                TotalAmount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", entity.Sum(s => s.Amount))
             }).ToList();
         }
         else if (labelText == "EPF,PPF,NPS")
@@ -137,7 +137,7 @@ public partial class AssetPage : TabbedPage
             .Select(entity => new EntitywiseModel
             {
                 InvestmentEntity = entity.First().InvestmentEntity,
-                TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
+                TotalAmount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", entity.Sum(s => s.Amount))
             }).ToList();
         }
         else
@@ -148,7 +148,7 @@ public partial class AssetPage : TabbedPage
                 .Select(entity => new EntitywiseModel
                 {
                     InvestmentEntity = entity.First().InvestmentEntity,
-                    TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
+                    TotalAmount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", entity.Sum(s => s.Amount))
                 }).ToList();
         }
 
@@ -212,7 +212,7 @@ public partial class AssetPage : TabbedPage
         base.OnAppearing();
 
         LoadOwnersInDropdown();
-        lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", await _viewModel.GetAssetsList());
+        lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", await _viewModel.GetAssetsList());
         await ShowPrimaryAssetDetails();
     }
 
@@ -332,7 +332,7 @@ public partial class AssetPage : TabbedPage
         await SetUpDb();
         List<Assets> records = await _dbConnection.Table<Assets>().ToListAsync();
         decimal NetAssetValue = records.Sum(s => s.Amount);
-        string result = "Net Asset Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", NetAssetValue);
+        string result = "Net Asset Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", NetAssetValue);
         lblNetAssetValue.Text = result;
 
         decimal BankAssets = records.Where(b => b.Type == "Bank").Sum(s => s.Amount);
@@ -348,18 +348,18 @@ public partial class AssetPage : TabbedPage
         decimal Others = records.Where(b => b.Type == "Others").Sum(s => s.Amount);
         decimal TaxEfficient = records.Where(b => b.Type == "PPF" || b.Type == "EPF" || b.Type == "NPS").Sum(s => s.Amount);
 
-        lblBank.Text = "Bank Assets Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", BankAssets);
-        lblNCD.Text = "Non Convertible Debentures: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", NCDAssets);
-        lblMLD.Text = "Market Linked Debentures: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", MLDAssets);
+        lblBank.Text = "Bank Assets Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", BankAssets);
+        lblNCD.Text = "Non Convertible Debentures: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", NCDAssets);
+        lblMLD.Text = "Market Linked Debentures: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", MLDAssets);
 
-        lblInsuranceMF.Text = "Insurance/MF: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Insurance_MF);
-        lblGold.Text = "Gold: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Gold);
-        lblOthers.Text = "Others: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Others);
-        //lblPPF.Text = "Public Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", PPF);
-        //lblEPF.Text = "Employee Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", EPF);
-        lblTaxEfficient.Text = "Tax Efficient Investments: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", TaxEfficient);
-        lblMF.Text = "Mutual Funds: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", MutualFunds);
-        lblStocks.Text = "Stocks: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Stocks);     
+        lblInsuranceMF.Text = "Insurance/MF: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Insurance_MF);
+        lblGold.Text = "Gold: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Gold);
+        lblOthers.Text = "Others: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Others);
+        //lblPPF.Text = "Public Provident Fund: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", PPF);
+        //lblEPF.Text = "Employee Provident Fund: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", EPF);
+        lblTaxEfficient.Text = "Tax Efficient Investments: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", TaxEfficient);
+        lblMF.Text = "Mutual Funds: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", MutualFunds);
+        lblStocks.Text = "Stocks: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Stocks);     
 
         decimal projectedAmount = 0;
         foreach (var item in records)
@@ -377,7 +377,7 @@ public partial class AssetPage : TabbedPage
                 projectedAmount = projectedAmount + item.Amount;
             }
         }
-        lblProjectedAssetValue.Text = "Projected Asset Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Math.Round(projectedAmount, 2));
+        lblProjectedAssetValue.Text = "Projected Asset Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Math.Round(projectedAmount, 2));
 
     }
 
@@ -388,7 +388,7 @@ public partial class AssetPage : TabbedPage
         {
             daysLeft = "0";
         }
-        lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", await _viewModel.GetMaturingAssetsListByDaysLeft(Convert.ToInt32(daysLeft)));
+        lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", await _viewModel.GetMaturingAssetsListByDaysLeft(Convert.ToInt32(daysLeft)));
     }
 
     private async void btnSave_Clicked(object sender, EventArgs e)
