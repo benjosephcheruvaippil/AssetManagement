@@ -2,8 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AssetManagement.Views.AppLaunchPage"
-             Title="Select Currency">
+             Title="Select Preferences">
     <VerticalStackLayout>
+        <Entry x:Name="entryOwnerName" Placeholder="Your name"/>
         <Picker x:Name="pickerCurrencyList" Title="Select currency" SelectedIndexChanged="pickerCurrencyList_SelectedIndexChanged">
             <!--<Picker.ItemsSource>
                 <x:Array Type="{x:Type x:String}">

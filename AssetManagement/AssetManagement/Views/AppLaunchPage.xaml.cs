@@ -23,8 +23,10 @@ public partial class AppLaunchPage : ContentPage
         _from = from;
         if (_from == Constants.FromSettingsPage)
         {
+            Title = "Select Currency";
             btnDone.Text = "Save";
             layoutGeneralInfo.IsVisible = false;
+            entryOwnerName.IsVisible = false;
         }
     }
 
@@ -108,8 +110,19 @@ public partial class AppLaunchPage : ContentPage
             await DisplayAlert("Message", "Please select a currency to continue", "Ok");
             return;
         }
-        //add user currency into table
         await SetUpDb();
+        //add owner/user
+        if (!string.IsNullOrEmpty(entryOwnerName.Text))
+        {
+            Owners objOwner = new Owners
+            {
+                OwnerName = entryOwnerName.Text
+            };
+
+            await _dbConnection.InsertAsync(objOwner);
+        }
+        //add owner/user
+        //add user currency into table
         await _dbConnection.ExecuteAsync("DELETE FROM UserCurrency");
         if (pickerCurrencyList.SelectedItem is CurrencyDTO selectedItem)
         {
