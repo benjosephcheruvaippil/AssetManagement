@@ -75,22 +75,7 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="40" />
                 <Label x:Name="lblCurrentMonthExpenses" FontSize="Large" Text="" HorizontalOptions="CenterAndExpand"></Label>
                 <ActivityIndicator x:Name="activityIndicator" IsRunning="False" Color="Blue"/>
                 <Label x:Name="lblLastUploaded" IsVisible="false" Text="" HorizontalOptions="CenterAndExpand"></Label>
-                <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="End">
-                    <Button
-                x:Name="btnUploadData"
-                        IsVisible="false"
-                Text="Upload"
-                Margin="0,0,5,0"
-                Clicked="btnUploadData_Clicked"/>
-
-                    <Button
-                x:Name="btnDownloadData"
-                        IsVisible="false"
-                Text="Download"
-                Margin="5,0,0,0"
-                Clicked="btnDownloadData_Clicked"/>
-
-                </StackLayout>
+                
 
             </VerticalStackLayout>
         </ScrollView>
