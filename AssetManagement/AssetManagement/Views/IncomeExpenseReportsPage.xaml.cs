@@ -237,6 +237,11 @@ public partial class IncomeExpenseReportsPage : ContentPage
     {
         try
         {
+            if (typePicker.SelectedIndex == -1)
+            {
+                await DisplayAlert("Message", "Please select report type.", "Ok");
+                return;
+            }
             activityIndicator.IsRunning = true;        
             DateTime fromDateIncomeReport = dpFromDateIncomeReport.Date;
             DateTime toDateIncomeReport = dpTODateIncomeReport.Date;

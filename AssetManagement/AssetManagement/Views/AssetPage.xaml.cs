@@ -161,6 +161,9 @@ public partial class AssetPage : TabbedPage
     {
         base.OnNavigatedTo(args);
 
+        //this method can be removed after some months.(by 2025 January)
+        await AssetUpdatesOnLoad();
+        //this method can be removed after some months.(by 2025 January)
         await LoadAssets();
     }
 
@@ -173,6 +176,23 @@ public partial class AssetPage : TabbedPage
         catch
         {
             await DisplayAlert("Info", "Welcome to asset management!", "OK");
+        }
+    }
+
+    private async Task AssetUpdatesOnLoad()
+    {
+        try
+        {
+            await SetUpDb();
+            int MFAssets = await _dbConnection.Table<Assets>().Where(a => a.Type == "MF").CountAsync();
+            if (MFAssets > 0)
+            {
+                var rowsAffected = await _dbConnection.ExecuteAsync("Update Assets set Type='Equity Mutual Fund' where Type='MF'");
+            }
+        }
+        catch
+        {
+            return;
         }
     }
 
@@ -340,7 +360,8 @@ public partial class AssetPage : TabbedPage
         decimal Gold = records.Where(b => b.Type == "Gold" || b.Type=="SGB").Sum(s => s.Amount);
         //decimal PPF = records.Where(b => b.Type == "PPF").Sum(s => s.Amount);
         //decimal EPF = records.Where(b => b.Type == "EPF").Sum(s => s.Amount);
-        decimal MutualFunds = records.Where(b => b.Type == "MF").Sum(s => s.Amount);
+        decimal DebtMutualFunds = records.Where(b => b.Type == "Debt Mutual Fund").Sum(s => s.Amount);
+        decimal EquityMutualFunds = records.Where(b => b.Type == "Equity Mutual Fund").Sum(s => s.Amount);
         decimal Stocks = records.Where(b => b.Type == "Stocks").Sum(s => s.Amount);
         decimal Others = records.Where(b => b.Type == "Others").Sum(s => s.Amount);
         decimal TaxEfficient = records.Where(b => b.Type == "PPF" || b.Type == "EPF" || b.Type == "NPS").Sum(s => s.Amount);
@@ -355,7 +376,8 @@ public partial class AssetPage : TabbedPage
         //lblPPF.Text = "Public Provident Fund: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", PPF);
         //lblEPF.Text = "Employee Provident Fund: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", EPF);
         lblTaxEfficient.Text = "Tax Efficient Investments: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", TaxEfficient);
-        lblMF.Text = "Mutual Funds: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", MutualFunds);
+        lblDebtMF.Text = "Debt Mutual Funds: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", DebtMutualFunds);
+        lblEquityMF.Text = "Equity Mutual Funds: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", EquityMutualFunds);
         lblStocks.Text = "Stocks: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Stocks);     
 
         decimal projectedAmount = 0;
@@ -411,7 +433,7 @@ public partial class AssetPage : TabbedPage
             Remarks = entRemarks.Text
         };
 
-        if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "MF" || objAsset.Type == "Stocks" || objAsset.Type == "NPS" || objAsset.Type == "Others")
+        if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "Equity Mutual Fund" || objAsset.Type == "Debt Mutual Fund" || objAsset.Type == "Stocks" || objAsset.Type == "NPS" || objAsset.Type == "Others")
         {
             objAsset.AsOfDate = entAsOfDate.Date;
             objAsset.StartDate= Convert.ToDateTime("01-01-0001");
@@ -500,10 +522,10 @@ public partial class AssetPage : TabbedPage
     {
         string type = entType.SelectedItem.ToString();
 
-        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "MF" || type == "Stocks" || type == "NPS" || type == "Others")
+        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "Equity Mutual Fund" || type == "Debt Mutual Fund" || type == "Stocks" || type == "NPS" || type == "Others")
         {
-            entStartDate.Date = Convert.ToDateTime("01-01-0001");
-            entMaturityDate.Date = Convert.ToDateTime("01-01-0001");
+            entStartDate.Date = DateTime.Now;
+            entMaturityDate.Date = DateTime.Now;
 
             entStartDate.IsEnabled = false;
             entMaturityDate.IsEnabled = false;
@@ -511,7 +533,7 @@ public partial class AssetPage : TabbedPage
         }
         else
         {
-            entAsOfDate.Date = Convert.ToDateTime("01-01-0001");
+            entAsOfDate.Date = DateTime.Now;
 
             entStartDate.IsEnabled = true;
             entMaturityDate.IsEnabled = true;

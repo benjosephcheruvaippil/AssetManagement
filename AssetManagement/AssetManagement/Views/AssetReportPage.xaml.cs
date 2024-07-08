@@ -154,7 +154,7 @@ public partial class AssetReportPage : ContentPage
             if (totalAmount[0].Amount > 0)
             {
                 var debtPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Bank'" +
-                    ",'NCD','MLD','PPF','EPF')");
+                    ",'NCD','MLD','PPF','EPF','Debt Mutual Fund')");
                 decimal debtPortfolioPercentage = Math.Round((debtPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
                 Label lblDebt = new Label();
                 lblDebt.Text = "Debt/Fixed Income: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", debtPortfolioAmount[0].Amount) + " (" + debtPortfolioPercentage + "%)";
@@ -162,7 +162,7 @@ public partial class AssetReportPage : ContentPage
                 lblDebt.FontAttributes = FontAttributes.Bold;
 
                 var equityPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Insurance_MF'" +
-                    ",'MF','Stocks')");
+                    ",'Equity Mutual Fund','Stocks')");
                 decimal equityPortfolioPercentage = Math.Round((equityPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
                 Label lblEquity = new Label();
                 lblEquity.Text = "Equity: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", equityPortfolioAmount[0].Amount) + " (" + equityPortfolioPercentage + "%)";
