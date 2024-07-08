@@ -154,15 +154,14 @@ public partial class AssetReportPage : ContentPage
             if (totalAmount[0].Amount > 0)
             {
                 var debtPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Bank'" +
-                    ",'NCD','MLD','PPF','EPF','Debt Mutual Fund')");
+                    ",'NCD','MLD','PPF','Debt Mutual Fund')");
                 decimal debtPortfolioPercentage = Math.Round((debtPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
                 Label lblDebt = new Label();
                 lblDebt.Text = "Debt/Fixed Income: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", debtPortfolioAmount[0].Amount) + " (" + debtPortfolioPercentage + "%)";
                 lblDebt.FontSize = 18;
                 lblDebt.FontAttributes = FontAttributes.Bold;
 
-                var equityPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Insurance_MF'" +
-                    ",'Equity Mutual Fund','Stocks')");
+                var equityPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Equity Mutual Fund','Stocks')");
                 decimal equityPortfolioPercentage = Math.Round((equityPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
                 Label lblEquity = new Label();
                 lblEquity.Text = "Equity: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", equityPortfolioAmount[0].Amount) + " (" + equityPortfolioPercentage + "%)";
@@ -177,9 +176,18 @@ public partial class AssetReportPage : ContentPage
                 lblGold.FontSize = 18;
                 lblGold.FontAttributes = FontAttributes.Bold;
 
+                var othersPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Insurance_MF'" +
+                    ",'EPF','NPS','Others')");
+                decimal othersPortfolioPercentage = Math.Round((othersPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
+                Label lblOthers = new Label();
+                lblOthers.Text = "Others: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", othersPortfolioAmount[0].Amount) + " (" + othersPortfolioPercentage + "%)";
+                lblOthers.FontSize = 18;
+                lblOthers.FontAttributes = FontAttributes.Bold;
+
                 stackLayout.Add(lblDebt);
                 stackLayout.Add(lblEquity);
                 stackLayout.Add(lblGold);
+                stackLayout.Add(lblOthers);
 
                 //new report
                 List<AssetAllocationReport> assetAllocationReport = new List<AssetAllocationReport>();
@@ -200,6 +208,13 @@ public partial class AssetReportPage : ContentPage
                 objAssetAllocationGold.Amount = goldPortfolioAmount[0].Amount.ToString();
                 objAssetAllocationGold.PortfolioPercentage = goldPortfolioPercentage.ToString() + "%";
                 assetAllocationReport.Add(objAssetAllocationGold);
+
+                AssetAllocationReport objAssetAllocationOthers = new AssetAllocationReport();
+                objAssetAllocationOthers.AssetType = "Others";
+                objAssetAllocationOthers.Amount = othersPortfolioAmount[0].Amount.ToString();
+                objAssetAllocationOthers.PortfolioPercentage = othersPortfolioPercentage.ToString() + "%";
+                assetAllocationReport.Add(objAssetAllocationOthers);
+
                 ShowAssetAllocationChart(assetAllocationReport);
             }
         }
@@ -328,6 +343,10 @@ public partial class AssetReportPage : ContentPage
                 else if (asset.AssetType == "Gold")
                 {
                     hexCode = "#FFFF00";
+                }
+                else if (asset.AssetType == "Others")
+                {
+                    hexCode = "#FFA500";
                 }
                 ChartEntry chartEntry = new ChartEntry(value)
                 {
