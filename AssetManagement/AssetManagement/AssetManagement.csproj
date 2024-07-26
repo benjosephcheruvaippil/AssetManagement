@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0-android</TargetFrameworks>
+		<TargetFrameworks>net8.0-android34.0</TargetFrameworks>
 		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>-->
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net7.0-tizen</TargetFrameworks> -->
@@ -19,8 +19,8 @@
 		<ApplicationIdGuid>e44d9f3a-6397-4876-bf13-6606255cdef8</ApplicationIdGuid>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>3.1</ApplicationDisplayVersion>
-		<ApplicationVersion>9</ApplicationVersion>
+		<ApplicationDisplayVersion>3.8</ApplicationDisplayVersion>
+		<ApplicationVersion>16</ApplicationVersion>
 		<!--<PublishTrimmed>true</PublishTrimmed>-->
 		<AndroidLinkResources>false</AndroidLinkResources>
 
