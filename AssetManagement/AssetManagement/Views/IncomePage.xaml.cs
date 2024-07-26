@@ -82,7 +82,7 @@ public partial class IncomePage : ContentPage
         try
         {
             await SetUpDb();
-            var incomeCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Income").ToListAsync();
+            var incomeCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Income" && i.IsVisible == true).ToListAsync();
             IncomeExpenseCategories objCategories = new IncomeExpenseCategories
             {
                 IncomeExpenseCategoryId = 0,
