@@ -173,7 +173,7 @@ public partial class ManageCategoriesPage : ContentPage
         {
             incomeExpenseRecord.IsVisible = false;
         }
-        chkIsVisible.IsVisible = (bool)incomeExpenseRecord.IsVisible;
+        chkIsVisible.IsChecked = (bool)incomeExpenseRecord.IsVisible;
         OldCategoryName = entryCategoryName.Text;
     }
 
