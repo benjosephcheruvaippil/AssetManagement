@@ -15,9 +15,9 @@ namespace AssetManagement.Models
         public string CategoryType { get; set; }
         public bool? IsVisible { get; set; }
 
-        public IncomeExpenseCategories()
-        {
-            IsVisible = true;
-        }
+        //public IncomeExpenseCategories()
+        //{
+        //    IsVisible = true;
+        //}
     }
 }
