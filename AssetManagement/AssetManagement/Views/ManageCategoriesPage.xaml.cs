@@ -169,19 +169,11 @@ public partial class ManageCategoriesPage : ContentPage
         txtIncomeExpenseCategoryId.Text = textCell[1].Trim();
         int incomeExpenseCategoryId = Convert.ToInt32(textCell[1].Trim());
         var incomeExpenseRecord = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.IncomeExpenseCategoryId == incomeExpenseCategoryId).FirstOrDefaultAsync();
-        if (incomeExpenseRecord.IsVisible == null)
-        {
-            //IncomeExpenseCategories objIncomeExpenseCat = new IncomeExpenseCategories
-            //{
-            //    IncomeExpenseCategoryId = incomeExpenseCategoryId,
-            //    CategoryName = entryCategoryName.Text.Trim(),
-            //    CategoryType = categoryTypePicker.SelectedItem.ToString(),
-            //    IsVisible = chkIsVisible.IsChecked
-            //};
-            //int rowsAffected = await _dbConnection.UpdateAsync(objIncomeExpenseCat);
-            int result = await _dbConnection.ExecuteAsync("update IncomeExpenseCategories set IsVisible=1 where IncomeExpenseCategoryId=?", incomeExpenseCategoryId);
-            incomeExpenseRecord.IsVisible = true;
-        }
+        //if (incomeExpenseRecord.IsVisible == null)
+        //{
+        //    int result = await _dbConnection.ExecuteAsync("update IncomeExpenseCategories set IsVisible=1 where IncomeExpenseCategoryId=?", incomeExpenseCategoryId);
+        //    incomeExpenseRecord.IsVisible = true;
+        //}
         chkIsVisible.IsChecked = (bool)incomeExpenseRecord.IsVisible;
         OldCategoryName = entryCategoryName.Text;
     }

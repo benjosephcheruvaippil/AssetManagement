@@ -37,10 +37,11 @@ public partial class ExpensePage : ContentPage
 
             CommonFunctions objCommon = new CommonFunctions();
             await objCommon.SetUserCurrencyGlobally();
+            await objCommon.SetCategoriesAsIsVisibleIfNullOrEmpty();
             LoadExpensesInPage("Last5");// show expenses in the expense tab          
             await ShowCurrentMonthExpenses();
             LoadExpenseCategoriesInDropdown();
-            SetLastUploadedDate();
+            //SetLastUploadedDate();
         }
         catch(Exception)
         {

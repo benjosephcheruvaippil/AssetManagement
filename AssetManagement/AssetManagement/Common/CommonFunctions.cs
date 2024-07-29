@@ -141,5 +141,12 @@ namespace AssetManagement.Common
             }
             //set user currency
         }
+
+        public async Task SetCategoriesAsIsVisibleIfNullOrEmpty()
+        {
+            //var data = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.IsVisible == null).ToListAsync();
+            int result = await _dbConnection.ExecuteAsync("update IncomeExpenseCategories set IsVisible=1 where IsVisible is null or IsVisible=''");
+
+        }
     }
 }
