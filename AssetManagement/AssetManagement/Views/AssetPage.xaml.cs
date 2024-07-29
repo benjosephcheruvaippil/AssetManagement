@@ -106,6 +106,30 @@ public partial class AssetPage : TabbedPage
             ShowBankAssetsPopup("EPF,PPF,NPS");
         };
         lblTaxEfficient.GestureRecognizers.Add(labelTaxEfficient);
+
+        var labelDebtMF = new TapGestureRecognizer();
+        labelDebtMF.Tapped += (s, e) =>
+        {
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("EPF,PPF,NPS", _assetService));
+            ShowBankAssetsPopup("Debt Mutual Fund");
+        };
+        lblDebtMF.GestureRecognizers.Add(labelDebtMF);
+
+        var labelEquityMF = new TapGestureRecognizer();
+        labelEquityMF.Tapped += (s, e) =>
+        {
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("EPF,PPF,NPS", _assetService));
+            ShowBankAssetsPopup("Equity Mutual Fund");
+        };
+        lblEquityMF.GestureRecognizers.Add(labelEquityMF);
+
+        var labelStocks = new TapGestureRecognizer();
+        labelStocks.Tapped += (s, e) =>
+        {
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("EPF,PPF,NPS", _assetService));
+            ShowBankAssetsPopup("Stocks");
+        };
+        lblStocks.GestureRecognizers.Add(labelStocks);
     }
 
     public async Task ShowBankAssetsPopup(string labelText)
@@ -136,6 +160,42 @@ public partial class AssetPage : TabbedPage
                 InvestmentEntity = entity.First().InvestmentEntity,
                 TotalAmount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", entity.Sum(s => s.Amount))
             }).ToList();
+        }
+        else if (labelText == "Debt Mutual Fund")
+        {
+            string[] type = labelText.Split(',');
+            investmentEntity = records
+           .Where(w => type.Contains(w.Type))
+           .GroupBy(g => g.InvestmentEntity)
+           .Select(entity => new EntitywiseModel
+           {
+               InvestmentEntity = entity.First().InvestmentEntity,
+               TotalAmount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", entity.Sum(s => s.Amount))
+           }).ToList();
+        }
+        else if (labelText == "Equity Mutual Fund")
+        {
+            string[] type = labelText.Split(',');
+            investmentEntity = records
+           .Where(w => type.Contains(w.Type))
+           .GroupBy(g => g.InvestmentEntity)
+           .Select(entity => new EntitywiseModel
+           {
+               InvestmentEntity = entity.First().InvestmentEntity,
+               TotalAmount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", entity.Sum(s => s.Amount))
+           }).ToList();
+        }
+        else if (labelText == "Stocks")
+        {
+            string[] type = labelText.Split(',');
+            investmentEntity = records
+           .Where(w => type.Contains(w.Type))
+           .GroupBy(g => g.InvestmentEntity)
+           .Select(entity => new EntitywiseModel
+           {
+               InvestmentEntity = entity.First().InvestmentEntity,
+               TotalAmount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", entity.Sum(s => s.Amount))
+           }).ToList();
         }
         else
         {
