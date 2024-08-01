@@ -37,10 +37,11 @@ public partial class ExpensePage : ContentPage
 
             CommonFunctions objCommon = new CommonFunctions();
             await objCommon.SetUserCurrencyGlobally();
+            await objCommon.SetCategoriesAsIsVisibleIfNullOrEmpty();
             LoadExpensesInPage("Last5");// show expenses in the expense tab          
             await ShowCurrentMonthExpenses();
             LoadExpenseCategoriesInDropdown();
-            SetLastUploadedDate();
+            //SetLastUploadedDate();
         }
         catch(Exception)
         {
@@ -109,7 +110,7 @@ public partial class ExpensePage : ContentPage
         try
         {
             await SetUpDb();
-            var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
+            var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense" && i.IsVisible == true).ToListAsync();
             IncomeExpenseCategories objCategories = new IncomeExpenseCategories
             {
                 IncomeExpenseCategoryId = 0,

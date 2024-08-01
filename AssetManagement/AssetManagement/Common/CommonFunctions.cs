@@ -57,9 +57,9 @@ namespace AssetManagement.Common
                 {
                     List<IncomeExpenseCategories> objExpenseCategory = new List<IncomeExpenseCategories>
                 {
-                    new IncomeExpenseCategories{CategoryName="Household Items",CategoryType="Expense"},
-                    new IncomeExpenseCategories{CategoryName="Autombile",CategoryType="Expense"},
-                    new IncomeExpenseCategories{CategoryName="Leisure",CategoryType="Expense"}
+                    new IncomeExpenseCategories{CategoryName="Household Items",CategoryType="Expense",IsVisible=true},
+                    new IncomeExpenseCategories{CategoryName="Autombile",CategoryType="Expense",IsVisible=true},
+                    new IncomeExpenseCategories{CategoryName="Leisure",CategoryType="Expense",IsVisible=true}
                 };
                     await _dbConnection.InsertAllAsync(objExpenseCategory);
                 }
@@ -71,9 +71,9 @@ namespace AssetManagement.Common
                 {
                     List<IncomeExpenseCategories> objExpenseCategory = new List<IncomeExpenseCategories>
                 {
-                    new IncomeExpenseCategories{CategoryName="Salary",CategoryType="Income"},
-                    new IncomeExpenseCategories{CategoryName="Business Income",CategoryType="Income"},
-                    new IncomeExpenseCategories{CategoryName="Passive Income",CategoryType="Income"}
+                    new IncomeExpenseCategories{CategoryName="Salary",CategoryType="Income",IsVisible=true},
+                    new IncomeExpenseCategories{CategoryName="Business Income",CategoryType="Income",IsVisible=true},
+                    new IncomeExpenseCategories{CategoryName="Passive Income",CategoryType="Income",IsVisible=true}
                 };
                     await _dbConnection.InsertAllAsync(objExpenseCategory);
                 }
@@ -140,6 +140,13 @@ namespace AssetManagement.Common
                 Constants.SetCurrency(userCurrency.CurrencyCode);
             }
             //set user currency
+        }
+
+        public async Task SetCategoriesAsIsVisibleIfNullOrEmpty()
+        {
+            //var data = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.IsVisible == null).ToListAsync();
+            int result = await _dbConnection.ExecuteAsync("update IncomeExpenseCategories set IsVisible=1 where IsVisible is null or IsVisible=''");
+
         }
     }
 }
