@@ -1,4 +1,5 @@
-﻿using AssetManagement.Services;
+﻿using AssetManagement.Models.Constants;
+using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using AssetManagement.Views;
 //using Mopups.Interfaces;
@@ -19,7 +20,17 @@ public partial class App : Application
         //_popupNavigation= popupNavigation;
         _assetService= assetService;
 
-        //MainPage = new NavigationPage(new AssetListPage(_viewModel, _popupNavigation, _assetService));
-        MainPage = new AppFlyoutPage(_viewModel, _assetService);
+        bool isFirstLaunch = Preferences.Get("IsFirstLaunch", true);
+
+        if (isFirstLaunch)
+        {
+            MainPage = new NavigationPage(new AppLaunchPage(_viewModel, _assetService,Constants.FromLaunchPage));
+            Preferences.Set("IsFirstLaunch", false);
+        }
+        else
+        {
+            //MainPage = new NavigationPage(new AssetListPage(_viewModel, _popupNavigation, _assetService));
+            MainPage = new AppFlyoutPage(_viewModel, _assetService);
+        }
     }
 }

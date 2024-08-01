@@ -49,13 +49,13 @@ public partial class ManageUsersPage : ContentPage
 
     private async void btnSaveOwner_Clicked(object sender, EventArgs e)
     {
-        entryOwnerName.Text = entryOwnerName.Text.Trim();
         if (string.IsNullOrEmpty(entryOwnerName.Text))
         {
             await DisplayAlert("Message", "Please input name", "OK");
             return;
         }
-        
+        entryOwnerName.Text = entryOwnerName.Text.Trim();
+
         if (string.IsNullOrEmpty(txtOwnerId.Text))//insert
         {
             //check if duplicate names exist

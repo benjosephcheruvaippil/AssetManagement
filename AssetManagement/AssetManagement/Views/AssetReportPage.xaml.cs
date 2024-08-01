@@ -1,4 +1,5 @@
 using AssetManagement.Models;
+using AssetManagement.Models.Constants;
 using AssetManagement.Models.Reports;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
@@ -27,9 +28,9 @@ public partial class AssetReportPage : ContentPage
         _viewModel = viewModel;
         _assetService = assetService;
         SetUpDb();
-        SummaryByHolderName();
-        ShowAssetsByEquityAndDebt();
-        ShowNetWorthChart();
+        //SummaryByHolderName();
+        //ShowAssetsByEquityAndDebt();
+        //ShowNetWorthChart();
     }
 
     private void SetUpDb()
@@ -41,15 +42,39 @@ public partial class AssetReportPage : ContentPage
         }
     }
 
-    public async void SummaryByHolderName()
+    protected override void OnAppearing()
     {
+        base.OnAppearing();
+
+        //Device.BeginInvokeOnMainThread(async () =>
+        //{
+        //    await DisplayAlert("Welcome", "The secondary page has opened!", "OK");
+        //});
+        Task.Run(async () => { await CheckIfAssetsPresent(); });
+        
+    }
+    public async Task CheckIfAssetsPresent()
+    {
+        await MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            if (await SummaryByHolderName())
+            {
+                ShowAssetsByEquityAndDebt();
+                ShowNetWorthChart();
+            }
+        });
+    }
+
+    public async Task<bool> SummaryByHolderName()
+    {
+        bool dataExists = false;
         try
         {
             var holders = await _dbConnection.QueryAsync<Assets>("select Holder from Assets Group By Holder");
-
             List<Assets> holderDetailList = new List<Assets>();
             if (holders.Count > 0)
             {
+                dataExists = true;
                 foreach (var holder in holders)
                 {
                     if (!string.IsNullOrEmpty(holder.Holder))
@@ -78,7 +103,7 @@ public partial class AssetReportPage : ContentPage
                         //set to white color
                         objHolder.TextColor = Color.FromArgb("#FFFFFF");
                     }
-                    objHolder.Detail = string.Format(new CultureInfo("en-IN"), "{0:C0}", holder.Amount);
+                    objHolder.Detail = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", holder.Amount);
                     objHolder.Height = 40;
                     objHolder.Tapped += (sender, args) =>
                     {
@@ -102,6 +127,7 @@ public partial class AssetReportPage : ContentPage
         {
             await DisplayAlert("Info", ex.Message, "Ok");
         }
+        return dataExists;
     }
 
     public async void ShowAssetsByHolder(string holderName)
@@ -114,7 +140,7 @@ public partial class AssetReportPage : ContentPage
 
         foreach (var item in investmentEntity)
         {
-            displayText = displayText + item.InvestmentEntity + ": " + string.Format(new CultureInfo("en-IN"), "{0:C0}", item.Amount) + "\n";
+            displayText = displayText + item.InvestmentEntity + ": " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", item.Amount) + "\n";
         }
 
         await DisplayAlert("Asset Info", displayText, "Ok");
@@ -128,18 +154,17 @@ public partial class AssetReportPage : ContentPage
             if (totalAmount[0].Amount > 0)
             {
                 var debtPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Bank'" +
-                    ",'NCD','MLD','PPF','EPF')");
+                    ",'NCD','MLD','PPF','Debt Mutual Fund')");
                 decimal debtPortfolioPercentage = Math.Round((debtPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
                 Label lblDebt = new Label();
-                lblDebt.Text = "Debt/Fixed Income: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", debtPortfolioAmount[0].Amount) + " (" + debtPortfolioPercentage + "%)";
+                lblDebt.Text = "Debt/Fixed Income: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", debtPortfolioAmount[0].Amount) + " (" + debtPortfolioPercentage + "%)";
                 lblDebt.FontSize = 18;
                 lblDebt.FontAttributes = FontAttributes.Bold;
 
-                var equityPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Insurance_MF'" +
-                    ",'MF','Stocks')");
+                var equityPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Equity Mutual Fund','Stocks')");
                 decimal equityPortfolioPercentage = Math.Round((equityPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
                 Label lblEquity = new Label();
-                lblEquity.Text = "Equity: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", equityPortfolioAmount[0].Amount) + " (" + equityPortfolioPercentage + "%)";
+                lblEquity.Text = "Equity: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", equityPortfolioAmount[0].Amount) + " (" + equityPortfolioPercentage + "%)";
                 lblEquity.FontSize = 18;
                 lblEquity.FontAttributes = FontAttributes.Bold;
 
@@ -147,13 +172,22 @@ public partial class AssetReportPage : ContentPage
                     ",'Gold')");
                 decimal goldPortfolioPercentage = Math.Round((goldPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
                 Label lblGold = new Label();
-                lblGold.Text = "Gold: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", goldPortfolioAmount[0].Amount) + " (" + goldPortfolioPercentage + "%)";
+                lblGold.Text = "Gold: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", goldPortfolioAmount[0].Amount) + " (" + goldPortfolioPercentage + "%)";
                 lblGold.FontSize = 18;
                 lblGold.FontAttributes = FontAttributes.Bold;
+
+                var othersPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Insurance_MF'" +
+                    ",'EPF','NPS','Others')");
+                decimal othersPortfolioPercentage = Math.Round((othersPortfolioAmount[0].Amount / totalAmount[0].Amount) * 100, 2);
+                Label lblOthers = new Label();
+                lblOthers.Text = "Others: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", othersPortfolioAmount[0].Amount) + " (" + othersPortfolioPercentage + "%)";
+                lblOthers.FontSize = 18;
+                lblOthers.FontAttributes = FontAttributes.Bold;
 
                 stackLayout.Add(lblDebt);
                 stackLayout.Add(lblEquity);
                 stackLayout.Add(lblGold);
+                stackLayout.Add(lblOthers);
 
                 //new report
                 List<AssetAllocationReport> assetAllocationReport = new List<AssetAllocationReport>();
@@ -174,6 +208,13 @@ public partial class AssetReportPage : ContentPage
                 objAssetAllocationGold.Amount = goldPortfolioAmount[0].Amount.ToString();
                 objAssetAllocationGold.PortfolioPercentage = goldPortfolioPercentage.ToString() + "%";
                 assetAllocationReport.Add(objAssetAllocationGold);
+
+                AssetAllocationReport objAssetAllocationOthers = new AssetAllocationReport();
+                objAssetAllocationOthers.AssetType = "Others";
+                objAssetAllocationOthers.Amount = othersPortfolioAmount[0].Amount.ToString();
+                objAssetAllocationOthers.PortfolioPercentage = othersPortfolioPercentage.ToString() + "%";
+                assetAllocationReport.Add(objAssetAllocationOthers);
+
                 ShowAssetAllocationChart(assetAllocationReport);
             }
         }
@@ -260,7 +301,7 @@ public partial class AssetReportPage : ContentPage
                     ChartEntry chartEntry = new ChartEntry(value)
                     {
                         Label = log.DisplayLabel,
-                        ValueLabel = string.Format(new CultureInfo("en-IN"), "{0:C0}", roundedAssetValue),
+                        ValueLabel = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", roundedAssetValue),
                         Color = SKColor.Parse("#3498db")
                     };
                     listChartEntry.Add(chartEntry);
@@ -302,6 +343,10 @@ public partial class AssetReportPage : ContentPage
                 else if (asset.AssetType == "Gold")
                 {
                     hexCode = "#FFFF00";
+                }
+                else if (asset.AssetType == "Others")
+                {
+                    hexCode = "#FFA500";
                 }
                 ChartEntry chartEntry = new ChartEntry(value)
                 {

@@ -70,7 +70,8 @@ public partial class ManageCategoriesPage : ContentPage
             IncomeExpenseCategories objIncomeExpenseCat = new IncomeExpenseCategories
             {
                 CategoryName = entryCategoryName.Text.Trim(),
-                CategoryType = categoryTypePicker.SelectedItem.ToString()
+                CategoryType = categoryTypePicker.SelectedItem.ToString(),
+                IsVisible = chkIsVisible.IsChecked
             };
             await SetUpDb();
             int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpenseCat);
@@ -106,7 +107,8 @@ public partial class ManageCategoriesPage : ContentPage
             {
                 IncomeExpenseCategoryId = incomeExpenseCategoryId,
                 CategoryName = entryCategoryName.Text.Trim(),
-                CategoryType = categoryTypePicker.SelectedItem.ToString()
+                CategoryType = categoryTypePicker.SelectedItem.ToString(),
+                IsVisible = chkIsVisible.IsChecked
             };
             await SetUpDb();
             int rowsAffected = await _dbConnection.UpdateAsync(objIncomeExpenseCat);
@@ -156,7 +158,7 @@ public partial class ManageCategoriesPage : ContentPage
         }
     }
 
-    private void ObjCell_Tapped(object sender, EventArgs e)
+    private async void ObjCell_Tapped(object sender, EventArgs e)
     {
 
         var tappedViewCell = (TextCell)sender;
@@ -165,6 +167,14 @@ public partial class ManageCategoriesPage : ContentPage
         entryCategoryName.Text = textCell[0].Trim();
         categoryTypePicker.SelectedItem = tappedViewCell.Detail;
         txtIncomeExpenseCategoryId.Text = textCell[1].Trim();
+        int incomeExpenseCategoryId = Convert.ToInt32(textCell[1].Trim());
+        var incomeExpenseRecord = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.IncomeExpenseCategoryId == incomeExpenseCategoryId).FirstOrDefaultAsync();
+        //if (incomeExpenseRecord.IsVisible == null)
+        //{
+        //    int result = await _dbConnection.ExecuteAsync("update IncomeExpenseCategories set IsVisible=1 where IncomeExpenseCategoryId=?", incomeExpenseCategoryId);
+        //    incomeExpenseRecord.IsVisible = true;
+        //}
+        chkIsVisible.IsChecked = (bool)incomeExpenseRecord.IsVisible;
         OldCategoryName = entryCategoryName.Text;
     }
 

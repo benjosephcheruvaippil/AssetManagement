@@ -1,15 +1,12 @@
 using AssetManagement.Models;
 using AssetManagement.Models.Constants;
-using AssetManagement.Models.FirestoreModel;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using CommunityToolkit.Maui.Storage;
 using ExcelDataReader;
-using Google.Cloud.Firestore;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 //using Mopups.Interfaces;
-using Newtonsoft.Json;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using SQLite;
@@ -27,23 +24,23 @@ public partial class AssetPage : TabbedPage
     //private IPopupNavigation _popupNavigation;
     private readonly IAssetService _assetService;
     private readonly HttpClient httpClient = new();
-    public bool IsRefreshing { get; set; }
-    public ObservableCollection<Assets> Assets { get; set; } = new();
-    public Command RefreshCommand { get; set; }
-    public Assets SelectedAsset { get; set; }
-    public bool PaginationEnabled { get; set; } = true;
+    //public bool IsRefreshing { get; set; } = true;
+    //public ObservableCollection<Assets> Assets { get; set; } = new();
+    //public Command RefreshCommand { get; set; }
+    //public Assets SelectedAsset { get; set; }
+    //public bool PaginationEnabled { get; set; } = true;
     public AssetPage(AssetListPageViewModel viewModel, IAssetService assetService)
     {
-        RefreshCommand = new Command(async () =>
-        {
-            // Simulate delay
-            await Task.Delay(2000);
+        //RefreshCommand = new Command(async () =>
+        //{
+        //    // Simulate delay
+        //    await Task.Delay(2000);
 
-            await LoadAssets();
+        //    await LoadAssets();
 
-            IsRefreshing = false;
-            OnPropertyChanged(nameof(IsRefreshing));
-        });
+        //    IsRefreshing = true;
+        //    OnPropertyChanged(nameof(IsRefreshing));
+        //});
 
         //BindingContext = this;
 
@@ -109,6 +106,30 @@ public partial class AssetPage : TabbedPage
             ShowBankAssetsPopup("EPF,PPF,NPS");
         };
         lblTaxEfficient.GestureRecognizers.Add(labelTaxEfficient);
+
+        var labelDebtMF = new TapGestureRecognizer();
+        labelDebtMF.Tapped += (s, e) =>
+        {
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("EPF,PPF,NPS", _assetService));
+            ShowBankAssetsPopup("Debt Mutual Fund");
+        };
+        lblDebtMF.GestureRecognizers.Add(labelDebtMF);
+
+        var labelEquityMF = new TapGestureRecognizer();
+        labelEquityMF.Tapped += (s, e) =>
+        {
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("EPF,PPF,NPS", _assetService));
+            ShowBankAssetsPopup("Equity Mutual Fund");
+        };
+        lblEquityMF.GestureRecognizers.Add(labelEquityMF);
+
+        var labelStocks = new TapGestureRecognizer();
+        labelStocks.Tapped += (s, e) =>
+        {
+            //_popupNavigation.PushAsync(new AssetsByCategoryPage("EPF,PPF,NPS", _assetService));
+            ShowBankAssetsPopup("Stocks");
+        };
+        lblStocks.GestureRecognizers.Add(labelStocks);
     }
 
     public async Task ShowBankAssetsPopup(string labelText)
@@ -125,7 +146,7 @@ public partial class AssetPage : TabbedPage
             .Select(entity => new EntitywiseModel
             {
                 InvestmentEntity = entity.First().InvestmentEntity,
-                TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
+                TotalAmount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", entity.Sum(s => s.Amount))
             }).ToList();
         }
         else if (labelText == "EPF,PPF,NPS")
@@ -137,8 +158,44 @@ public partial class AssetPage : TabbedPage
             .Select(entity => new EntitywiseModel
             {
                 InvestmentEntity = entity.First().InvestmentEntity,
-                TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
+                TotalAmount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", entity.Sum(s => s.Amount))
             }).ToList();
+        }
+        else if (labelText == "Debt Mutual Fund")
+        {
+            string[] type = labelText.Split(',');
+            investmentEntity = records
+           .Where(w => type.Contains(w.Type))
+           .GroupBy(g => g.InvestmentEntity)
+           .Select(entity => new EntitywiseModel
+           {
+               InvestmentEntity = entity.First().InvestmentEntity,
+               TotalAmount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", entity.Sum(s => s.Amount))
+           }).ToList();
+        }
+        else if (labelText == "Equity Mutual Fund")
+        {
+            string[] type = labelText.Split(',');
+            investmentEntity = records
+           .Where(w => type.Contains(w.Type))
+           .GroupBy(g => g.InvestmentEntity)
+           .Select(entity => new EntitywiseModel
+           {
+               InvestmentEntity = entity.First().InvestmentEntity,
+               TotalAmount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", entity.Sum(s => s.Amount))
+           }).ToList();
+        }
+        else if (labelText == "Stocks")
+        {
+            string[] type = labelText.Split(',');
+            investmentEntity = records
+           .Where(w => type.Contains(w.Type))
+           .GroupBy(g => g.InvestmentEntity)
+           .Select(entity => new EntitywiseModel
+           {
+               InvestmentEntity = entity.First().InvestmentEntity,
+               TotalAmount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", entity.Sum(s => s.Amount))
+           }).ToList();
         }
         else
         {
@@ -148,7 +205,7 @@ public partial class AssetPage : TabbedPage
                 .Select(entity => new EntitywiseModel
                 {
                     InvestmentEntity = entity.First().InvestmentEntity,
-                    TotalAmount = string.Format(new CultureInfo("en-IN"), "{0:C0}", entity.Sum(s => s.Amount))
+                    TotalAmount = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", entity.Sum(s => s.Amount))
                 }).ToList();
         }
 
@@ -164,6 +221,9 @@ public partial class AssetPage : TabbedPage
     {
         base.OnNavigatedTo(args);
 
+        //this method can be removed after some months.(by 2025 January)
+        await AssetUpdatesOnLoad();
+        //this method can be removed after some months.(by 2025 January)
         await LoadAssets();
     }
 
@@ -176,6 +236,23 @@ public partial class AssetPage : TabbedPage
         catch
         {
             await DisplayAlert("Info", "Welcome to asset management!", "OK");
+        }
+    }
+
+    private async Task AssetUpdatesOnLoad()
+    {
+        try
+        {
+            await SetUpDb();
+            int MFAssets = await _dbConnection.Table<Assets>().Where(a => a.Type == "MF").CountAsync();
+            if (MFAssets > 0)
+            {
+                var rowsAffected = await _dbConnection.ExecuteAsync("Update Assets set Type='Equity Mutual Fund' where Type='MF'");
+            }
+        }
+        catch
+        {
+            return;
         }
     }
 
@@ -212,7 +289,7 @@ public partial class AssetPage : TabbedPage
         base.OnAppearing();
 
         LoadOwnersInDropdown();
-        lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", await _viewModel.GetAssetsList());
+        lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", await _viewModel.GetAssetsList());
         await ShowPrimaryAssetDetails();
     }
 
@@ -332,7 +409,7 @@ public partial class AssetPage : TabbedPage
         await SetUpDb();
         List<Assets> records = await _dbConnection.Table<Assets>().ToListAsync();
         decimal NetAssetValue = records.Sum(s => s.Amount);
-        string result = "Net Asset Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", NetAssetValue);
+        string result = "Net Asset Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", NetAssetValue);
         lblNetAssetValue.Text = result;
 
         decimal BankAssets = records.Where(b => b.Type == "Bank").Sum(s => s.Amount);
@@ -343,23 +420,25 @@ public partial class AssetPage : TabbedPage
         decimal Gold = records.Where(b => b.Type == "Gold" || b.Type=="SGB").Sum(s => s.Amount);
         //decimal PPF = records.Where(b => b.Type == "PPF").Sum(s => s.Amount);
         //decimal EPF = records.Where(b => b.Type == "EPF").Sum(s => s.Amount);
-        decimal MutualFunds = records.Where(b => b.Type == "MF").Sum(s => s.Amount);
+        decimal DebtMutualFunds = records.Where(b => b.Type == "Debt Mutual Fund").Sum(s => s.Amount);
+        decimal EquityMutualFunds = records.Where(b => b.Type == "Equity Mutual Fund").Sum(s => s.Amount);
         decimal Stocks = records.Where(b => b.Type == "Stocks").Sum(s => s.Amount);
         decimal Others = records.Where(b => b.Type == "Others").Sum(s => s.Amount);
         decimal TaxEfficient = records.Where(b => b.Type == "PPF" || b.Type == "EPF" || b.Type == "NPS").Sum(s => s.Amount);
 
-        lblBank.Text = "Bank Assets Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", BankAssets);
-        lblNCD.Text = "Non Convertible Debentures: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", NCDAssets);
-        lblMLD.Text = "Market Linked Debentures: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", MLDAssets);
+        lblBank.Text = "Bank Assets Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", BankAssets);
+        lblNCD.Text = "Non Convertible Debentures: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", NCDAssets);
+        lblMLD.Text = "Market Linked Debentures: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", MLDAssets);
 
-        lblInsuranceMF.Text = "Insurance/MF: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Insurance_MF);
-        lblGold.Text = "Gold: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Gold);
-        lblOthers.Text = "Others: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Others);
-        //lblPPF.Text = "Public Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", PPF);
-        //lblEPF.Text = "Employee Provident Fund: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", EPF);
-        lblTaxEfficient.Text = "Tax Efficient Investments: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", TaxEfficient);
-        lblMF.Text = "Mutual Funds: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", MutualFunds);
-        lblStocks.Text = "Stocks: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Stocks);     
+        lblInsuranceMF.Text = "Insurance/MF: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Insurance_MF);
+        lblGold.Text = "Gold: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Gold);
+        lblOthers.Text = "Others: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Others);
+        //lblPPF.Text = "Public Provident Fund: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", PPF);
+        //lblEPF.Text = "Employee Provident Fund: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", EPF);
+        lblTaxEfficient.Text = "Tax Efficient Investments: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", TaxEfficient);
+        lblDebtMF.Text = "Debt Mutual Funds: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", DebtMutualFunds);
+        lblEquityMF.Text = "Equity Mutual Funds: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", EquityMutualFunds);
+        lblStocks.Text = "Stocks: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Stocks);     
 
         decimal projectedAmount = 0;
         foreach (var item in records)
@@ -377,7 +456,7 @@ public partial class AssetPage : TabbedPage
                 projectedAmount = projectedAmount + item.Amount;
             }
         }
-        lblProjectedAssetValue.Text = "Projected Asset Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", Math.Round(projectedAmount, 2));
+        lblProjectedAssetValue.Text = "Projected Asset Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Math.Round(projectedAmount, 2));
 
     }
 
@@ -388,7 +467,7 @@ public partial class AssetPage : TabbedPage
         {
             daysLeft = "0";
         }
-        lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo("en-IN"), "{0:C0}", await _viewModel.GetMaturingAssetsListByDaysLeft(Convert.ToInt32(daysLeft)));
+        lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", await _viewModel.GetMaturingAssetsListByDaysLeft(Convert.ToInt32(daysLeft)));
     }
 
     private async void btnSave_Clicked(object sender, EventArgs e)
@@ -414,7 +493,7 @@ public partial class AssetPage : TabbedPage
             Remarks = entRemarks.Text
         };
 
-        if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "MF" || objAsset.Type == "Stocks" || objAsset.Type == "NPS" || objAsset.Type == "Others")
+        if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "Equity Mutual Fund" || objAsset.Type == "Debt Mutual Fund" || objAsset.Type == "Stocks" || objAsset.Type == "NPS" || objAsset.Type == "Others")
         {
             objAsset.AsOfDate = entAsOfDate.Date;
             objAsset.StartDate= Convert.ToDateTime("01-01-0001");
@@ -477,6 +556,17 @@ public partial class AssetPage : TabbedPage
                 int rowsAffected = await _dbConnection.DeleteAsync(objAsset);
                 if (rowsAffected > 0)
                 {
+                    //add asset audit log
+                    double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>("select SUM(Amount) from Assets");
+
+                    AssetAuditLog objAssetAuditLog = new AssetAuditLog
+                    {
+                        LiquidAssetValue = netAssetValue,
+                        NetAssetValue = netAssetValue,
+                        CreatedDate = DateTime.Now
+                    };
+                    await _dbConnection.InsertAsync(objAssetAuditLog);
+                    //add asset audit log
                     await DisplayAlert("Message", "Asset Deleted", "OK");
                     await LoadAssets();
                 }
@@ -492,10 +582,10 @@ public partial class AssetPage : TabbedPage
     {
         string type = entType.SelectedItem.ToString();
 
-        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "MF" || type == "Stocks" || type == "NPS" || type == "Others")
+        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "Equity Mutual Fund" || type == "Debt Mutual Fund" || type == "Stocks" || type == "NPS" || type == "Others")
         {
-            entStartDate.Date = Convert.ToDateTime("01-01-0001");
-            entMaturityDate.Date = Convert.ToDateTime("01-01-0001");
+            entStartDate.Date = DateTime.Now;
+            entMaturityDate.Date = DateTime.Now;
 
             entStartDate.IsEnabled = false;
             entMaturityDate.IsEnabled = false;
@@ -503,7 +593,7 @@ public partial class AssetPage : TabbedPage
         }
         else
         {
-            entAsOfDate.Date = Convert.ToDateTime("01-01-0001");
+            entAsOfDate.Date = DateTime.Now;
 
             entStartDate.IsEnabled = true;
             entMaturityDate.IsEnabled = true;
@@ -520,216 +610,216 @@ public partial class AssetPage : TabbedPage
         //await DisplayAlert("Message", entAssetSearch.Text, "OK");
     }
 
-    private async void btnUploadAssets_Clicked(object sender, EventArgs e)
-    {
-        bool userResponse = await DisplayAlert("Message", "Are you sure to upload data to firestore DB?", "Yes", "No");
-        if (!userResponse)
-        {
-            return;
-        }
-        activityIndicator.IsVisible = true;
-        activityIndicator.IsRunning = true;
-        var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+    //private async void btnUploadAssets_Clicked(object sender, EventArgs e)
+    //{
+    //    bool userResponse = await DisplayAlert("Message", "Are you sure to upload data to firestore DB?", "Yes", "No");
+    //    if (!userResponse)
+    //    {
+    //        return;
+    //    }
+    //    activityIndicator.IsVisible = true;
+    //    activityIndicator.IsRunning = true;
+    //    var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
 
-        using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
-        using var dest = File.Create(localPath);
-        await json.CopyToAsync(dest);
+    //    using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+    //    using var dest = File.Create(localPath);
+    //    await json.CopyToAsync(dest);
 
-        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
-        dest.Close();
-        string projectId = "firestoredemo-d2bdc";
-        var _fireStoreDb = FirestoreDb.Create(projectId);
+    //    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
+    //    dest.Close();
+    //    string projectId = "firestoredemo-d2bdc";
+    //    var _fireStoreDb = FirestoreDb.Create(projectId);
 
-        await DeleteAllDocumentsInCollection(Constants.AssetFirestoreCollection);
-        //deleted all records in firestore
-
-
-        await SetUpDb();
-        List<Assets> assets = await _dbConnection.Table<Assets>().ToListAsync();
-        int writeFlag = 0;
+    //    await DeleteAllDocumentsInCollection(Constants.AssetFirestoreCollection);
+    //    //deleted all records in firestore
 
 
-
-        CollectionReference collectionReference = _fireStoreDb.Collection(Constants.AssetFirestoreCollection);
-
-        foreach (var asset in assets)
-        {
-            AssetDetails assetDetail = new AssetDetails();
-            assetDetail.AssetId = asset.AssetId;
-            assetDetail.InvestmentEntity = asset.InvestmentEntity;
-            assetDetail.Type = asset.Type;
-            assetDetail.Amount = Convert.ToDouble(asset.Amount);
-            assetDetail.InterestRate = Convert.ToDouble(asset.InterestRate);
-            assetDetail.InterestFrequency = asset.InterestFrequency;
-            assetDetail.Holder = asset.Holder;
-            assetDetail.Remarks = asset.Remarks;
-            assetDetail.StartDate = Convert.ToString(asset.StartDate);
-            assetDetail.MaturityDate = Convert.ToString(asset.MaturityDate);
-            assetDetail.AsOfDate = Convert.ToString(asset.AsOfDate);
-
-            var result = await collectionReference.AddAsync(assetDetail);
-            writeFlag++;
-        }
-
-        if (writeFlag == assets.Count)
-        {
-            //DataSyncAudit objSync = new DataSyncAudit
-            //{
-            //    Date = DateTime.Now,
-            //    Action = "Upload"
-            //};
-            //await _dbConnection.InsertAsync(objSync);
-            //lblLastUploaded.Text = "Last Uploaded: " + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt");
-            activityIndicator.IsVisible = false;
-            activityIndicator.IsRunning = false;
-            await DisplayAlert("Message", "Data Upload Successful", "OK");
-
-        }
-        else
-        {
-            activityIndicator.IsVisible = false;
-            activityIndicator.IsRunning = false;
-            await DisplayAlert("Error", "Something went wrong", "OK");
-        }
-    }
-
-    private async void btnDownloadAssets_Clicked(object sender, EventArgs e)
-    {      
-        await SetUpDb();
-        var existingRecords = await _dbConnection.Table<Assets>().Take(1).ToListAsync();
-        if (existingRecords.Count > 0)
-        {
-            bool userResponse = await DisplayAlert("Message", "There are existing records in the local database.Do you want to overwrite them?", "Yes", "No");
-            if (userResponse)
-            {
-                int recordsDeleted = await _dbConnection.ExecuteAsync("Delete from Assets"); //delete all present records in sqlite db
-                activityIndicator.IsVisible = true;
-                activityIndicator.IsRunning = true;
-                await DownloadData();
-            }
-            activityIndicator.IsVisible = false;
-            activityIndicator.IsRunning = false;
-        }
-        else
-        {
-            activityIndicator.IsVisible = true;
-            activityIndicator.IsRunning = true;
-            await DownloadData();
-        }
-    }
-
-    public async Task DeleteAllDocumentsInCollection(string collectionPath)
-    {
-        var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
-
-        using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
-        using var dest = File.Create(localPath);
-        await json.CopyToAsync(dest);
-
-        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
-        dest.Close();
-        string projectId = "firestoredemo-d2bdc";
-        var _fireStoreDb = FirestoreDb.Create(projectId);
-
-        CollectionReference collectionRef = _fireStoreDb.Collection(collectionPath);
-
-        // Get all documents in the collection
-        QuerySnapshot snapshot = await collectionRef.GetSnapshotAsync();
-
-        // Delete each document
-        foreach (DocumentSnapshot document in snapshot.Documents)
-        {
-            await document.Reference.DeleteAsync();
-        }
-    }
-
-    public async Task DownloadData()
-    {
-        var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
-
-        using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
-        using var dest = File.Create(localPath);
-        await json.CopyToAsync(dest);
-
-        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
-        dest.Close();
-        string projectId = "firestoredemo-d2bdc";
-        var _fireStoreDb = FirestoreDb.Create(projectId);
-
-        int rowsAffected = 0;
-        try
-        {
-            Query orderQuery = _fireStoreDb.Collection(Constants.AssetFirestoreCollection);
-            QuerySnapshot orderQuerySnapshot = await orderQuery.GetSnapshotAsync();
-            List<AssetDetails> assetObj = new List<AssetDetails>();
-
-            foreach (DocumentSnapshot documentSnapshot in orderQuerySnapshot.Documents)
-            {
-                if (documentSnapshot.Exists)
-                {
-                    Dictionary<string, object> dictionary = documentSnapshot.ToDictionary();
-                    string jsonObj = JsonConvert.SerializeObject(dictionary);
-                    AssetDetails newAssetObj = JsonConvert.DeserializeObject<AssetDetails>(jsonObj);
-                    assetObj.Add(newAssetObj);
-                }
-            }
-
-            foreach (var item in assetObj)
-            {
-                Assets model = new Assets();
-                model.InvestmentEntity = item.InvestmentEntity;
-                model.Type = item.Type;
-                model.Amount = Convert.ToDecimal(item.Amount);
-                model.InterestRate = Convert.ToDecimal(item.InterestRate);
-                model.InterestFrequency = item.InterestFrequency;
-                model.Holder = item.Holder;
-                model.Remarks = item.Remarks;
-                if (DateTime.TryParse(item.StartDate, out DateTime startDate))
-                {
-                    model.StartDate = Convert.ToDateTime(item.StartDate);
-                }
-                else
-                {
-                    model.StartDate = DateTime.Now;
-                }
-
-                if (DateTime.TryParse(item.MaturityDate, out DateTime maturityDate))
-                {
-                    model.MaturityDate = Convert.ToDateTime(item.MaturityDate);
-                }
-                else
-                {
-                    model.MaturityDate = DateTime.Now;
-                }
-
-                if (DateTime.TryParse(item.AsOfDate, out DateTime asOfDate))
-                {
-                    model.AsOfDate = Convert.ToDateTime(item.AsOfDate);
-                }
-                else
-                {
-                    model.AsOfDate = DateTime.Now;
-                }
-
-                rowsAffected = rowsAffected + await _dbConnection.InsertAsync(model);
-            }
+    //    await SetUpDb();
+    //    List<Assets> assets = await _dbConnection.Table<Assets>().ToListAsync();
+    //    int writeFlag = 0;
 
 
-            if (rowsAffected == assetObj.Count)
-            {
-                activityIndicator.IsVisible = false;
-                activityIndicator.IsRunning = false;
-                await DisplayAlert("Message", "Success", "OK");
-            }
-            else
-            {
-                activityIndicator.IsVisible = false;
-                activityIndicator.IsRunning = false;
-                await DisplayAlert("Error", "Something went wrong", "OK");
-            }
-        }
-        catch (Exception) { throw; }
-    }
+
+    //    CollectionReference collectionReference = _fireStoreDb.Collection(Constants.AssetFirestoreCollection);
+
+    //    foreach (var asset in assets)
+    //    {
+    //        AssetDetails assetDetail = new AssetDetails();
+    //        assetDetail.AssetId = asset.AssetId;
+    //        assetDetail.InvestmentEntity = asset.InvestmentEntity;
+    //        assetDetail.Type = asset.Type;
+    //        assetDetail.Amount = Convert.ToDouble(asset.Amount);
+    //        assetDetail.InterestRate = Convert.ToDouble(asset.InterestRate);
+    //        assetDetail.InterestFrequency = asset.InterestFrequency;
+    //        assetDetail.Holder = asset.Holder;
+    //        assetDetail.Remarks = asset.Remarks;
+    //        assetDetail.StartDate = Convert.ToString(asset.StartDate);
+    //        assetDetail.MaturityDate = Convert.ToString(asset.MaturityDate);
+    //        assetDetail.AsOfDate = Convert.ToString(asset.AsOfDate);
+
+    //        var result = await collectionReference.AddAsync(assetDetail);
+    //        writeFlag++;
+    //    }
+
+    //    if (writeFlag == assets.Count)
+    //    {
+    //        //DataSyncAudit objSync = new DataSyncAudit
+    //        //{
+    //        //    Date = DateTime.Now,
+    //        //    Action = "Upload"
+    //        //};
+    //        //await _dbConnection.InsertAsync(objSync);
+    //        //lblLastUploaded.Text = "Last Uploaded: " + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt");
+    //        activityIndicator.IsVisible = false;
+    //        activityIndicator.IsRunning = false;
+    //        await DisplayAlert("Message", "Data Upload Successful", "OK");
+
+    //    }
+    //    else
+    //    {
+    //        activityIndicator.IsVisible = false;
+    //        activityIndicator.IsRunning = false;
+    //        await DisplayAlert("Error", "Something went wrong", "OK");
+    //    }
+    //}
+
+    //private async void btnDownloadAssets_Clicked(object sender, EventArgs e)
+    //{      
+    //    await SetUpDb();
+    //    var existingRecords = await _dbConnection.Table<Assets>().Take(1).ToListAsync();
+    //    if (existingRecords.Count > 0)
+    //    {
+    //        bool userResponse = await DisplayAlert("Message", "There are existing records in the local database.Do you want to overwrite them?", "Yes", "No");
+    //        if (userResponse)
+    //        {
+    //            int recordsDeleted = await _dbConnection.ExecuteAsync("Delete from Assets"); //delete all present records in sqlite db
+    //            activityIndicator.IsVisible = true;
+    //            activityIndicator.IsRunning = true;
+    //            await DownloadData();
+    //        }
+    //        activityIndicator.IsVisible = false;
+    //        activityIndicator.IsRunning = false;
+    //    }
+    //    else
+    //    {
+    //        activityIndicator.IsVisible = true;
+    //        activityIndicator.IsRunning = true;
+    //        await DownloadData();
+    //    }
+    //}
+
+    //public async Task DeleteAllDocumentsInCollection(string collectionPath)
+    //{
+    //    var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+
+    //    using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+    //    using var dest = File.Create(localPath);
+    //    await json.CopyToAsync(dest);
+
+    //    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
+    //    dest.Close();
+    //    string projectId = "firestoredemo-d2bdc";
+    //    var _fireStoreDb = FirestoreDb.Create(projectId);
+
+    //    CollectionReference collectionRef = _fireStoreDb.Collection(collectionPath);
+
+    //    // Get all documents in the collection
+    //    QuerySnapshot snapshot = await collectionRef.GetSnapshotAsync();
+
+    //    // Delete each document
+    //    foreach (DocumentSnapshot document in snapshot.Documents)
+    //    {
+    //        await document.Reference.DeleteAsync();
+    //    }
+    //}
+
+    //public async Task DownloadData()
+    //{
+    //    var localPath = Path.Combine(FileSystem.CacheDirectory, "firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+
+    //    using var json = await FileSystem.OpenAppPackageFileAsync("firestoredemo-d2bdc-firebase-adminsdk-zmue4-6f935f5ddc.json");
+    //    using var dest = File.Create(localPath);
+    //    await json.CopyToAsync(dest);
+
+    //    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", localPath);
+    //    dest.Close();
+    //    string projectId = "firestoredemo-d2bdc";
+    //    var _fireStoreDb = FirestoreDb.Create(projectId);
+
+    //    int rowsAffected = 0;
+    //    try
+    //    {
+    //        Query orderQuery = _fireStoreDb.Collection(Constants.AssetFirestoreCollection);
+    //        QuerySnapshot orderQuerySnapshot = await orderQuery.GetSnapshotAsync();
+    //        List<AssetDetails> assetObj = new List<AssetDetails>();
+
+    //        foreach (DocumentSnapshot documentSnapshot in orderQuerySnapshot.Documents)
+    //        {
+    //            if (documentSnapshot.Exists)
+    //            {
+    //                Dictionary<string, object> dictionary = documentSnapshot.ToDictionary();
+    //                string jsonObj = JsonConvert.SerializeObject(dictionary);
+    //                AssetDetails newAssetObj = JsonConvert.DeserializeObject<AssetDetails>(jsonObj);
+    //                assetObj.Add(newAssetObj);
+    //            }
+    //        }
+
+    //        foreach (var item in assetObj)
+    //        {
+    //            Assets model = new Assets();
+    //            model.InvestmentEntity = item.InvestmentEntity;
+    //            model.Type = item.Type;
+    //            model.Amount = Convert.ToDecimal(item.Amount);
+    //            model.InterestRate = Convert.ToDecimal(item.InterestRate);
+    //            model.InterestFrequency = item.InterestFrequency;
+    //            model.Holder = item.Holder;
+    //            model.Remarks = item.Remarks;
+    //            if (DateTime.TryParse(item.StartDate, out DateTime startDate))
+    //            {
+    //                model.StartDate = Convert.ToDateTime(item.StartDate);
+    //            }
+    //            else
+    //            {
+    //                model.StartDate = DateTime.Now;
+    //            }
+
+    //            if (DateTime.TryParse(item.MaturityDate, out DateTime maturityDate))
+    //            {
+    //                model.MaturityDate = Convert.ToDateTime(item.MaturityDate);
+    //            }
+    //            else
+    //            {
+    //                model.MaturityDate = DateTime.Now;
+    //            }
+
+    //            if (DateTime.TryParse(item.AsOfDate, out DateTime asOfDate))
+    //            {
+    //                model.AsOfDate = Convert.ToDateTime(item.AsOfDate);
+    //            }
+    //            else
+    //            {
+    //                model.AsOfDate = DateTime.Now;
+    //            }
+
+    //            rowsAffected = rowsAffected + await _dbConnection.InsertAsync(model);
+    //        }
+
+
+    //        if (rowsAffected == assetObj.Count)
+    //        {
+    //            activityIndicator.IsVisible = false;
+    //            activityIndicator.IsRunning = false;
+    //            await DisplayAlert("Message", "Success", "OK");
+    //        }
+    //        else
+    //        {
+    //            activityIndicator.IsVisible = false;
+    //            activityIndicator.IsRunning = false;
+    //            await DisplayAlert("Error", "Something went wrong", "OK");
+    //        }
+    //    }
+    //    catch (Exception) { throw; }
+    //}
 
     private async void btnDownloadAssetsExcel_Clicked(object sender, EventArgs e)
     {

@@ -63,7 +63,7 @@
             <ActivityIndicator x:Name="activityIndicator" IsRunning="False" Color="Blue"/>
             <Button
             x:Name="btnGenerateIncomeReport"
-            Text="Generate Report"
+            Text="Download Excel"
             Clicked="btnGenerateIncomeReport_Clicked"/>
 
         </VerticalStackLayout>

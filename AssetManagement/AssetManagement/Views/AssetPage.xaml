@@ -6,7 +6,7 @@
              x:DataType="viewModels:AssetListPageViewModel"
              x:Class="AssetManagement.Views.AssetPage"
             
-             Title="Tabbed Page" >
+             Title="Assets" >
 
     <ContentPage Title="Asset Details">
         <ScrollView>
@@ -26,23 +26,6 @@
                         Margin="2"
                 HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
 
-                    <Button
-x:Name="btnUploadAssets"
-IsVisible="false"
-Text="Upload"
-Clicked="btnUploadAssets_Clicked"
-FontSize="8"
-Margin="2"
-HorizontalOptions="Center" WidthRequest="70" HeightRequest="35" />
-
-                    <Button
-x:Name="btnDownloadAssets"
-IsVisible="false"
-Text="Download"
-Clicked="btnDownloadAssets_Clicked"
-FontSize="8"
-Margin="2"
-HorizontalOptions="Center" WidthRequest="80" HeightRequest="35" />
 
                     <Button
 x:Name="btnDownloadAssetsExcel"
@@ -116,7 +99,14 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
             HorizontalOptions="Center" />-->
 
                 <Label
-            x:Name="lblMF"
+            x:Name="lblDebtMF"
+            Text=""
+            SemanticProperties.HeadingLevel="Level1"
+            FontSize="16"
+            HorizontalOptions="Center" />       
+
+                <Label
+            x:Name="lblEquityMF"
             Text=""
             SemanticProperties.HeadingLevel="Level1"
             FontSize="16"
@@ -247,7 +237,8 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                             <x:String>PPF</x:String>
                             <x:String>EPF</x:String>
                             <x:String>NPS</x:String>
-                            <x:String>MF</x:String>
+                            <x:String>Debt Mutual Fund</x:String>
+                            <x:String>Equity Mutual Fund</x:String>
                             <x:String>Stocks</x:String>
                             <x:String>Others</x:String>
                         </x:Array>
