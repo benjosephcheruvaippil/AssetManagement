@@ -190,8 +190,9 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                  Title="Manage Asset">
 
         <ScrollView x:Name="manageAssetsScroll">
-            <Grid RowSpacing="4" ColumnSpacing="3">
+            <Grid RowSpacing="4" ColumnSpacing="4">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="100" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
@@ -200,8 +201,7 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
+                    <RowDefinition Height="100" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
                     <!--<RowDefinition Height="50" />-->
@@ -210,22 +210,23 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
+                    <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <BoxView Color="Green" />
                 <Label Text="Investment Entity"
                HorizontalOptions="Start"
                VerticalOptions="Center" />
-                <BoxView Grid.Column="1" Color="Orange" />
-                <Entry Grid.Column="1" x:Name="entEntityName" />
+                <BoxView Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <Editor Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entEntityName" Placeholder="Enter investment name" HeightRequest="100" AutoSize="TextChanges"/>
                 <Label x:Name="lblAssetId" IsVisible="False"/>
 
                 <BoxView Grid.Row="1" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="1" Grid.Column="0" Text="Type"
            HorizontalOptions="Start"
            VerticalOptions="Center" />
-                <BoxView Grid.Row="1" Grid.Column="1" Color="Orange" />
+                <BoxView Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
                 <!--<Entry Grid.Row="1" Grid.Column="1" x:Name="entType" />-->
-                <Picker Grid.Row="1" Grid.Column="1" x:Name="entType" SelectedIndexChanged="entType_SelectedIndexChanged" Title="Select type">
+                <Picker Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entType" SelectedIndexChanged="entType_SelectedIndexChanged" Title="Select type">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
                             <x:String>Bank</x:String>
@@ -249,23 +250,23 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                 <Label Grid.Row="2" Grid.Column="0" Text="Amount"
            HorizontalOptions="Start"
            VerticalOptions="Center" />
-                <BoxView Grid.Row="2" Grid.Column="1" Color="Orange" />
-                <Entry Grid.Row="2" Grid.Column="1" x:Name="entAmount" Keyboard="Numeric" />
+                <BoxView Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <Entry Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entAmount" Keyboard="Numeric" />
 
                 <BoxView Grid.Row="3" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="3" Grid.Column="0" Text="Interest Rate"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="3" Grid.Column="1" Color="Orange" />
-                <Entry Grid.Row="3" Grid.Column="1" x:Name="entInterestRate" Keyboard="Numeric" />
+                <BoxView Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <Entry Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entInterestRate" Keyboard="Numeric" />
 
                 <BoxView Grid.Row="4" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="4" Grid.Column="0" Text="Interest Frequency"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="4" Grid.Column="1" Color="Orange" />
+                <BoxView Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
                 <!--<Entry Grid.Row="4" Grid.Column="1" x:Name="entInterestFrequency" />-->
-                <Picker Grid.Row="4" Grid.Column="1" x:Name="entInterestFrequency" Title="Select frequency">
+                <Picker Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entInterestFrequency" Title="Select frequency">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
                             <x:String>Monthly</x:String>
@@ -281,8 +282,8 @@ VerticalOptions="Center" />
                 <Label Grid.Row="5" Grid.Column="0" Text="Holder"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="5" Grid.Column="1" Color="Orange" />
-                <Picker Grid.Row="5" Grid.Column="1" x:Name="entHolder" Title="Select holder">
+                <BoxView Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <Picker Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entHolder" Title="Select holder">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
                             <!--<x:String>Ben Joseph</x:String>
@@ -303,35 +304,37 @@ VerticalOptions="Center" />
                 <Label Grid.Row="6" Grid.Column="0" Text="Start Date"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="6" Grid.Column="1" Color="Orange" />
-                <DatePicker Grid.Row="6" Grid.Column="1" x:Name="entStartDate" />
+                <BoxView Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <DatePicker Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entStartDate" />
 
                 <BoxView Grid.Row="7" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="7" Grid.Column="0" Text="Maturity Date"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="7" Grid.Column="1" Color="Orange" />
-                <DatePicker Grid.Row="7" Grid.Column="1" x:Name="entMaturityDate" />
+                <BoxView Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <DatePicker Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entMaturityDate" />
 
                 <BoxView Grid.Row="8" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="8" Grid.Column="0" Text="As Of Date"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="8" Grid.Column="1" Color="Orange" />
-                <DatePicker Grid.Row="8" Grid.Column="1" x:Name="entAsOfDate" />
+                <BoxView Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <DatePicker Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entAsOfDate" />
 
                 <BoxView Grid.Row="9" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="9" Grid.Column="0" Text="Remarks"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="9" Grid.Column="1" Color="Orange" />
-                <Entry Grid.Row="9" Grid.Column="1" x:Name="entRemarks" />
+                <BoxView Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <Editor Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entRemarks" Placeholder="Enter additional details like nominee,remarks etc." HeightRequest="100" AutoSize="TextChanges"/>
 
                 <!--Update and delete buttons-->
                 <BoxView Grid.Row="10" Grid.Column="0" Color="Orange" />
                 <Button Grid.Row="10" Grid.Column="0" x:Name="btnSave" Clicked="btnSave_Clicked" Text="Save"></Button>
                 <BoxView Grid.Row="10" Grid.Column="1" Color="Orange" />
                 <Button Grid.Row="10" Grid.Column="1" x:Name="btnDelete" Clicked="btnDelete_Clicked" Text="Delete"></Button>
+                <BoxView Grid.Row="10" Grid.Column="2" Color="Orange" />
+                <Button Grid.Row="10" Grid.Column="2" x:Name="btnClear" Text="Clear"></Button>
                 <!--Update and delete buttons-->
 
                 <!--<BoxView Grid.Row="11"
@@ -340,14 +343,14 @@ VerticalOptions="Center" />
                 <!--<Button x:Name="btnGetDetail" IsVisible="false" Text="Get Detail" Clicked="btnGetDetail_Clicked" Grid.Row="11" Grid.ColumnSpan="2"></Button>-->
 
                 <BoxView Grid.Row="11"
-Grid.ColumnSpan="2"
+Grid.ColumnSpan="3"
 Color="White" />
-                <Entry x:Name="entAssetSearch" TextChanged="entAssetSearch_TextChanged" Grid.Row="11" Grid.ColumnSpan="2" Placeholder="Search by name,amount,holder"/>
+                <Entry x:Name="entAssetSearch" TextChanged="entAssetSearch_TextChanged" Grid.Row="11" Grid.ColumnSpan="3" Placeholder="Search by name,amount,holder"/>
 
                 <BoxView Grid.Row="12"
-                 Grid.ColumnSpan="2"
+                 Grid.ColumnSpan="3"
                  Color="Red" />
-                <dg:DataGrid x:Name="dgAssetsDataTable" ItemSelected="dgAssetsDataTable_ItemSelected" Grid.Row="12" Grid.ColumnSpan="2"  ItemsSource="{Binding Assets}" SelectionEnabled="True" SelectedItem="{Binding SelectedAsset}"
+                <dg:DataGrid x:Name="dgAssetsDataTable" ItemSelected="dgAssetsDataTable_ItemSelected" Grid.Row="12" Grid.ColumnSpan="3"  ItemsSource="{Binding Assets}" SelectionEnabled="True" SelectedItem="{Binding SelectedAsset}"
          RowHeight="58" HeaderHeight="50" PullToRefreshCommand="{Binding RefreshCommand}"
          IsRefreshing="{Binding IsRefreshing}" HeaderBackground="Red" PaginationEnabled="{Binding PaginationEnabled}" PageSize="5">
                     <dg:DataGrid.NoDataView>
