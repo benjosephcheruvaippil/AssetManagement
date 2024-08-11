@@ -334,7 +334,7 @@ VerticalOptions="Center" />
                 <BoxView Grid.Row="10" Grid.Column="1" Color="Orange" />
                 <Button Grid.Row="10" Grid.Column="1" x:Name="btnDelete" Clicked="btnDelete_Clicked" Text="Delete"></Button>
                 <BoxView Grid.Row="10" Grid.Column="2" Color="Orange" />
-                <Button Grid.Row="10" Grid.Column="2" x:Name="btnClear" Text="Clear"></Button>
+                <Button Grid.Row="10" Grid.Column="2" x:Name="btnClear" Clicked="btnClear_Clicked" Text="Clear"></Button>
                 <!--Update and delete buttons-->
 
                 <!--<BoxView Grid.Row="11"

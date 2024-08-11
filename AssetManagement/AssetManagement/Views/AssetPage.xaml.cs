@@ -960,4 +960,32 @@ public partial class AssetPage : TabbedPage
             }
         }
     }
+
+    private void btnClear_Clicked(object sender, EventArgs e)
+    {
+        try
+        {
+            manageAssetsScroll.ScrollToAsync(0, 0, true);
+            lblAssetId.Text = "";
+            entEntityName.Text = "";
+            //if (entType != null)
+            //{
+            //    entType.ItemsSource.Clear();
+            //    entType.SelectedIndex = -1;
+            //}
+            //entType.SelectedIndex = -1;
+            entAmount.Text = "";
+            entInterestRate.Text = "";
+            //entInterestFrequency.SelectedIndex = -1;
+            //entHolder.SelectedIndex = -1;
+            entStartDate.Date = DateTime.Now;
+            entMaturityDate.Date = DateTime.Now;
+            entAsOfDate.Date = DateTime.Now;
+            entRemarks.Text = "";
+        }
+        catch (Exception ex) 
+        {
+            string msg=ex.Message;
+        }
+    }
 }
