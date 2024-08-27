@@ -531,11 +531,23 @@ public partial class AssetPage : TabbedPage
 
                 AssetAuditLog objAssetAuditLog = new AssetAuditLog
                 {
+                    AssetId = objAsset.AssetId,
+                    InvestmentEntity = objAsset.InvestmentEntity,
+                    Type = objAsset.Type,
+                    Amount = objAsset.Amount,
+                    InterestRate = objAsset.InterestRate,
+                    InterestFrequency = objAsset.InterestFrequency,
+                    Holder = objAsset.Holder,
+                    StartDate = objAsset.StartDate,
+                    MaturityDate = objAsset.MaturityDate,
+                    Remarks = objAsset.Remarks,
+                    AsOfDate = objAsset.AsOfDate,
                     LiquidAssetValue = netAssetValue,
                     NetAssetValue = netAssetValue,
+                    ActionType = string.IsNullOrEmpty(lblAssetId.Text) ? "Insert" : "Update",
                     CreatedDate = DateTime.Now
                 };
-                await _dbConnection.InsertAsync(objAssetAuditLog);
+                SaveAssetAuditLog(objAssetAuditLog);
                 //add asset audit log
                 await DisplayAlert("Message", "Asset Saved", "OK");
                 await LoadAssets();
@@ -554,25 +566,39 @@ public partial class AssetPage : TabbedPage
             bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
             if (userResponse)
             {
+                int assetId = Convert.ToInt32(lblAssetId.Text);
+                var assetDeleted = await _dbConnection.GetAsync<Assets>(assetId);               
                 Models.Assets objAsset = new Assets()
                 {
-                    AssetId = Convert.ToInt32(lblAssetId.Text)
+                    AssetId = assetId
                 };
 
                 await SetUpDb();
                 int rowsAffected = await _dbConnection.DeleteAsync(objAsset);
                 if (rowsAffected > 0)
                 {
-                    //add asset audit log
+                    //add asset audit log  
                     double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>("select SUM(Amount) from Assets");
 
                     AssetAuditLog objAssetAuditLog = new AssetAuditLog
                     {
+                        AssetId = assetDeleted.AssetId,
+                        InvestmentEntity = assetDeleted.InvestmentEntity,
+                        Type = assetDeleted.Type,
+                        Amount = assetDeleted.Amount,
+                        InterestRate = assetDeleted.InterestRate,
+                        InterestFrequency = assetDeleted.InterestFrequency,
+                        Holder = assetDeleted.Holder,
+                        StartDate = assetDeleted.StartDate,
+                        MaturityDate = assetDeleted.MaturityDate,
+                        Remarks = assetDeleted.Remarks,
+                        AsOfDate = assetDeleted.AsOfDate,
                         LiquidAssetValue = netAssetValue,
                         NetAssetValue = netAssetValue,
+                        ActionType = "Delete",
                         CreatedDate = DateTime.Now
                     };
-                    await _dbConnection.InsertAsync(objAssetAuditLog);
+                    SaveAssetAuditLog(objAssetAuditLog);
                     //add asset audit log
                     await DisplayAlert("Message", "Asset Deleted", "OK");
                     ClearManageAssetForm();
@@ -584,6 +610,29 @@ public partial class AssetPage : TabbedPage
         {
             await DisplayAlert("Message", "Please select an asset", "OK");
         }
+    }
+
+    private async void SaveAssetAuditLog(AssetAuditLog assetAuditLog)
+    {
+        AssetAuditLog objAssetAuditLog = new AssetAuditLog
+        {
+            AssetId = assetAuditLog.AssetId,
+            InvestmentEntity = assetAuditLog.InvestmentEntity,
+            Type = assetAuditLog.Type,
+            Amount = assetAuditLog.Amount,
+            InterestRate = assetAuditLog.InterestRate,
+            InterestFrequency = assetAuditLog.InterestFrequency,
+            Holder = assetAuditLog.Holder,
+            StartDate = assetAuditLog.StartDate,
+            MaturityDate = assetAuditLog.MaturityDate,
+            Remarks = assetAuditLog.Remarks,
+            AsOfDate = assetAuditLog.AsOfDate,
+            LiquidAssetValue = assetAuditLog.NetAssetValue,
+            NetAssetValue = assetAuditLog.NetAssetValue,
+            ActionType = assetAuditLog.ActionType,
+            CreatedDate = DateTime.Now
+        };
+        await _dbConnection.InsertAsync(objAssetAuditLog);
     }
 
     private void entType_SelectedIndexChanged(object sender, EventArgs e)
