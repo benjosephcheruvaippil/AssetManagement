@@ -58,7 +58,7 @@ namespace AssetManagement.Common
                     List<IncomeExpenseCategories> objExpenseCategory = new List<IncomeExpenseCategories>
                 {
                     new IncomeExpenseCategories{CategoryName="Household Items",CategoryType="Expense",IsVisible=true},
-                    new IncomeExpenseCategories{CategoryName="Autombile",CategoryType="Expense",IsVisible=true},
+                    new IncomeExpenseCategories{CategoryName="Automobile",CategoryType="Expense",IsVisible=true},
                     new IncomeExpenseCategories{CategoryName="Leisure",CategoryType="Expense",IsVisible=true}
                 };
                     await _dbConnection.InsertAllAsync(objExpenseCategory);

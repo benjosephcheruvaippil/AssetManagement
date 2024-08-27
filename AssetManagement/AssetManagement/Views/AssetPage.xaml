@@ -357,7 +357,7 @@ Color="White" />
                         <Label Text="Nothing to see here 🙈" HorizontalOptions="Center" VerticalOptions="Center" />
                     </dg:DataGrid.NoDataView>
                     <dg:DataGrid.Columns>
-                        <dg:DataGridColumn IsVisible="False" Title="Image" PropertyName="Image" Width="150" SortingEnabled="False">
+                        <dg:DataGridColumn IsVisible="False" Title="Image" PropertyName="Image" Width="*" SortingEnabled="False">
                             <dg:DataGridColumn.CellTemplate>
                                 <DataTemplate>
                                     <Image Source="{Binding}" HorizontalOptions="Center" VerticalOptions="Center"
@@ -365,10 +365,10 @@ Color="White" />
                                 </DataTemplate>
                             </dg:DataGridColumn.CellTemplate>
                         </dg:DataGridColumn>
-                        <dg:DataGridColumn Title="Investment Entity" PropertyName="InvestmentEntity"  />
-                        <dg:DataGridColumn Title="Amount" PropertyName="Amount"  />
-                        <dg:DataGridColumn Title="Maturity Date" PropertyName="MaturityDate"  />
-                        <dg:DataGridColumn Title="As Of Date" PropertyName="AsOfDate"  />
+                        <dg:DataGridColumn Title="Investment Entity" PropertyName="InvestmentEntity" Width="*"  />
+                        <dg:DataGridColumn Title="Amount" PropertyName="Amount"  Width="*"/>
+                        <dg:DataGridColumn Title="Maturity Date" PropertyName="MaturityDate" Width="*" />
+                        <dg:DataGridColumn Title="As Of Date" PropertyName="AsOfDate"  Width="*" />
                         <!--<dg:DataGridColumn Title="Longitude" PropertyName="Longitude" />
                         <dg:DataGridColumn Title="Population" PropertyName="Population" />
                         <dg:DataGridColumn Title="Details" PropertyName="Details" Width="0.5*" />-->
