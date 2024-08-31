@@ -274,6 +274,12 @@ public partial class ExpensePage : ContentPage
             {
                 showRecordCount = PageSize + offset;
             }
+            if (TotalExpenseRecordCount - offset < PageSize)
+            {
+                showRecordCount = TotalExpenseRecordCount;
+                lblShowRemainingRecords.IsVisible = false;
+            }
+
             tblscExpenses.Title = "Showing "+ showRecordCount + " of "+ TotalExpenseRecordCount + " records";
             expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 30 Offset " + offset);
         }

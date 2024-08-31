@@ -133,6 +133,12 @@ public partial class IncomePage : ContentPage
             {
                 showRecordCount = PageSize + offset;
             }
+            if (TotalIncomeRecordCount - offset < PageSize)
+            {
+                showRecordCount = TotalIncomeRecordCount;
+                lblShowRemainingRecords.IsVisible = false;
+            }
+
             tblscIncome.Title = "Showing " + showRecordCount + " of " + TotalIncomeRecordCount + " records";
 
             income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 30 Offset " + offset);
