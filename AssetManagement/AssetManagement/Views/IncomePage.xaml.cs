@@ -9,6 +9,7 @@ public partial class IncomePage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
     AppTheme currentTheme = Application.Current.RequestedTheme;
+    public int PageNumber = 0, PageSize = 30, TotalIncomeRecordCount = 0;
     public IncomePage()
     {
         InitializeComponent();
@@ -16,7 +17,7 @@ public partial class IncomePage : ContentPage
         var labelShowRemaining = new TapGestureRecognizer();
         labelShowRemaining.Tapped += (s, e) =>
         {
-            LoadIncomeInPage("AllRecords");
+            LoadIncomeInPage("Pagewise");
         };
         lblShowRemainingRecords.GestureRecognizers.Add(labelShowRemaining);
     }
@@ -115,9 +116,26 @@ public partial class IncomePage : ContentPage
         {
             income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 5");
         }
-        else if(hint == "AllRecords")
+        else if(hint == "Pagewise")
         {
-            income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc");
+            PageNumber = PageNumber + 1;
+            int offset = (PageNumber - 1) * PageSize;
+            if (TotalIncomeRecordCount == 0)
+            {
+                TotalIncomeRecordCount = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Income").CountAsync();
+            }
+            int showRecordCount = 0;
+            if (offset == 0)
+            {
+                showRecordCount = PageSize;
+            }
+            else
+            {
+                showRecordCount = PageSize + offset;
+            }
+            tblscIncome.Title = "Showing " + showRecordCount + " of " + TotalIncomeRecordCount + " records";
+
+            income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 30 Offset " + offset);
         }
         
 
