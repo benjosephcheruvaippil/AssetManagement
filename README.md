@@ -3,7 +3,7 @@
 ## The apk file can be found on bin\Release\net8.0-android34.0\
 
 
-#Page Information
+Page Information:
 1.AppFlyoutPage.xaml, MenuPage.xaml - related to page layout
 2.ExpensePage.xaml - the home page or where expense data is recorded
 3.IncomePage.xaml - where income data is recorded
