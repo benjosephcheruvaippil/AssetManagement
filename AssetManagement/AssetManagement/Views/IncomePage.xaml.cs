@@ -194,8 +194,27 @@ public partial class IncomePage : ContentPage
         {
             dpDateIncome.Date = new DateTime(year, month, day);
 
-            entryIncomeAmount.Text = tappedViewCell.Detail.Split("-")[0].Trim();
-            entryIncomeRemarks.Text = tappedViewCell.Detail.Split("-")[1].Trim();  
+            string[] amountAndRemarks = tappedViewCell.Detail.Split(new[] { "-" }, StringSplitOptions.TrimEntries);
+            string remarks = "";
+            entryIncomeAmount.Text = amountAndRemarks[0];
+            int loop = 1;
+            //logic for '-' symbol handling in remarks. for example if detail has some value like '250 - this is for 24-35 date range', then the below logic will
+            //handle it to populate it in remarks.
+            foreach (var item in amountAndRemarks)
+            {
+                if (loop > 1)
+                {
+                    string next = item;
+                    if (loop > 2)
+                    {
+                        next = " - " + item;
+                    }
+                    remarks = remarks + next;
+
+                }
+                loop++;
+            }
+            entryIncomeRemarks.Text = remarks;
         }
         else
         {
