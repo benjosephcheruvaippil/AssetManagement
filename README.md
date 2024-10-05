@@ -1,5 +1,5 @@
 # AssetManagement-MobileApp
-## Put this command in the terminal to create the apk file. (dotnet publish -c Release -f:net8.0-android)
+## Put this command in the terminal to create the apk file. (dotnet publish -c Release -f:net8.0-android34.0)
 ## The apk file can be found on bin\Release\net8.0-android34.0\
 
 
