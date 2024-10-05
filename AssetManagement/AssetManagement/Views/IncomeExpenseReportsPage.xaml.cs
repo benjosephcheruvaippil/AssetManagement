@@ -1,4 +1,4 @@
-using Android.Content;
+﻿using Android.Content;
 using Android.SE.Omapi;
 using AssetManagement.Models;
 using AssetManagement.Models.Reports;
@@ -18,6 +18,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
     AppTheme currentTheme = Application.Current.RequestedTheme;
+    decimal yearlyIncome = 0, yearlyExpense = 0, yearlyBalance = 0;
     private bool onLoad = false;
     public IncomeExpenseReportsPage()
     {
@@ -56,7 +57,9 @@ public partial class IncomeExpenseReportsPage : ContentPage
 
         tblscIncomeExpenseReport.Title = "Income & Expense - Year " + selectedYear;
 
-        decimal yearlyIncome = 0, yearlyExpense = 0, yearlyBalance = 0;
+        yearlyIncome = 0;
+        yearlyExpense = 0;
+        yearlyBalance = 0;
 
         for (int i = 1; i <= 12; i++)
         {
@@ -111,11 +114,13 @@ public partial class IncomeExpenseReportsPage : ContentPage
         objCellYearly.Detail = "Expense: " + yearlyExpense.ToString("#,#.##", new CultureInfo(0x0439)) + " | " + "Income: " + yearlyIncome.ToString("#,#.##", new CultureInfo(0x0439)) + " | " + "Balance: " + yearlyBalance.ToString("#,#.##", new CultureInfo(0x0439));
         objCellYearly.Height = 40;
         tblscIncomeExpenseReport.Add(objCellYearly);
+        objCellYearly.Tapped += ObjCell_Tapped;
     }
 
     private async void ObjCell_Tapped(object sender, EventArgs e)
     {
         var tappedViewCell = (TextCell)sender;
+        string displayText = "";
         string month= tappedViewCell.Text.ToString();
         int monthInteger = 0;
         switch (month)
@@ -156,6 +161,18 @@ public partial class IncomeExpenseReportsPage : ContentPage
             case "December":
                 monthInteger = 12;
                 break;
+            default:
+                monthInteger = 0;
+                break;
+        }
+
+        if (monthInteger == 0)
+        {
+            displayText = $"Total Expense: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", yearlyExpense)}" +
+          $"\nTotal Income: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", yearlyIncome)}" +
+          $"\nTotal Balance: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", yearlyBalance)}";
+            await DisplayAlert(month, displayText, "Ok");
+            return;
         }
 
         string year = yearPicker.SelectedItem.ToString();       
@@ -169,8 +186,17 @@ public partial class IncomeExpenseReportsPage : ContentPage
         var fileUploadExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && e.Mode == "file_upload" && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
         var totalFileUploadExpenses = fileUploadExpenseList.Select(s => s.Amount).Sum();
 
-        string displayText = $"Expense Manually Added: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalManualAddedExpenses)}\nExpense File Upload: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalFileUploadExpenses)}";
-        await DisplayAlert("Info", displayText, "Ok");
+        var monthlyIncomeList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Income" && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
+        var totalMonthlyIncome = monthlyIncomeList.Select(s => s.Amount).Sum();
+
+        double totalMonthlySavings = totalMonthlyIncome - (totalManualAddedExpenses + totalFileUploadExpenses);
+
+        displayText = $"Expense Manually Added: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalManualAddedExpenses)}\nExpense File Upload: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalFileUploadExpenses)}" +
+           $"\n────────────────────" +
+           $"\nTotal Expense: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalManualAddedExpenses + totalFileUploadExpenses)}" +
+           $"\nTotal Income: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalMonthlyIncome)}" +
+           $"\nTotal Balance: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalMonthlySavings)}";
+        await DisplayAlert(month, displayText, "Ok");
     }
 
     private async void yearPicker_SelectedIndexChanged(object sender, EventArgs e)
