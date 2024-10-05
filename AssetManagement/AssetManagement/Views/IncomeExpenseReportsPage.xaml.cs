@@ -216,16 +216,19 @@ public partial class IncomeExpenseReportsPage : ContentPage
                 category.CategoryName = "Uncategorized Expense";
             }
             //new code
-            TextCell objCategory = new TextCell();
-            objCategory.Text = category.CategoryName;
-            if (currentTheme == AppTheme.Dark)
+            if (total > 0)
             {
-                //set to white color
-                objCategory.TextColor = Color.FromArgb("#FFFFFF");
+                TextCell objCategory = new TextCell();
+                objCategory.Text = category.CategoryName;
+                if (currentTheme == AppTheme.Dark)
+                {
+                    //set to white color
+                    objCategory.TextColor = Color.FromArgb("#FFFFFF");
+                }
+                objCategory.Detail = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", total);
+                objCategory.Height = 40;
+                tblscCategoryWiseReport.Add(objCategory);
             }
-            objCategory.Detail = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", total);
-            objCategory.Height = 40;
-            tblscCategoryWiseReport.Add(objCategory);
         }
 
         tblscCategoryWiseReport.Title = "Category Wise Report " + selectedYear;
