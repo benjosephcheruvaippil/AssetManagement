@@ -73,8 +73,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="akgul.Maui.DataGrid" Version="4.0.4" />
-		<PackageReference Include="CommunityToolkit.Maui" Version="6.0.0" />
+		<PackageReference Include="akgul.Maui.DataGrid" Version="4.0.5" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="6.1.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
 		<PackageReference Include="EPPlus" Version="6.2.9" />
 		<PackageReference Include="ExcelDataReader.DataSet" Version="3.6.0" />

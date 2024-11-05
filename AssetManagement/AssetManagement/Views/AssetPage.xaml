@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <TabbedPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:models="clr-namespace:AssetManagement.Models"
              xmlns:viewModels="clr-namespace:AssetManagement.ViewModels"
              x:DataType="viewModels:AssetListPageViewModel"
-             x:Class="AssetManagement.Views.AssetPage"
+             x:Class="AssetManagement.Views.AssetPage"   
             
              Title="Assets" >
 
@@ -201,7 +202,7 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
-                    <RowDefinition Height="100" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
                     <!--<RowDefinition Height="50" />-->
@@ -321,12 +322,37 @@ VerticalOptions="Center" />
                 <BoxView Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
                 <DatePicker Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entAsOfDate" />
 
-                <BoxView Grid.Row="9" Grid.Column="0" Color="Green" />
+                <!--<BoxView Grid.Row="9" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="9" Grid.Column="0" Text="Remarks"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
                 <BoxView Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
-                <Editor Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entRemarks" Placeholder="Enter additional details like nominee,remarks etc." HeightRequest="100" AutoSize="TextChanges"/>
+                <Editor Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entRemarks" Placeholder="Enter additional details like nominee,remarks etc." HeightRequest="100" AutoSize="TextChanges"/>-->
+
+                <!--expander-->
+                <BoxView Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" Color="Gray"/>
+                <toolkit:Expander Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" x:Name="expanderAdditionalDetails" ExpandedChanged="expanderAdditionalDetails_ExpandedChanged" IsExpanded="False">
+                    <toolkit:Expander.Header>
+                        <Label Text="Click To Add More Details"
+                        FontAttributes="Bold"
+                        FontSize="Medium" />
+                    </toolkit:Expander.Header>
+                    <VerticalStackLayout>
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="Nominee" VerticalOptions="Center" />
+                            <Entry x:Name="entNominee" Keyboard="Text" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="Risk Number" VerticalOptions="Center" />
+                            <Entry x:Name="entRiskValue" Keyboard="Numeric" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="Remarks" VerticalOptions="Center" />
+                            <Editor x:Name="entRemarks" Placeholder="Enter additional details like nominee,remarks etc." AutoSize="TextChanges"/>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </toolkit:Expander>
+                <!--expander-->
 
                 <!--Update and delete buttons-->
                 <BoxView Grid.Row="10" Grid.Column="0" Color="Orange" />

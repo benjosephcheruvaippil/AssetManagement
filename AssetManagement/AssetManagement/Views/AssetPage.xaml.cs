@@ -1050,4 +1050,12 @@ public partial class AssetPage : TabbedPage
             string msg = ex.Message;
         }
     }
+
+    private void expanderAdditionalDetails_ExpandedChanged(object sender, CommunityToolkit.Maui.Core.ExpandedChangedEventArgs e)
+    {
+        if (e.IsExpanded)
+        {
+            manageAssetsScroll.ScrollToAsync(expanderAdditionalDetails, ScrollToPosition.Start, true);
+        }
+    }
 }
