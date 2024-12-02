@@ -338,18 +338,34 @@ VerticalOptions="Center" />
                         FontSize="Medium" />
                     </toolkit:Expander.Header>
                     <VerticalStackLayout>
-                        <HorizontalStackLayout Spacing="10">
-                            <Label Text="Nominee" VerticalOptions="Center" />
-                            <Entry x:Name="entNominee" Keyboard="Text" />
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="10">
-                            <Label Text="Risk Number" VerticalOptions="Center" />
-                            <Entry x:Name="entRiskValue" Keyboard="Numeric" />
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="10">
-                            <Label Text="Remarks" VerticalOptions="Center" />
-                            <Editor x:Name="entRemarks" Placeholder="Enter additional details like nominee,remarks etc." AutoSize="TextChanges"/>
-                        </HorizontalStackLayout>
+                        <Grid ColumnDefinitions="150, *">
+                            <Label Text="Nominee" VerticalOptions="Center" Grid.Column="0" />
+                            <Picker x:Name="entNominee" Title="Select nominee" Grid.Column="1">
+                                <Picker.ItemsSource>
+                                    <x:Array Type="{x:Type x:String}">
+                                        <x:String>Ben Joseph</x:String>
+                                        <x:String>Ann Mary Joseph</x:String>
+                                        <x:String>Deepa Jossy</x:String>
+                                        <x:String>Jossy C Peter/Deepa Jossy</x:String>
+                                        <x:String>Ouseph KK(Pappa)</x:String>
+                                        <x:String>Ben Joseph/Ann Mary Joseph</x:String>
+                                        <x:String>Ben Joseph/Ann Mary Joseph/Deepa Jossy</x:String>
+                                    </x:Array>
+                                </Picker.ItemsSource>
+                            </Picker>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="150, *">
+                            <Label Text="Risk Number" VerticalOptions="Center" Grid.Column="0" />
+                            <Entry x:Name="entRiskValue" Keyboard="Numeric" Grid.Column="1" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="150, *">
+                            <Label Text="Remarks" VerticalOptions="Center" Grid.Column="0" />
+                            <Editor x:Name="entRemarks" 
+                    Placeholder="Enter additional details like nominee, remarks etc." 
+                    AutoSize="TextChanges" Grid.Column="1" />
+                        </Grid>
                     </VerticalStackLayout>
                 </toolkit:Expander>
                 <!--expander-->
