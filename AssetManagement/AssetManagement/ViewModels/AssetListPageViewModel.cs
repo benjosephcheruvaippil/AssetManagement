@@ -89,7 +89,9 @@ namespace AssetManagement.ViewModels
                     StartDate = SelectedAsset.StartDate,
                     MaturityDate = SelectedAsset.MaturityDate,
                     AsOfDate = SelectedAsset.AsOfDate,
-                    Remarks = SelectedAsset.Remarks
+                    Remarks = SelectedAsset.Remarks,
+                    Nominee = SelectedAsset.Nominee,
+                    RiskNumber = SelectedAsset.RiskNumber
                 };
             }
 
