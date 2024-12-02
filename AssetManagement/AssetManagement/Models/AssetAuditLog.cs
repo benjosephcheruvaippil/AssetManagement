@@ -20,6 +20,8 @@ namespace AssetManagement.Models
         public DateTime MaturityDate { get; set; }
         public string Remarks { get; set; }
         public DateTime AsOfDate { get; set; }
+        public string Nominee { get; set; }
+        public decimal? RiskNumber { get; set; }
         public double? LiquidAssetValue { get; set; }
         public double? NonMovableAssetValue { get; set; }
         public double? NetAssetValue { get; set; }

@@ -544,6 +544,8 @@ public partial class AssetPage : TabbedPage
                     StartDate = objAsset.StartDate,
                     MaturityDate = objAsset.MaturityDate,
                     Remarks = objAsset.Remarks,
+                    Nominee = objAsset.Nominee,
+                    RiskNumber = objAsset.RiskNumber,
                     AsOfDate = objAsset.AsOfDate,
                     LiquidAssetValue = netAssetValue,
                     NetAssetValue = netAssetValue,
