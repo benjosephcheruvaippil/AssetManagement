@@ -475,10 +475,15 @@ public partial class AssetPage : TabbedPage
     {
         try
         {
-            if (string.IsNullOrEmpty(entEntityName.Text) || string.IsNullOrEmpty(entInterestRate.Text) || string.IsNullOrEmpty(entAmount.Text))
+            if (string.IsNullOrEmpty(entEntityName.Text) || entType.SelectedItem == null || string.IsNullOrEmpty(entAmount.Text))
             {
                 await DisplayAlert("Message", "Please input all required fields", "OK");
                 return;
+            }
+
+            if (string.IsNullOrEmpty(entInterestRate.Text))
+            {
+                entInterestRate.Text = "0";
             }
 
             int rowsAffected = 0;
@@ -1051,6 +1056,7 @@ public partial class AssetPage : TabbedPage
             entMaturityDate.Date = DateTime.Now;
             entAsOfDate.Date = DateTime.Now;
             entRemarks.Text = "";
+            entRiskValue.Text = "";
         }
         catch (Exception ex)
         {

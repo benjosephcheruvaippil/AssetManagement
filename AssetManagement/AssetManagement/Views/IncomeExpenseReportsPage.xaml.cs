@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using CommunityToolkit.Maui.Storage;
 using AssetManagement.Models.Constants;
+using AssetManagement.Models.DataTransferObject;
 //using static Android.Content.ClipData;
 
 namespace AssetManagement.Views;
@@ -210,14 +211,16 @@ public partial class IncomeExpenseReportsPage : ContentPage
 
     public async void SummaryByCategory(string selectedYear)
     {
+        List<CategoryWiseAmountDTO> categoryWiseAmountList = new List<CategoryWiseAmountDTO>();
         DateTime yearBegin = new DateTime(Convert.ToInt32(selectedYear), 1, 1, 0, 0, 0);
         DateTime yearEnd = new DateTime(Convert.ToInt32(selectedYear), 12, 31, 23, 59, 59);
-        var categories = await _dbConnection.QueryAsync<IncomeExpenseModel>("select CategoryName from IncomeExpenseModel Group By CategoryName");
+        var categories = await _dbConnection.QueryAsync<IncomeExpenseModel>("select CategoryName,TransactionType from IncomeExpenseModel Group By CategoryName,TransactionType");
         var records = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.Date >= yearBegin && d.Date <= yearEnd).ToListAsync();
 
         double total = 0;
         foreach (var category in categories)
         {
+            CategoryWiseAmountDTO objCategoryWiseAmount = new CategoryWiseAmountDTO();
             total = 0;
             if (!string.IsNullOrEmpty(category.CategoryName))
             {
@@ -242,25 +245,50 @@ public partial class IncomeExpenseReportsPage : ContentPage
                 category.CategoryName = "Uncategorized Expense";
             }
             //new code
+
             if (total > 0)
             {
+                objCategoryWiseAmount.CategoryName = category.CategoryName;
+                objCategoryWiseAmount.TransactionType = category.TransactionType;
+                objCategoryWiseAmount.Amount = total;
+                categoryWiseAmountList.Add(objCategoryWiseAmount);
+            }
+            //if (total > 0)
+            //{
+            //    TextCell objCategory = new TextCell();
+            //    objCategory.Text = category.CategoryName;
+            //    if (currentTheme == AppTheme.Dark)
+            //    {
+            //        //set to white color
+            //        objCategory.TextColor = Color.FromArgb("#FFFFFF");
+            //    }
+            //    objCategory.Detail = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", total + " - " + category.TransactionType);
+            //    objCategory.Height = 40;
+            //    tblscCategoryWiseReport.Add(objCategory);
+            //}
+        }
+
+        if (categoryWiseAmountList.Count > 0)
+        {
+            categoryWiseAmountList = categoryWiseAmountList.OrderBy(o => o.TransactionType).ThenByDescending(o => o.Amount).ToList();
+            foreach (var item in categoryWiseAmountList)
+            {
                 TextCell objCategory = new TextCell();
-                objCategory.Text = category.CategoryName;
+                objCategory.Text = item.CategoryName + " - " + item.TransactionType;
                 if (currentTheme == AppTheme.Dark)
                 {
                     //set to white color
                     objCategory.TextColor = Color.FromArgb("#FFFFFF");
                 }
-                objCategory.Detail = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", total);
+                objCategory.Detail = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", item.Amount);
                 objCategory.Height = 40;
                 tblscCategoryWiseReport.Add(objCategory);
             }
         }
 
         tblscCategoryWiseReport.Title = "Category Wise Report " + selectedYear;
-
-
     }
+
 
     private async void btnGenerateIncomeReport_Clicked(object sender, EventArgs e)
     {
