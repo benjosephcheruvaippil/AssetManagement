@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <TabbedPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:models="clr-namespace:AssetManagement.Models"
              xmlns:viewModels="clr-namespace:AssetManagement.ViewModels"
              x:DataType="viewModels:AssetListPageViewModel"
-             x:Class="AssetManagement.Views.AssetPage"
+             x:Class="AssetManagement.Views.AssetPage"   
             
              Title="Assets" >
 
@@ -201,7 +202,7 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
-                    <RowDefinition Height="100" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
                     <!--<RowDefinition Height="50" />-->
@@ -321,12 +322,74 @@ VerticalOptions="Center" />
                 <BoxView Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
                 <DatePicker Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entAsOfDate" />
 
-                <BoxView Grid.Row="9" Grid.Column="0" Color="Green" />
+                <!--<BoxView Grid.Row="9" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="9" Grid.Column="0" Text="Remarks"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
                 <BoxView Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
-                <Editor Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entRemarks" Placeholder="Enter additional details like nominee,remarks etc." HeightRequest="100" AutoSize="TextChanges"/>
+                <Editor Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entRemarks" Placeholder="Enter additional details like nominee,remarks etc." HeightRequest="100" AutoSize="TextChanges"/>-->
+
+                <!--expander-->
+                <BoxView Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" Color="Gray"/>
+                <toolkit:Expander Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" x:Name="expanderAdditionalDetails" ExpandedChanged="expanderAdditionalDetails_ExpandedChanged" IsExpanded="False">
+                    <toolkit:Expander.Header>
+                        <Grid ColumnDefinitions="*, Auto">
+                            <!-- Header Text -->
+                            <Label Text="Click To Add More Details"
+                   FontAttributes="Bold"
+                   FontSize="Medium"
+                   VerticalOptions="Center" 
+                   Grid.Column="0" />
+                            <!-- Up/Down Icon -->
+                            <Image Grid.Column="1"
+                   WidthRequest="24"
+                   HeightRequest="24"
+                   VerticalOptions="Center">
+                                <Image.Triggers>
+                                    <!-- When IsExpanded is True, show up icon -->
+                                    <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference expanderAdditionalDetails}, Path=IsExpanded}" Value="True">
+                                        <Setter Property="Source" Value="unfold.png" />
+                                    </DataTrigger>
+                                    <!-- When IsExpanded is False, show down icon -->
+                                    <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference expanderAdditionalDetails}, Path=IsExpanded}" Value="False">
+                                        <Setter Property="Source" Value="unfold.png" />
+                                    </DataTrigger>
+                                </Image.Triggers>
+                            </Image>
+                        </Grid>
+                    </toolkit:Expander.Header>
+                    <VerticalStackLayout>
+                        <Grid ColumnDefinitions="150, *">
+                            <Label Text="Nominee" VerticalOptions="Center" Grid.Column="0" />
+                            <Picker x:Name="entNominee" Title="Select nominee" Grid.Column="1">
+                                <Picker.ItemsSource>
+                                    <x:Array Type="{x:Type x:String}">
+                                        <x:String>Ben Joseph</x:String>
+                                        <x:String>Ann Mary Joseph</x:String>
+                                        <x:String>Deepa Jossy</x:String>
+                                        <x:String>Jossy C Peter/Deepa Jossy</x:String>
+                                        <x:String>Ouseph KK(Pappa)</x:String>
+                                        <x:String>Ben Joseph/Ann Mary Joseph</x:String>
+                                        <x:String>Ben Joseph/Ann Mary Joseph/Deepa Jossy</x:String>
+                                    </x:Array>
+                                </Picker.ItemsSource>
+                            </Picker>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="150, *">
+                            <Label Text="Risk Number" VerticalOptions="Center" Grid.Column="0" />
+                            <Entry x:Name="entRiskValue" Keyboard="Numeric" Grid.Column="1" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="150, *">
+                            <Label Text="Remarks" VerticalOptions="Center" Grid.Column="0" />
+                            <Editor x:Name="entRemarks" 
+                    Placeholder="Enter additional details like nominee, remarks etc." 
+                    AutoSize="TextChanges" Grid.Column="1" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </toolkit:Expander>
+                <!--expander-->
 
                 <!--Update and delete buttons-->
                 <BoxView Grid.Row="10" Grid.Column="0" Color="Orange" />

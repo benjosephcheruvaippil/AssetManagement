@@ -310,6 +310,7 @@ public partial class AssetPage : TabbedPage
         await SetUpDb();
         var owners = await _dbConnection.Table<Owners>().ToListAsync();
         entHolder.ItemsSource = owners.Select(s => s.OwnerName).ToList();
+        entNominee.ItemsSource = owners.Select(s => s.OwnerName).ToList();
     }
 
     private async void PickFileClicked(object sender, EventArgs e)
@@ -492,7 +493,9 @@ public partial class AssetPage : TabbedPage
                 //StartDate = entStartDate.Date,
                 //MaturityDate = entMaturityDate.Date,
                 //AsOfDate = entAsOfDate.Date,
-                Remarks = entRemarks.Text
+                Remarks = entRemarks.Text,
+                Nominee = entNominee.SelectedItem == null ? "" : entNominee.SelectedItem.ToString(),
+                RiskNumber = !string.IsNullOrEmpty(entRiskValue.Text) ? Convert.ToDecimal(entRiskValue.Text) : null
             };
 
             if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "Equity Mutual Fund" || objAsset.Type == "Debt Mutual Fund" || objAsset.Type == "Stocks" || objAsset.Type == "NPS" || objAsset.Type == "Others")
@@ -541,6 +544,8 @@ public partial class AssetPage : TabbedPage
                     StartDate = objAsset.StartDate,
                     MaturityDate = objAsset.MaturityDate,
                     Remarks = objAsset.Remarks,
+                    Nominee = objAsset.Nominee,
+                    RiskNumber = objAsset.RiskNumber,
                     AsOfDate = objAsset.AsOfDate,
                     LiquidAssetValue = netAssetValue,
                     NetAssetValue = netAssetValue,
@@ -1005,6 +1010,8 @@ public partial class AssetPage : TabbedPage
                 entMaturityDate.Date = obj.MaturityDate;
                 entAsOfDate.Date = obj.AsOfDate;
                 entRemarks.Text = obj.Remarks;
+                entNominee.SelectedItem = obj.Nominee;
+                entRiskValue.Text = Convert.ToString(obj.RiskNumber);
 
                 lblAssetId.Text = Convert.ToString(obj.AssetId);
 
@@ -1048,6 +1055,14 @@ public partial class AssetPage : TabbedPage
         catch (Exception ex)
         {
             string msg = ex.Message;
+        }
+    }
+
+    private void expanderAdditionalDetails_ExpandedChanged(object sender, CommunityToolkit.Maui.Core.ExpandedChangedEventArgs e)
+    {
+        if (e.IsExpanded)
+        {
+            manageAssetsScroll.ScrollToAsync(expanderAdditionalDetails, ScrollToPosition.Start, true);
         }
     }
 }
