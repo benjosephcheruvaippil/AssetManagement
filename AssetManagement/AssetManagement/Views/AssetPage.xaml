@@ -333,9 +333,30 @@ VerticalOptions="Center" />
                 <BoxView Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" Color="Gray"/>
                 <toolkit:Expander Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" x:Name="expanderAdditionalDetails" ExpandedChanged="expanderAdditionalDetails_ExpandedChanged" IsExpanded="False">
                     <toolkit:Expander.Header>
-                        <Label Text="Click To Add More Details"
-                        FontAttributes="Bold"
-                        FontSize="Medium" />
+                        <Grid ColumnDefinitions="*, Auto">
+                            <!-- Header Text -->
+                            <Label Text="Click To Add More Details"
+                   FontAttributes="Bold"
+                   FontSize="Medium"
+                   VerticalOptions="Center" 
+                   Grid.Column="0" />
+                            <!-- Up/Down Icon -->
+                            <Image Grid.Column="1"
+                   WidthRequest="24"
+                   HeightRequest="24"
+                   VerticalOptions="Center">
+                                <Image.Triggers>
+                                    <!-- When IsExpanded is True, show up icon -->
+                                    <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference expanderAdditionalDetails}, Path=IsExpanded}" Value="True">
+                                        <Setter Property="Source" Value="unfold.png" />
+                                    </DataTrigger>
+                                    <!-- When IsExpanded is False, show down icon -->
+                                    <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference expanderAdditionalDetails}, Path=IsExpanded}" Value="False">
+                                        <Setter Property="Source" Value="unfold.png" />
+                                    </DataTrigger>
+                                </Image.Triggers>
+                            </Image>
+                        </Grid>
                     </toolkit:Expander.Header>
                     <VerticalStackLayout>
                         <Grid ColumnDefinitions="150, *">

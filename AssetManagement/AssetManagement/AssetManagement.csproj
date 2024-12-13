@@ -64,6 +64,7 @@
 	  <None Remove="Resources\Images\income_icon.png" />
 	  <None Remove="Resources\Images\report_icon.png" />
 	  <None Remove="Resources\Images\settings.png" />
+	  <None Remove="Resources\Images\unfold.png" />
 	</ItemGroup>
 
 	<ItemGroup>
