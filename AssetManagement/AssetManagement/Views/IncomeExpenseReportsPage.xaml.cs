@@ -1,4 +1,4 @@
-using Android.Content;
+﻿using Android.Content;
 using Android.SE.Omapi;
 using AssetManagement.Models;
 using AssetManagement.Models.Reports;
@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using CommunityToolkit.Maui.Storage;
 using AssetManagement.Models.Constants;
+using AssetManagement.Models.DataTransferObject;
 //using static Android.Content.ClipData;
 
 namespace AssetManagement.Views;
@@ -18,6 +19,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
     AppTheme currentTheme = Application.Current.RequestedTheme;
+    decimal yearlyIncome = 0, yearlyExpense = 0, yearlyBalance = 0;
     private bool onLoad = false;
     public IncomeExpenseReportsPage()
     {
@@ -56,7 +58,9 @@ public partial class IncomeExpenseReportsPage : ContentPage
 
         tblscIncomeExpenseReport.Title = "Income & Expense - Year " + selectedYear;
 
-        decimal yearlyIncome = 0, yearlyExpense = 0, yearlyBalance = 0;
+        yearlyIncome = 0;
+        yearlyExpense = 0;
+        yearlyBalance = 0;
 
         for (int i = 1; i <= 12; i++)
         {
@@ -111,11 +115,13 @@ public partial class IncomeExpenseReportsPage : ContentPage
         objCellYearly.Detail = "Expense: " + yearlyExpense.ToString("#,#.##", new CultureInfo(0x0439)) + " | " + "Income: " + yearlyIncome.ToString("#,#.##", new CultureInfo(0x0439)) + " | " + "Balance: " + yearlyBalance.ToString("#,#.##", new CultureInfo(0x0439));
         objCellYearly.Height = 40;
         tblscIncomeExpenseReport.Add(objCellYearly);
+        objCellYearly.Tapped += ObjCell_Tapped;
     }
 
     private async void ObjCell_Tapped(object sender, EventArgs e)
     {
         var tappedViewCell = (TextCell)sender;
+        string displayText = "";
         string month= tappedViewCell.Text.ToString();
         int monthInteger = 0;
         switch (month)
@@ -156,6 +162,18 @@ public partial class IncomeExpenseReportsPage : ContentPage
             case "December":
                 monthInteger = 12;
                 break;
+            default:
+                monthInteger = 0;
+                break;
+        }
+
+        if (monthInteger == 0)
+        {
+            displayText = $"Total Expense: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", yearlyExpense)}" +
+          $"\nTotal Income: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", yearlyIncome)}" +
+          $"\nTotal Balance: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", yearlyBalance)}";
+            await DisplayAlert(month, displayText, "Ok");
+            return;
         }
 
         string year = yearPicker.SelectedItem.ToString();       
@@ -169,8 +187,17 @@ public partial class IncomeExpenseReportsPage : ContentPage
         var fileUploadExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && e.Mode == "file_upload" && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
         var totalFileUploadExpenses = fileUploadExpenseList.Select(s => s.Amount).Sum();
 
-        string displayText = $"Expense Manually Added: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalManualAddedExpenses)}\nExpense File Upload: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalFileUploadExpenses)}";
-        await DisplayAlert("Info", displayText, "Ok");
+        var monthlyIncomeList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Income" && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
+        var totalMonthlyIncome = monthlyIncomeList.Select(s => s.Amount).Sum();
+
+        double totalMonthlySavings = totalMonthlyIncome - (totalManualAddedExpenses + totalFileUploadExpenses);
+
+        displayText = $"Expense Manually Added: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalManualAddedExpenses)}\nExpense File Upload: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalFileUploadExpenses)}" +
+           $"\n────────────────────" +
+           $"\nTotal Expense: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalManualAddedExpenses + totalFileUploadExpenses)}" +
+           $"\nTotal Income: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalMonthlyIncome)}" +
+           $"\nTotal Balance: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalMonthlySavings)}";
+        await DisplayAlert(month, displayText, "Ok");
     }
 
     private async void yearPicker_SelectedIndexChanged(object sender, EventArgs e)
@@ -184,14 +211,16 @@ public partial class IncomeExpenseReportsPage : ContentPage
 
     public async void SummaryByCategory(string selectedYear)
     {
+        List<CategoryWiseAmountDTO> categoryWiseAmountList = new List<CategoryWiseAmountDTO>();
         DateTime yearBegin = new DateTime(Convert.ToInt32(selectedYear), 1, 1, 0, 0, 0);
         DateTime yearEnd = new DateTime(Convert.ToInt32(selectedYear), 12, 31, 23, 59, 59);
-        var categories = await _dbConnection.QueryAsync<IncomeExpenseModel>("select CategoryName from IncomeExpenseModel Group By CategoryName");
+        var categories = await _dbConnection.QueryAsync<IncomeExpenseModel>("select CategoryName,TransactionType from IncomeExpenseModel Group By CategoryName,TransactionType");
         var records = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.Date >= yearBegin && d.Date <= yearEnd).ToListAsync();
 
         double total = 0;
         foreach (var category in categories)
         {
+            CategoryWiseAmountDTO objCategoryWiseAmount = new CategoryWiseAmountDTO();
             total = 0;
             if (!string.IsNullOrEmpty(category.CategoryName))
             {
@@ -216,22 +245,50 @@ public partial class IncomeExpenseReportsPage : ContentPage
                 category.CategoryName = "Uncategorized Expense";
             }
             //new code
-            TextCell objCategory = new TextCell();
-            objCategory.Text = category.CategoryName;
-            if (currentTheme == AppTheme.Dark)
+
+            if (total > 0)
             {
-                //set to white color
-                objCategory.TextColor = Color.FromArgb("#FFFFFF");
+                objCategoryWiseAmount.CategoryName = category.CategoryName;
+                objCategoryWiseAmount.TransactionType = category.TransactionType;
+                objCategoryWiseAmount.Amount = total;
+                categoryWiseAmountList.Add(objCategoryWiseAmount);
             }
-            objCategory.Detail = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", total);
-            objCategory.Height = 40;
-            tblscCategoryWiseReport.Add(objCategory);
+            //if (total > 0)
+            //{
+            //    TextCell objCategory = new TextCell();
+            //    objCategory.Text = category.CategoryName;
+            //    if (currentTheme == AppTheme.Dark)
+            //    {
+            //        //set to white color
+            //        objCategory.TextColor = Color.FromArgb("#FFFFFF");
+            //    }
+            //    objCategory.Detail = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", total + " - " + category.TransactionType);
+            //    objCategory.Height = 40;
+            //    tblscCategoryWiseReport.Add(objCategory);
+            //}
+        }
+
+        if (categoryWiseAmountList.Count > 0)
+        {
+            categoryWiseAmountList = categoryWiseAmountList.OrderBy(o => o.TransactionType).ThenByDescending(o => o.Amount).ToList();
+            foreach (var item in categoryWiseAmountList)
+            {
+                TextCell objCategory = new TextCell();
+                objCategory.Text = item.CategoryName + " - " + item.TransactionType;
+                if (currentTheme == AppTheme.Dark)
+                {
+                    //set to white color
+                    objCategory.TextColor = Color.FromArgb("#FFFFFF");
+                }
+                objCategory.Detail = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", item.Amount);
+                objCategory.Height = 40;
+                tblscCategoryWiseReport.Add(objCategory);
+            }
         }
 
         tblscCategoryWiseReport.Title = "Category Wise Report " + selectedYear;
-
-
     }
+
 
     private async void btnGenerateIncomeReport_Clicked(object sender, EventArgs e)
     {

@@ -21,5 +21,7 @@ namespace AssetManagement.Models
         public DateTime MaturityDate { get; set; }
         public string Remarks { get; set; }
         public DateTime AsOfDate { get; set; }
+        public string Nominee { get; set; }
+        public decimal? RiskNumber { get; set; }//1-10 (1 indicates least risk and 10 indicates highest risk)
     }
 }

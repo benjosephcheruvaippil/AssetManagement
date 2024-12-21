@@ -68,7 +68,7 @@
                         </TableSection>
                     </TableRoot>
                 </TableView>
-                <Label x:Name="lblShowRemainingRecords" Text="Show Remaining" FontAttributes="Bold" HorizontalOptions="Center" />
+            <Label x:Name="lblShowRemainingRecords" Text="Show Next 30 Records" FontAttributes="Bold" HorizontalOptions="Center" />
             <BoxView HeightRequest="50" Color="Transparent"/>
                 <Label x:Name="lblCurrentMonthIncome" FontSize="Large" Text="" HorizontalOptions="CenterAndExpand"></Label>
             </VerticalStackLayout>

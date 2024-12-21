@@ -9,6 +9,7 @@ public partial class IncomePage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
     AppTheme currentTheme = Application.Current.RequestedTheme;
+    public int PageNumber = 0, PageSize = 30, TotalIncomeRecordCount = 0;
     public IncomePage()
     {
         InitializeComponent();
@@ -16,7 +17,7 @@ public partial class IncomePage : ContentPage
         var labelShowRemaining = new TapGestureRecognizer();
         labelShowRemaining.Tapped += (s, e) =>
         {
-            LoadIncomeInPage("AllRecords");
+            LoadIncomeInPage("Pagewise");
         };
         lblShowRemainingRecords.GestureRecognizers.Add(labelShowRemaining);
     }
@@ -115,9 +116,32 @@ public partial class IncomePage : ContentPage
         {
             income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 5");
         }
-        else if(hint == "AllRecords")
+        else if(hint == "Pagewise")
         {
-            income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc");
+            PageNumber = PageNumber + 1;
+            int offset = (PageNumber - 1) * PageSize;
+            if (TotalIncomeRecordCount == 0)
+            {
+                TotalIncomeRecordCount = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Income").CountAsync();
+            }
+            int showRecordCount = 0;
+            if (offset == 0)
+            {
+                showRecordCount = PageSize;
+            }
+            else
+            {
+                showRecordCount = PageSize + offset;
+            }
+            if (TotalIncomeRecordCount - offset < PageSize)
+            {
+                showRecordCount = TotalIncomeRecordCount;
+                lblShowRemainingRecords.IsVisible = false;
+            }
+
+            tblscIncome.Title = "Showing " + showRecordCount + " of " + TotalIncomeRecordCount + " records";
+
+            income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 30 Offset " + offset);
         }
         
 
@@ -170,8 +194,27 @@ public partial class IncomePage : ContentPage
         {
             dpDateIncome.Date = new DateTime(year, month, day);
 
-            entryIncomeAmount.Text = tappedViewCell.Detail.Split("-")[0].Trim();
-            entryIncomeRemarks.Text = tappedViewCell.Detail.Split("-")[1].Trim();  
+            string[] amountAndRemarks = tappedViewCell.Detail.Split(new[] { "-" }, StringSplitOptions.TrimEntries);
+            string remarks = "";
+            entryIncomeAmount.Text = amountAndRemarks[0];
+            int loop = 1;
+            //logic for '-' symbol handling in remarks. for example if detail has some value like '250 - this is for 24-35 date range', then the below logic will
+            //handle it to populate it in remarks.
+            foreach (var item in amountAndRemarks)
+            {
+                if (loop > 1)
+                {
+                    string next = item;
+                    if (loop > 2)
+                    {
+                        next = " - " + item;
+                    }
+                    remarks = remarks + next;
+
+                }
+                loop++;
+            }
+            entryIncomeRemarks.Text = remarks;
         }
         else
         {

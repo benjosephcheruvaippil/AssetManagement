@@ -135,7 +135,7 @@ public partial class ManageCategoriesPage : ContentPage
             List<IncomeExpenseCategories> categories = new List<IncomeExpenseCategories>();
             tblscCategories.Clear();
             await SetUpDb();
-            categories = await _dbConnection.QueryAsync<IncomeExpenseCategories>("select IncomeExpenseCategoryId, CategoryName, CategoryType from IncomeExpenseCategories");
+            categories = await _dbConnection.QueryAsync<IncomeExpenseCategories>("select IncomeExpenseCategoryId, CategoryName, CategoryType from IncomeExpenseCategories order by CategoryType asc, CategoryName asc");
             foreach (var item in categories)
             {
                 TextCell objCell = new TextCell();

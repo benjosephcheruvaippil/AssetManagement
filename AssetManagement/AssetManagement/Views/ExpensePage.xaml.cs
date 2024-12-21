@@ -17,6 +17,7 @@ public partial class ExpensePage : ContentPage
     AppTheme currentTheme = Application.Current.RequestedTheme;
     //private IPopupNavigation _popupNavigation;
     ///private readonly IAssetService _assetService;
+    public int PageNumber = 0, PageSize = 30, TotalExpenseRecordCount = 0;
     public ExpensePage()
     {
         InitializeComponent();
@@ -24,7 +25,7 @@ public partial class ExpensePage : ContentPage
         var labelShowRemaining = new TapGestureRecognizer();
         labelShowRemaining.Tapped += (s, e) =>
         {
-            LoadExpensesInPage("Last40");
+            LoadExpensesInPage("Pagewise");
         };
         lblShowRemainingRecords.GestureRecognizers.Add(labelShowRemaining);
     }
@@ -225,8 +226,27 @@ public partial class ExpensePage : ContentPage
         {
             dpDateExpense.Date = new DateTime(year, month, day);
 
-            entryExpenseAmount.Text = tappedViewCell.Detail.Split("-")[0].Trim();
-            entryExpenseRemarks.Text = tappedViewCell.Detail.Split("-")[1].Trim();
+            string[] amountAndRemarks = tappedViewCell.Detail.Split(new[] { "-" }, StringSplitOptions.TrimEntries);
+            string remarks = "";
+            entryExpenseAmount.Text = amountAndRemarks[0];
+            int loop = 1;
+            //logic for '-' symbol handling in remarks. for example if detail has some value like '250 - this is for 24-35 date range', then the below logic will
+            //handle it to populate it in remarks.
+            foreach(var item in amountAndRemarks)
+            {
+                if (loop > 1)
+                {
+                    string next = item;
+                    if (loop > 2)
+                    {
+                        next = " - " + item;
+                    }
+                    remarks = remarks + next;
+                    
+                }
+                loop++;
+            }
+            entryExpenseRemarks.Text = remarks;
         }
         else
         {
@@ -240,7 +260,7 @@ public partial class ExpensePage : ContentPage
     }
 
     private async void LoadExpensesInPage(string hint)
-    {
+    {  
         pickerExpenseCategory.SelectedItem = "Household Items"; //set this value by default
         dpDateExpense.MinimumDate = new DateTime(2020, 1, 1);
         dpDateExpense.MaximumDate = new DateTime(2050, 12, 31);
@@ -255,9 +275,32 @@ public partial class ExpensePage : ContentPage
         {
             expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
         }
-        else if (hint == "Last40")
+        else if (hint == "Pagewise")
         {
-            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 40");
+            
+            PageNumber = PageNumber + 1;
+            int offset = (PageNumber - 1) * PageSize;
+            if (TotalExpenseRecordCount == 0)
+            {
+                TotalExpenseRecordCount = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense").CountAsync();
+            }
+            int showRecordCount = 0;
+            if (offset == 0)
+            {
+                showRecordCount = PageSize;
+            }
+            else
+            {
+                showRecordCount = PageSize + offset;
+            }
+            if (TotalExpenseRecordCount - offset < PageSize)
+            {
+                showRecordCount = TotalExpenseRecordCount;
+                lblShowRemainingRecords.IsVisible = false;
+            }
+
+            tblscExpenses.Title = "Showing "+ showRecordCount + " of "+ TotalExpenseRecordCount + " records";
+            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 30 Offset " + offset);
         }
 
         foreach (var item in expenses)

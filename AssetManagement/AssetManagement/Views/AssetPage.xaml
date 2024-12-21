@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <TabbedPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:models="clr-namespace:AssetManagement.Models"
              xmlns:viewModels="clr-namespace:AssetManagement.ViewModels"
              x:DataType="viewModels:AssetListPageViewModel"
-             x:Class="AssetManagement.Views.AssetPage"
+             x:Class="AssetManagement.Views.AssetPage"   
             
              Title="Assets" >
 
@@ -190,8 +191,9 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                  Title="Manage Asset">
 
         <ScrollView x:Name="manageAssetsScroll">
-            <Grid RowSpacing="4" ColumnSpacing="3">
+            <Grid RowSpacing="4" ColumnSpacing="4">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="100" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
@@ -200,8 +202,7 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="50" />
                     <RowDefinition Height="50" />
                     <!--<RowDefinition Height="50" />-->
@@ -210,22 +211,23 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
+                    <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <BoxView Color="Green" />
                 <Label Text="Investment Entity"
                HorizontalOptions="Start"
                VerticalOptions="Center" />
-                <BoxView Grid.Column="1" Color="Orange" />
-                <Entry Grid.Column="1" x:Name="entEntityName" />
+                <BoxView Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <Editor Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entEntityName" Placeholder="Enter investment name" HeightRequest="100" AutoSize="TextChanges"/>
                 <Label x:Name="lblAssetId" IsVisible="False"/>
 
                 <BoxView Grid.Row="1" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="1" Grid.Column="0" Text="Type"
            HorizontalOptions="Start"
            VerticalOptions="Center" />
-                <BoxView Grid.Row="1" Grid.Column="1" Color="Orange" />
+                <BoxView Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
                 <!--<Entry Grid.Row="1" Grid.Column="1" x:Name="entType" />-->
-                <Picker Grid.Row="1" Grid.Column="1" x:Name="entType" SelectedIndexChanged="entType_SelectedIndexChanged" Title="Select type">
+                <Picker Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entType" SelectedIndexChanged="entType_SelectedIndexChanged" Title="Select type">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
                             <x:String>Bank</x:String>
@@ -249,23 +251,23 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                 <Label Grid.Row="2" Grid.Column="0" Text="Amount"
            HorizontalOptions="Start"
            VerticalOptions="Center" />
-                <BoxView Grid.Row="2" Grid.Column="1" Color="Orange" />
-                <Entry Grid.Row="2" Grid.Column="1" x:Name="entAmount" Keyboard="Numeric" />
+                <BoxView Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <Entry Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entAmount" Keyboard="Numeric" />
 
                 <BoxView Grid.Row="3" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="3" Grid.Column="0" Text="Interest Rate"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="3" Grid.Column="1" Color="Orange" />
-                <Entry Grid.Row="3" Grid.Column="1" x:Name="entInterestRate" Keyboard="Numeric" />
+                <BoxView Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <Entry Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entInterestRate" Keyboard="Numeric" />
 
                 <BoxView Grid.Row="4" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="4" Grid.Column="0" Text="Interest Frequency"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="4" Grid.Column="1" Color="Orange" />
+                <BoxView Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
                 <!--<Entry Grid.Row="4" Grid.Column="1" x:Name="entInterestFrequency" />-->
-                <Picker Grid.Row="4" Grid.Column="1" x:Name="entInterestFrequency" Title="Select frequency">
+                <Picker Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entInterestFrequency" Title="Select frequency">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
                             <x:String>Monthly</x:String>
@@ -281,8 +283,8 @@ VerticalOptions="Center" />
                 <Label Grid.Row="5" Grid.Column="0" Text="Holder"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="5" Grid.Column="1" Color="Orange" />
-                <Picker Grid.Row="5" Grid.Column="1" x:Name="entHolder" Title="Select holder">
+                <BoxView Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <Picker Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entHolder" Title="Select holder">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
                             <!--<x:String>Ben Joseph</x:String>
@@ -303,35 +305,99 @@ VerticalOptions="Center" />
                 <Label Grid.Row="6" Grid.Column="0" Text="Start Date"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="6" Grid.Column="1" Color="Orange" />
-                <DatePicker Grid.Row="6" Grid.Column="1" x:Name="entStartDate" />
+                <BoxView Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <DatePicker Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entStartDate" />
 
                 <BoxView Grid.Row="7" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="7" Grid.Column="0" Text="Maturity Date"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="7" Grid.Column="1" Color="Orange" />
-                <DatePicker Grid.Row="7" Grid.Column="1" x:Name="entMaturityDate" />
+                <BoxView Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <DatePicker Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entMaturityDate" />
 
                 <BoxView Grid.Row="8" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="8" Grid.Column="0" Text="As Of Date"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="8" Grid.Column="1" Color="Orange" />
-                <DatePicker Grid.Row="8" Grid.Column="1" x:Name="entAsOfDate" />
+                <BoxView Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <DatePicker Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entAsOfDate" />
 
-                <BoxView Grid.Row="9" Grid.Column="0" Color="Green" />
+                <!--<BoxView Grid.Row="9" Grid.Column="0" Color="Green" />
                 <Label Grid.Row="9" Grid.Column="0" Text="Remarks"
 HorizontalOptions="Start"
 VerticalOptions="Center" />
-                <BoxView Grid.Row="9" Grid.Column="1" Color="Orange" />
-                <Entry Grid.Row="9" Grid.Column="1" x:Name="entRemarks" />
+                <BoxView Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" Color="Orange" />
+                <Editor Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" x:Name="entRemarks" Placeholder="Enter additional details like nominee,remarks etc." HeightRequest="100" AutoSize="TextChanges"/>-->
+
+                <!--expander-->
+                <BoxView Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" Color="Gray"/>
+                <toolkit:Expander Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" x:Name="expanderAdditionalDetails" ExpandedChanged="expanderAdditionalDetails_ExpandedChanged" IsExpanded="False">
+                    <toolkit:Expander.Header>
+                        <Grid ColumnDefinitions="*, Auto">
+                            <!-- Header Text -->
+                            <Label Text="Click To Add More Details"
+                   FontAttributes="Bold"
+                   FontSize="Medium"
+                   VerticalOptions="Center" 
+                   Grid.Column="0" />
+                            <!-- Up/Down Icon -->
+                            <Image Grid.Column="1"
+                   WidthRequest="24"
+                   HeightRequest="24"
+                   VerticalOptions="Center">
+                                <Image.Triggers>
+                                    <!-- When IsExpanded is True, show up icon -->
+                                    <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference expanderAdditionalDetails}, Path=IsExpanded}" Value="True">
+                                        <Setter Property="Source" Value="unfold.png" />
+                                    </DataTrigger>
+                                    <!-- When IsExpanded is False, show down icon -->
+                                    <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference expanderAdditionalDetails}, Path=IsExpanded}" Value="False">
+                                        <Setter Property="Source" Value="unfold.png" />
+                                    </DataTrigger>
+                                </Image.Triggers>
+                            </Image>
+                        </Grid>
+                    </toolkit:Expander.Header>
+                    <VerticalStackLayout>
+                        <Grid ColumnDefinitions="150, *">
+                            <Label Text="Nominee" VerticalOptions="Center" Grid.Column="0" />
+                            <Picker x:Name="entNominee" Title="Select nominee" Grid.Column="1">
+                                <Picker.ItemsSource>
+                                    <x:Array Type="{x:Type x:String}">
+                                        <x:String>Ben Joseph</x:String>
+                                        <x:String>Ann Mary Joseph</x:String>
+                                        <x:String>Deepa Jossy</x:String>
+                                        <x:String>Jossy C Peter/Deepa Jossy</x:String>
+                                        <x:String>Ouseph KK(Pappa)</x:String>
+                                        <x:String>Ben Joseph/Ann Mary Joseph</x:String>
+                                        <x:String>Ben Joseph/Ann Mary Joseph/Deepa Jossy</x:String>
+                                    </x:Array>
+                                </Picker.ItemsSource>
+                            </Picker>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="150, *">
+                            <Label Text="Risk Number" VerticalOptions="Center" Grid.Column="0" />
+                            <Entry x:Name="entRiskValue" Keyboard="Numeric" Grid.Column="1" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="150, *">
+                            <Label Text="Remarks" VerticalOptions="Center" Grid.Column="0" />
+                            <Editor x:Name="entRemarks" 
+                    Placeholder="Enter additional details like nominee, remarks etc." 
+                    AutoSize="TextChanges" Grid.Column="1" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </toolkit:Expander>
+                <!--expander-->
 
                 <!--Update and delete buttons-->
                 <BoxView Grid.Row="10" Grid.Column="0" Color="Orange" />
                 <Button Grid.Row="10" Grid.Column="0" x:Name="btnSave" Clicked="btnSave_Clicked" Text="Save"></Button>
                 <BoxView Grid.Row="10" Grid.Column="1" Color="Orange" />
                 <Button Grid.Row="10" Grid.Column="1" x:Name="btnDelete" Clicked="btnDelete_Clicked" Text="Delete"></Button>
+                <BoxView Grid.Row="10" Grid.Column="2" Color="Orange" />
+                <Button Grid.Row="10" Grid.Column="2" x:Name="btnClear" Clicked="btnClear_Clicked" Text="Clear"></Button>
                 <!--Update and delete buttons-->
 
                 <!--<BoxView Grid.Row="11"
@@ -340,21 +406,21 @@ VerticalOptions="Center" />
                 <!--<Button x:Name="btnGetDetail" IsVisible="false" Text="Get Detail" Clicked="btnGetDetail_Clicked" Grid.Row="11" Grid.ColumnSpan="2"></Button>-->
 
                 <BoxView Grid.Row="11"
-Grid.ColumnSpan="2"
+Grid.ColumnSpan="3"
 Color="White" />
-                <Entry x:Name="entAssetSearch" TextChanged="entAssetSearch_TextChanged" Grid.Row="11" Grid.ColumnSpan="2" Placeholder="Search by name,amount,holder"/>
+                <Entry x:Name="entAssetSearch" TextChanged="entAssetSearch_TextChanged" Grid.Row="11" Grid.ColumnSpan="3" Placeholder="Search by name,amount,holder"/>
 
                 <BoxView Grid.Row="12"
-                 Grid.ColumnSpan="2"
+                 Grid.ColumnSpan="3"
                  Color="Red" />
-                <dg:DataGrid x:Name="dgAssetsDataTable" ItemSelected="dgAssetsDataTable_ItemSelected" Grid.Row="12" Grid.ColumnSpan="2"  ItemsSource="{Binding Assets}" SelectionEnabled="True" SelectedItem="{Binding SelectedAsset}"
+                <dg:DataGrid x:Name="dgAssetsDataTable" ItemSelected="dgAssetsDataTable_ItemSelected" Grid.Row="12" Grid.ColumnSpan="3"  ItemsSource="{Binding Assets}" SelectionEnabled="True" SelectedItem="{Binding SelectedAsset}"
          RowHeight="58" HeaderHeight="50" PullToRefreshCommand="{Binding RefreshCommand}"
          IsRefreshing="{Binding IsRefreshing}" HeaderBackground="Red" PaginationEnabled="{Binding PaginationEnabled}" PageSize="5">
                     <dg:DataGrid.NoDataView>
                         <Label Text="Nothing to see here 🙈" HorizontalOptions="Center" VerticalOptions="Center" />
                     </dg:DataGrid.NoDataView>
                     <dg:DataGrid.Columns>
-                        <dg:DataGridColumn IsVisible="False" Title="Image" PropertyName="Image" Width="150" SortingEnabled="False">
+                        <dg:DataGridColumn IsVisible="False" Title="Image" PropertyName="Image" Width="*" SortingEnabled="False">
                             <dg:DataGridColumn.CellTemplate>
                                 <DataTemplate>
                                     <Image Source="{Binding}" HorizontalOptions="Center" VerticalOptions="Center"
@@ -362,10 +428,10 @@ Color="White" />
                                 </DataTemplate>
                             </dg:DataGridColumn.CellTemplate>
                         </dg:DataGridColumn>
-                        <dg:DataGridColumn Title="Investment Entity" PropertyName="InvestmentEntity"  />
-                        <dg:DataGridColumn Title="Amount" PropertyName="Amount"  />
-                        <dg:DataGridColumn Title="Maturity Date" PropertyName="MaturityDate"  />
-                        <dg:DataGridColumn Title="As Of Date" PropertyName="AsOfDate"  />
+                        <dg:DataGridColumn Title="Investment Entity" PropertyName="InvestmentEntity" Width="*"  />
+                        <dg:DataGridColumn Title="Amount" PropertyName="Amount"  Width="*"/>
+                        <dg:DataGridColumn Title="Maturity Date" PropertyName="MaturityDate" Width="*" />
+                        <dg:DataGridColumn Title="As Of Date" PropertyName="AsOfDate"  Width="*" />
                         <!--<dg:DataGridColumn Title="Longitude" PropertyName="Longitude" />
                         <dg:DataGridColumn Title="Population" PropertyName="Population" />
                         <dg:DataGridColumn Title="Details" PropertyName="Details" Width="0.5*" />-->

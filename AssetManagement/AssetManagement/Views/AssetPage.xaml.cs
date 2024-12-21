@@ -310,6 +310,7 @@ public partial class AssetPage : TabbedPage
         await SetUpDb();
         var owners = await _dbConnection.Table<Owners>().ToListAsync();
         entHolder.ItemsSource = owners.Select(s => s.OwnerName).ToList();
+        entNominee.ItemsSource = owners.Select(s => s.OwnerName).ToList();
     }
 
     private async void PickFileClicked(object sender, EventArgs e)
@@ -472,71 +473,99 @@ public partial class AssetPage : TabbedPage
 
     private async void btnSave_Clicked(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(entEntityName.Text))
+        try
         {
-            await DisplayAlert("Message", "Please input all required fields", "OK");
-            return;
-        }
-
-        int rowsAffected = 0;
-        Models.Assets objAsset = new Assets()
-        {
-            InvestmentEntity = entEntityName.Text,
-            Type = entType.SelectedItem.ToString(),
-            Amount = Convert.ToDecimal(entAmount.Text),
-            InterestRate = Convert.ToDecimal(entInterestRate.Text),
-            InterestFrequency = entInterestFrequency.SelectedItem == null ? "" : entInterestFrequency.SelectedItem.ToString(),
-            Holder = entHolder.SelectedItem == null ? "" : entHolder.SelectedItem.ToString(),
-            //StartDate = entStartDate.Date,
-            //MaturityDate = entMaturityDate.Date,
-            //AsOfDate = entAsOfDate.Date,
-            Remarks = entRemarks.Text
-        };
-
-        if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "Equity Mutual Fund" || objAsset.Type == "Debt Mutual Fund" || objAsset.Type == "Stocks" || objAsset.Type == "NPS" || objAsset.Type == "Others")
-        {
-            objAsset.AsOfDate = entAsOfDate.Date;
-            objAsset.StartDate= Convert.ToDateTime("01-01-0001");
-            objAsset.MaturityDate= Convert.ToDateTime("01-01-0001");
-
-            entStartDate.IsEnabled = false;
-            entMaturityDate.IsEnabled = false;
-        }
-        else
-        {
-            objAsset.AsOfDate = Convert.ToDateTime("01-01-0001");
-            objAsset.StartDate = entStartDate.Date;
-            objAsset.MaturityDate = entMaturityDate.Date;
-
-            entAsOfDate.IsEnabled = false;
-        }
-
-        await SetUpDb();
-        if (string.IsNullOrEmpty(lblAssetId.Text)) //insert asset
-        {
-            rowsAffected = await _dbConnection.InsertAsync(objAsset);
-        }
-        else //update asset
-        {
-            objAsset.AssetId = Convert.ToInt32(lblAssetId.Text);
-            rowsAffected = await _dbConnection.UpdateAsync(objAsset);
-        }
-
-        if (rowsAffected > 0)
-        {
-            //add asset audit log
-            double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>("select SUM(Amount) from Assets");
-
-            AssetAuditLog objAssetAuditLog = new AssetAuditLog
+            if (string.IsNullOrEmpty(entEntityName.Text) || entType.SelectedItem == null || string.IsNullOrEmpty(entAmount.Text))
             {
-                LiquidAssetValue = netAssetValue,
-                NetAssetValue = netAssetValue,
-                CreatedDate = DateTime.Now
+                await DisplayAlert("Message", "Please input all required fields", "OK");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(entInterestRate.Text))
+            {
+                entInterestRate.Text = "0";
+            }
+
+            int rowsAffected = 0;
+            Models.Assets objAsset = new Assets()
+            {
+                InvestmentEntity = entEntityName.Text,
+                Type = entType.SelectedItem.ToString(),
+                Amount = Convert.ToDecimal(entAmount.Text),
+                InterestRate = Convert.ToDecimal(entInterestRate.Text),
+                InterestFrequency = entInterestFrequency.SelectedItem == null ? "" : entInterestFrequency.SelectedItem.ToString(),
+                Holder = entHolder.SelectedItem == null ? "" : entHolder.SelectedItem.ToString(),
+                //StartDate = entStartDate.Date,
+                //MaturityDate = entMaturityDate.Date,
+                //AsOfDate = entAsOfDate.Date,
+                Remarks = entRemarks.Text,
+                Nominee = entNominee.SelectedItem == null ? "" : entNominee.SelectedItem.ToString(),
+                RiskNumber = !string.IsNullOrEmpty(entRiskValue.Text) ? Convert.ToDecimal(entRiskValue.Text) : null
             };
-            await _dbConnection.InsertAsync(objAssetAuditLog);
-            //add asset audit log
-            await DisplayAlert("Message", "Asset Saved", "OK");
-            await LoadAssets();
+
+            if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "Equity Mutual Fund" || objAsset.Type == "Debt Mutual Fund" || objAsset.Type == "Stocks" || objAsset.Type == "NPS" || objAsset.Type == "Others")
+            {
+                objAsset.AsOfDate = entAsOfDate.Date;
+                objAsset.StartDate = Convert.ToDateTime("01-01-0001");
+                objAsset.MaturityDate = Convert.ToDateTime("01-01-0001");
+
+                entStartDate.IsEnabled = false;
+                entMaturityDate.IsEnabled = false;
+            }
+            else
+            {
+                objAsset.AsOfDate = Convert.ToDateTime("01-01-0001");
+                objAsset.StartDate = entStartDate.Date;
+                objAsset.MaturityDate = entMaturityDate.Date;
+
+                entAsOfDate.IsEnabled = false;
+            }
+
+            await SetUpDb();
+            if (string.IsNullOrEmpty(lblAssetId.Text)) //insert asset
+            {
+                rowsAffected = await _dbConnection.InsertAsync(objAsset);
+            }
+            else //update asset
+            {
+                objAsset.AssetId = Convert.ToInt32(lblAssetId.Text);
+                rowsAffected = await _dbConnection.UpdateAsync(objAsset);
+            }
+
+            if (rowsAffected > 0)
+            {
+                //add asset audit log
+                double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>("select SUM(Amount) from Assets");
+
+                AssetAuditLog objAssetAuditLog = new AssetAuditLog
+                {
+                    AssetId = objAsset.AssetId,
+                    InvestmentEntity = objAsset.InvestmentEntity,
+                    Type = objAsset.Type,
+                    Amount = objAsset.Amount,
+                    InterestRate = objAsset.InterestRate,
+                    InterestFrequency = objAsset.InterestFrequency,
+                    Holder = objAsset.Holder,
+                    StartDate = objAsset.StartDate,
+                    MaturityDate = objAsset.MaturityDate,
+                    Remarks = objAsset.Remarks,
+                    Nominee = objAsset.Nominee,
+                    RiskNumber = objAsset.RiskNumber,
+                    AsOfDate = objAsset.AsOfDate,
+                    LiquidAssetValue = netAssetValue,
+                    NetAssetValue = netAssetValue,
+                    ActionType = string.IsNullOrEmpty(lblAssetId.Text) ? "Insert" : "Update",
+                    CreatedDate = DateTime.Now
+                };
+                SaveAssetAuditLog(objAssetAuditLog);
+                //add asset audit log
+                await DisplayAlert("Message", "Asset Saved", "OK");
+                await LoadAssets();
+            }
+        }
+        catch(Exception)
+        {
+            await DisplayAlert("Error", "Something went wrong. Please try again.", "Got It");
         }
     }
 
@@ -547,27 +576,42 @@ public partial class AssetPage : TabbedPage
             bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
             if (userResponse)
             {
+                int assetId = Convert.ToInt32(lblAssetId.Text);
+                var assetDeleted = await _dbConnection.GetAsync<Assets>(assetId);               
                 Models.Assets objAsset = new Assets()
                 {
-                    AssetId = Convert.ToInt32(lblAssetId.Text)
+                    AssetId = assetId
                 };
 
                 await SetUpDb();
                 int rowsAffected = await _dbConnection.DeleteAsync(objAsset);
                 if (rowsAffected > 0)
                 {
-                    //add asset audit log
+                    //add asset audit log  
                     double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>("select SUM(Amount) from Assets");
 
                     AssetAuditLog objAssetAuditLog = new AssetAuditLog
                     {
+                        AssetId = assetDeleted.AssetId,
+                        InvestmentEntity = assetDeleted.InvestmentEntity,
+                        Type = assetDeleted.Type,
+                        Amount = assetDeleted.Amount,
+                        InterestRate = assetDeleted.InterestRate,
+                        InterestFrequency = assetDeleted.InterestFrequency,
+                        Holder = assetDeleted.Holder,
+                        StartDate = assetDeleted.StartDate,
+                        MaturityDate = assetDeleted.MaturityDate,
+                        Remarks = assetDeleted.Remarks,
+                        AsOfDate = assetDeleted.AsOfDate,
                         LiquidAssetValue = netAssetValue,
                         NetAssetValue = netAssetValue,
+                        ActionType = "Delete",
                         CreatedDate = DateTime.Now
                     };
-                    await _dbConnection.InsertAsync(objAssetAuditLog);
+                    SaveAssetAuditLog(objAssetAuditLog);
                     //add asset audit log
                     await DisplayAlert("Message", "Asset Deleted", "OK");
+                    ClearManageAssetForm();
                     await LoadAssets();
                 }
             }
@@ -576,6 +620,29 @@ public partial class AssetPage : TabbedPage
         {
             await DisplayAlert("Message", "Please select an asset", "OK");
         }
+    }
+
+    private async void SaveAssetAuditLog(AssetAuditLog assetAuditLog)
+    {
+        AssetAuditLog objAssetAuditLog = new AssetAuditLog
+        {
+            AssetId = assetAuditLog.AssetId,
+            InvestmentEntity = assetAuditLog.InvestmentEntity,
+            Type = assetAuditLog.Type,
+            Amount = assetAuditLog.Amount,
+            InterestRate = assetAuditLog.InterestRate,
+            InterestFrequency = assetAuditLog.InterestFrequency,
+            Holder = assetAuditLog.Holder,
+            StartDate = assetAuditLog.StartDate,
+            MaturityDate = assetAuditLog.MaturityDate,
+            Remarks = assetAuditLog.Remarks,
+            AsOfDate = assetAuditLog.AsOfDate,
+            LiquidAssetValue = assetAuditLog.NetAssetValue,
+            NetAssetValue = assetAuditLog.NetAssetValue,
+            ActionType = assetAuditLog.ActionType,
+            CreatedDate = DateTime.Now
+        };
+        await _dbConnection.InsertAsync(objAssetAuditLog);
     }
 
     private void entType_SelectedIndexChanged(object sender, EventArgs e)
@@ -948,6 +1015,8 @@ public partial class AssetPage : TabbedPage
                 entMaturityDate.Date = obj.MaturityDate;
                 entAsOfDate.Date = obj.AsOfDate;
                 entRemarks.Text = obj.Remarks;
+                entNominee.SelectedItem = obj.Nominee;
+                entRiskValue.Text = Convert.ToString(obj.RiskNumber);
 
                 lblAssetId.Text = Convert.ToString(obj.AssetId);
 
@@ -958,6 +1027,48 @@ public partial class AssetPage : TabbedPage
             {
                 await DisplayAlert("Message", "Please select an asset", "OK");
             }
+        }
+    }
+
+    private void btnClear_Clicked(object sender, EventArgs e)
+    {
+        ClearManageAssetForm();
+    }
+
+    public void ClearManageAssetForm()
+    {
+        try
+        {
+            manageAssetsScroll.ScrollToAsync(0, 0, true);
+            lblAssetId.Text = "";
+            entEntityName.Text = "";
+            //if (entType != null)
+            //{
+            //    entType.ItemsSource.Clear();
+            //    entType.SelectedIndex = -1;
+            //}
+            //entType.SelectedIndex = -1;
+            entAmount.Text = "";
+            entInterestRate.Text = "";
+            //entInterestFrequency.SelectedIndex = -1;
+            //entHolder.SelectedIndex = -1;
+            entStartDate.Date = DateTime.Now;
+            entMaturityDate.Date = DateTime.Now;
+            entAsOfDate.Date = DateTime.Now;
+            entRemarks.Text = "";
+            entRiskValue.Text = "";
+        }
+        catch (Exception ex)
+        {
+            string msg = ex.Message;
+        }
+    }
+
+    private void expanderAdditionalDetails_ExpandedChanged(object sender, CommunityToolkit.Maui.Core.ExpandedChangedEventArgs e)
+    {
+        if (e.IsExpanded)
+        {
+            manageAssetsScroll.ScrollToAsync(expanderAdditionalDetails, ScrollToPosition.Start, true);
         }
     }
 }
