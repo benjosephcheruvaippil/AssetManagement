@@ -8,7 +8,7 @@
 IsVisible="false" />
         <Entry x:Name="entryCategoryName"
 Placeholder="Enter category name" />
-        <Picker x:Name="categoryTypePicker" Title="Select income or expense">
+        <Picker x:Name="categoryTypePicker" Title="Select income or expense" SelectedIndexChanged="categoryTypePicker_SelectedIndexChanged">
             <Picker.ItemsSource>
                 <x:Array Type="{x:Type x:String}">
                     <x:String>Income</x:String>
@@ -17,6 +17,8 @@ Placeholder="Enter category name" />
             </Picker.ItemsSource>
         </Picker>
         <StackLayout Orientation="Horizontal">
+            <Label x:Name="lblOneTimeExpense" IsVisible="False" VerticalOptions="Center">One Time Expense</Label>
+            <CheckBox x:Name="chkIsOneTimeExpense" IsVisible="False" IsChecked="true" />
             <Label VerticalOptions="Center">Is Visible</Label>
             <CheckBox x:Name="chkIsVisible" IsChecked="true" />
         </StackLayout>
