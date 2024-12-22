@@ -71,9 +71,14 @@ public partial class IncomeExpenseReportsPage : ContentPage
 
             IncomeExpenseReport objReport = new IncomeExpenseReport();
 
-            var expenses = await _dbConnection.Table<IncomeExpenseModel>()
-                .Where(e => e.TransactionType == "Expense" && e.Date >= startOfMonth && e.Date <= endOfMonth)
-                .ToListAsync();
+            //var expensesOld = await _dbConnection.Table<IncomeExpenseModel>()
+            //    .Where(e => e.TransactionType == "Expense" && e.Date >= startOfMonth && e.Date <= endOfMonth)
+            //    .ToListAsync();
+            var parameters = new object[] { startOfMonth, endOfMonth };
+            var expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
+                "IncomeExpenseCategories iec ON iem.CategoryName = iec.CategoryName Where iem.TransactionType='Expense' and (iec.IsOneTimeExpense=0 or iec.IsOneTimeExpense is null) " +
+                "and iem.Date >= ? and iem.Date<= ? ", parameters);
+
             decimal expenseAmount = (decimal)expenses.Sum(s => s.Amount);
 
             var income = await _dbConnection.Table<IncomeExpenseModel>()
