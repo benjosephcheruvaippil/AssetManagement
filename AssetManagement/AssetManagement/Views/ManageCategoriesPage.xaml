@@ -18,7 +18,7 @@ Placeholder="Enter category name" />
         </Picker>
         <StackLayout Orientation="Horizontal">
             <Label x:Name="lblOneTimeExpense" IsVisible="False" VerticalOptions="Center">One Time Expense</Label>
-            <CheckBox x:Name="chkIsOneTimeExpense" IsVisible="False" IsChecked="true" />
+            <CheckBox x:Name="chkIsOneTimeExpense" IsVisible="False" IsChecked="False" />
             <Label VerticalOptions="Center">Is Visible</Label>
             <CheckBox x:Name="chkIsVisible" IsChecked="true" />
         </StackLayout>
@@ -36,6 +36,7 @@ Margin="0,0,5,0"
 Clicked="btnDeleteCategory_Clicked"/>
 
         </StackLayout>
+        <Entry x:Name="entCategorySearch" TextChanged="entCategorySearch_TextChanged"  Placeholder="Search here..."/>
         <TableView x:Name="tblviewCategories" MaximumHeightRequest="400" Intent="Menu">
             <TableRoot>
                 <TableSection x:Name="tblscCategories" Title="Category List" TextColor="Red">

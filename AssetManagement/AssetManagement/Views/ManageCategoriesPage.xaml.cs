@@ -17,7 +17,7 @@ public partial class ManageCategoriesPage : ContentPage
         try
         {
             base.OnAppearing();
-            await LoadCategoriesInPage();
+            await LoadCategoriesInPage("");
         }
         catch (Exception)
         {
@@ -82,7 +82,7 @@ public partial class ManageCategoriesPage : ContentPage
                 if (rowsAffected > 0)
                 {
 
-                    await LoadCategoriesInPage();
+                    await LoadCategoriesInPage("");
                 }
                 else
                 {
@@ -123,7 +123,7 @@ public partial class ManageCategoriesPage : ContentPage
                     //update all records in Assets table
                     //var recordsUpdateAssets = await _dbConnection.ExecuteAsync($"Update Assets set Holder='{entryOwnerName.Text.Trim()}' where Holder='{OldOwnerName}'");
                     ClearCategoriesForm();
-                    await LoadCategoriesInPage();
+                    await LoadCategoriesInPage("");
                 }
                 else
                 {
@@ -137,14 +137,22 @@ public partial class ManageCategoriesPage : ContentPage
         }
     }
 
-    private async Task LoadCategoriesInPage()
+    private async Task LoadCategoriesInPage(string categoryName)
     {
         try
         {
             List<IncomeExpenseCategories> categories = new List<IncomeExpenseCategories>();
             tblscCategories.Clear();
             await SetUpDb();
-            categories = await _dbConnection.QueryAsync<IncomeExpenseCategories>("select IncomeExpenseCategoryId, CategoryName, CategoryType from IncomeExpenseCategories order by CategoryType asc, CategoryName asc");
+            if (string.IsNullOrEmpty(categoryName))
+            {
+                categories = await _dbConnection.QueryAsync<IncomeExpenseCategories>("select IncomeExpenseCategoryId, CategoryName, CategoryType from IncomeExpenseCategories order by CategoryType asc, CategoryName asc");
+            }
+            else 
+            {
+                categories = await _dbConnection.QueryAsync<IncomeExpenseCategories>("select IncomeExpenseCategoryId, CategoryName, CategoryType from IncomeExpenseCategories where CategoryName like '%" + categoryName + "%' order by CategoryType asc, CategoryName asc");
+            }
+            
             foreach (var item in categories)
             {
                 TextCell objCell = new TextCell();
@@ -214,7 +222,7 @@ public partial class ManageCategoriesPage : ContentPage
                     await SetUpDb();
                     int rowsAffected = await _dbConnection.DeleteAsync(objIncomeExpenseCat);
                     ClearCategoriesForm();
-                    await LoadCategoriesInPage();
+                    await LoadCategoriesInPage("");
                 }
             }
             else
@@ -230,6 +238,7 @@ public partial class ManageCategoriesPage : ContentPage
 
     public void ClearCategoriesForm()
     {
+        entCategorySearch.Text = "";
         txtIncomeExpenseCategoryId.Text = "";
         entryCategoryName.Text = "";
         categoryTypePicker.SelectedIndex = -1;
@@ -263,5 +272,10 @@ public partial class ManageCategoriesPage : ContentPage
         {
             DisplayAlert("Error", "Something went wrong: " + ex.Message.ToString(), "Ok");
         }
+    }
+
+    private async void entCategorySearch_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        await LoadCategoriesInPage(entCategorySearch.Text.Trim());
     }
 }
