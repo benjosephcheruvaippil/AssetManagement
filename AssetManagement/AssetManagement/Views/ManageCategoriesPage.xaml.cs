@@ -57,11 +57,11 @@ public partial class ManageCategoriesPage : ContentPage
                 //check if duplicate names exist
                 if (!string.IsNullOrEmpty(entryCategoryName.Text))
                 {
-                    string inputtedCategoryNameFormatted = entryCategoryName.Text;
+                    string inputtedCategoryNameFormatted = entryCategoryName.Text.ToLower();
 
                     await SetUpDb();
                     var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
-                    if (categories.Where(o => o.CategoryName == inputtedCategoryNameFormatted).Count() > 0)
+                    if (categories.Where(o => o.CategoryName.ToLower() == inputtedCategoryNameFormatted).Count() > 0)
                     {
                         await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
                         return;
@@ -78,11 +78,13 @@ public partial class ManageCategoriesPage : ContentPage
                 };
                 await SetUpDb();
                 int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpenseCat);
-                ClearCategoriesForm();
+                //ClearCategoriesForm();
                 if (rowsAffected > 0)
                 {
 
                     await LoadCategoriesInPage("");
+                    await Task.Delay(1000);
+                    ClearCategoriesForm();
                 }
                 else
                 {
@@ -91,21 +93,23 @@ public partial class ManageCategoriesPage : ContentPage
             }
             else //update
             {
+                int incomeExpenseCategoryId = Convert.ToInt32(txtIncomeExpenseCategoryId.Text);
                 //check if duplicate names exist
                 if (!string.IsNullOrEmpty(entryCategoryName.Text))
                 {
-                    string inputtedCategoryNameFormatted = entryCategoryName.Text.Trim();
+                    string inputtedCategoryNameFormatted = entryCategoryName.Text.ToLower().Trim();
 
                     await SetUpDb();
                     var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
-                    if (categories.Where(o => o.CategoryName == inputtedCategoryNameFormatted).Count() > 1)
+                    
+                    if (categories.Where(o => o.CategoryName.ToLower() == inputtedCategoryNameFormatted && o.IncomeExpenseCategoryId != incomeExpenseCategoryId).Count() >= 1)
                     {
                         await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
                         return;
                     }
                 }
                 //check if duplicate names exist
-                int incomeExpenseCategoryId = Convert.ToInt32(txtIncomeExpenseCategoryId.Text);
+                
                 IncomeExpenseCategories objIncomeExpenseCat = new IncomeExpenseCategories
                 {
                     IncomeExpenseCategoryId = incomeExpenseCategoryId,
@@ -122,8 +126,10 @@ public partial class ManageCategoriesPage : ContentPage
                     var recordsUpdatedIncomeExpense = await _dbConnection.ExecuteAsync($"Update IncomeExpenseModel set CategoryName='{entryCategoryName.Text.Trim()}' where CategoryName='{OldCategoryName}'");
                     //update all records in Assets table
                     //var recordsUpdateAssets = await _dbConnection.ExecuteAsync($"Update Assets set Holder='{entryOwnerName.Text.Trim()}' where Holder='{OldOwnerName}'");
-                    ClearCategoriesForm();
+                    //ClearCategoriesForm();
                     await LoadCategoriesInPage("");
+                    await Task.Delay(1000);
+                    ClearCategoriesForm();
                 }
                 else
                 {
@@ -221,8 +227,10 @@ public partial class ManageCategoriesPage : ContentPage
 
                     await SetUpDb();
                     int rowsAffected = await _dbConnection.DeleteAsync(objIncomeExpenseCat);
-                    ClearCategoriesForm();
+                    //ClearCategoriesForm();
                     await LoadCategoriesInPage("");
+                    await Task.Delay(1000);
+                    ClearCategoriesForm();
                 }
             }
             else
