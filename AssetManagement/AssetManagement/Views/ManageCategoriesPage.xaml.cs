@@ -8,6 +8,7 @@ public partial class ManageCategoriesPage : ContentPage
     private SQLiteAsyncConnection _dbConnection;
     AppTheme currentTheme = Application.Current.RequestedTheme;
     public string OldCategoryName = "";
+    private bool isProgrammaticChange = false;
     public ManageCategoriesPage()
 	{
 		InitializeComponent();
@@ -78,13 +79,11 @@ public partial class ManageCategoriesPage : ContentPage
                 };
                 await SetUpDb();
                 int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpenseCat);
-                //ClearCategoriesForm();
+                ClearCategoriesForm();
                 if (rowsAffected > 0)
                 {
 
                     await LoadCategoriesInPage("");
-                    await Task.Delay(1000);
-                    ClearCategoriesForm();
                 }
                 else
                 {
@@ -126,10 +125,8 @@ public partial class ManageCategoriesPage : ContentPage
                     var recordsUpdatedIncomeExpense = await _dbConnection.ExecuteAsync($"Update IncomeExpenseModel set CategoryName='{entryCategoryName.Text.Trim()}' where CategoryName='{OldCategoryName}'");
                     //update all records in Assets table
                     //var recordsUpdateAssets = await _dbConnection.ExecuteAsync($"Update Assets set Holder='{entryOwnerName.Text.Trim()}' where Holder='{OldOwnerName}'");
-                    //ClearCategoriesForm();
-                    await LoadCategoriesInPage("");
-                    await Task.Delay(1000);
                     ClearCategoriesForm();
+                    await LoadCategoriesInPage("");
                 }
                 else
                 {
@@ -148,6 +145,7 @@ public partial class ManageCategoriesPage : ContentPage
         try
         {
             List<IncomeExpenseCategories> categories = new List<IncomeExpenseCategories>();
+            isProgrammaticChange = false;
             tblscCategories.Clear();
             await SetUpDb();
             if (string.IsNullOrEmpty(categoryName))
@@ -227,10 +225,8 @@ public partial class ManageCategoriesPage : ContentPage
 
                     await SetUpDb();
                     int rowsAffected = await _dbConnection.DeleteAsync(objIncomeExpenseCat);
-                    //ClearCategoriesForm();
-                    await LoadCategoriesInPage("");
-                    await Task.Delay(1000);
                     ClearCategoriesForm();
+                    await LoadCategoriesInPage("");
                 }
             }
             else
@@ -246,6 +242,7 @@ public partial class ManageCategoriesPage : ContentPage
 
     public void ClearCategoriesForm()
     {
+        isProgrammaticChange = true;
         entCategorySearch.Text = "";
         txtIncomeExpenseCategoryId.Text = "";
         entryCategoryName.Text = "";
@@ -284,6 +281,9 @@ public partial class ManageCategoriesPage : ContentPage
 
     private async void entCategorySearch_TextChanged(object sender, TextChangedEventArgs e)
     {
-        await LoadCategoriesInPage(entCategorySearch.Text.Trim());
+        if (!isProgrammaticChange)
+        {
+            await LoadCategoriesInPage(entCategorySearch.Text.Trim());
+        }
     }
 }
