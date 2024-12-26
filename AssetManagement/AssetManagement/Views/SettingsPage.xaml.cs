@@ -12,11 +12,13 @@ public partial class SettingsPage : ContentPage
     private SQLiteAsyncConnection _dbConnection;
     private AssetListPageViewModel _viewModel;
     private readonly IAssetService _assetService;
-    public SettingsPage(AssetListPageViewModel viewModel, IAssetService assetService)
+    private readonly IAppRestarter _appRestarter;
+    public SettingsPage(AssetListPageViewModel viewModel, IAssetService assetService, IAppRestarter appRestarter)
 	{
 		InitializeComponent();
         _viewModel = viewModel;
         _assetService = assetService;
+        _appRestarter = appRestarter;
     }
 
     //private async Task SetUpDb()
@@ -109,7 +111,8 @@ public partial class SettingsPage : ContentPage
             //await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
             //await _dbConnection.CreateTableAsync<DataSyncAudit>();
 
-            await DisplayAlert("Info", "Database restored successfully", "OK");
+            await DisplayAlert("Info", "Database restored successfully. App will get restarted to load the database.", "OK");
+            _appRestarter.RestartApp();
         }
         catch (Exception ex)
         {

@@ -73,6 +73,7 @@ public partial class AppFlyoutPage : FlyoutPage
     {
         if (!((IFlyoutPageController)this).ShouldShowSplitMode)
             IsPresented = false;
-        Detail = new NavigationPage(new SettingsPage(_viewModel, _assetService));
+        IAppRestarter appRestarter = new AppRestarter();
+        Detail = new NavigationPage(new SettingsPage(_viewModel, _assetService, appRestarter));
     }
 }
