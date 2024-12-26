@@ -112,7 +112,9 @@ public partial class SettingsPage : ContentPage
             //await _dbConnection.CreateTableAsync<DataSyncAudit>();
 
             await DisplayAlert("Info", "Database restored successfully. App will get restarted to load the database.", "OK");
+            //this code is android specific for restarting the app programmatically
             _appRestarter.RestartApp();
+            //this code is android specific for restarting the app programmatically
         }
         catch (Exception ex)
         {

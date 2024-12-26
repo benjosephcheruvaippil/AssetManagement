@@ -10,6 +10,7 @@ namespace AssetManagement.Services
 {
     public class AppRestarter:IAppRestarter
     {
+        //this code is android specific for restarting the app programmatically
         public void RestartApp()
         {
 
