@@ -1,5 +1,7 @@
 ﻿using AssetManagement.Models;
 using AssetManagement.Models.Constants;
+using Plugin.Fingerprint.Abstractions;
+using Plugin.Fingerprint;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -147,6 +149,42 @@ namespace AssetManagement.Common
             //var data = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.IsVisible == null).ToListAsync();
             int result = await _dbConnection.ExecuteAsync("update IncomeExpenseCategories set IsVisible=1 where IsVisible is null or IsVisible=''");
 
+        }
+
+        public async Task<bool> AuthenticateWithBiometricsAsync()
+        {
+            try
+            {
+                await SetUpDb();
+                var lockDetails = await _dbConnection.Table<Owners>().FirstOrDefaultAsync();
+                if (lockDetails != null)
+                {
+                    if ((bool)lockDetails.Locked)
+                    {
+                        var result = await CrossFingerprint.Current.AuthenticateAsync(new AuthenticationRequestConfiguration(
+                        "Authentication Required", // Title for the dialog
+                        "Please authenticate with your fingerprint")); // Reason for authentication
+
+                        if (result.Authenticated)
+                        {
+                            // Authentication succeeded
+                            return true;
+                        }
+                        else
+                        {
+                            // Authentication failed
+                            return false;
+                        }
+                    }
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions (e.g., device doesn't support biometrics)
+                Console.WriteLine($"Error: {ex.Message}");
+                return false;
+            }
         }
     }
 }

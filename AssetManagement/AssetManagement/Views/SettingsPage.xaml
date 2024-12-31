@@ -9,5 +9,9 @@
         <Button x:Name="btnSelectCurrency" Text="Change Currency" Clicked="btnSelectCurrency_Clicked" BackgroundColor="LightGreen" TextColor="Black" WidthRequest="200" Margin="4"/>
         <Button x:Name="btnRestoreDb" Text="Restore Database" Clicked="btnRestoreDb_Clicked" BackgroundColor="LightGreen" TextColor="Black" WidthRequest="200" Margin="4"/>
         <Button x:Name="btnBackup" Text="Backup Database" Clicked="btnBackup_Clicked" BackgroundColor="LightGreen" TextColor="Black" WidthRequest="200" Margin="4"/>
+        <HorizontalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+            <Label x:Name="lblLockText" VerticalOptions="Center" HorizontalOptions="Start"></Label>
+            <Switch x:Name="lockSwitch" IsToggled="False" Toggled="lockSwitch_Toggled" VerticalOptions="Center" HorizontalOptions="End" />
+        </HorizontalStackLayout>
     </VerticalStackLayout>
 </ContentPage>

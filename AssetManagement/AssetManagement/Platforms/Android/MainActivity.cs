@@ -2,8 +2,10 @@
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
+using Plugin.Fingerprint;
 using Java.Lang;
 using SQLite;
+using AssetManagement.Common;
 
 namespace AssetManagement;
 
@@ -15,4 +17,16 @@ public class MainActivity : MauiAppCompatActivity
     //    base.OnCreate(savedInstanceState);
     //}
 
+    protected async override void OnCreate(Bundle savedInstanceState)
+    {
+        base.OnCreate(savedInstanceState);
+
+        // Set the current activity resolver for fingerprint plugin
+        CrossFingerprint.SetCurrentActivityResolver(() => this);
+
+        CommonFunctions objCommon = new CommonFunctions();
+        await objCommon.AuthenticateWithBiometricsAsync();
+
+        // Other initialization code
+    }
 }

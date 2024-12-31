@@ -602,6 +602,8 @@ public partial class AssetPage : TabbedPage
                         StartDate = assetDeleted.StartDate,
                         MaturityDate = assetDeleted.MaturityDate,
                         Remarks = assetDeleted.Remarks,
+                        RiskNumber = assetDeleted.RiskNumber,
+                        Nominee = assetDeleted.Nominee,
                         AsOfDate = assetDeleted.AsOfDate,
                         LiquidAssetValue = netAssetValue,
                         NetAssetValue = netAssetValue,
