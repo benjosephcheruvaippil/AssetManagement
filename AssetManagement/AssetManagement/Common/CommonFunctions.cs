@@ -159,6 +159,10 @@ namespace AssetManagement.Common
                 var lockDetails = await _dbConnection.Table<Owners>().FirstOrDefaultAsync();
                 if (lockDetails != null)
                 {
+                    if (lockDetails.Locked == null)
+                    {
+                        return true;
+                    }
                     if ((bool)lockDetails.Locked)
                     {
                         var result = await CrossFingerprint.Current.AuthenticateAsync(new AuthenticationRequestConfiguration(
@@ -177,7 +181,7 @@ namespace AssetManagement.Common
                         }
                     }
                 }
-                return false;
+                return true;
             }
             catch (Exception ex)
             {
