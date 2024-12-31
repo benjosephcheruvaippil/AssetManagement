@@ -17,7 +17,7 @@ public class MainActivity : MauiAppCompatActivity
     //    base.OnCreate(savedInstanceState);
     //}
 
-    protected async override void OnCreate(Bundle savedInstanceState)
+    protected override async void OnCreate(Bundle savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
 
@@ -25,8 +25,32 @@ public class MainActivity : MauiAppCompatActivity
         CrossFingerprint.SetCurrentActivityResolver(() => this);
 
         CommonFunctions objCommon = new CommonFunctions();
-        await objCommon.AuthenticateWithBiometricsAsync();
+        bool isAuthenticated = await objCommon.AuthenticateWithBiometricsAsync();
+        if (!isAuthenticated)
+        {
+            Finish();
+        }
 
         // Other initialization code
+    }
+
+    private bool isFingerprintChecked = false;
+
+    protected override async void OnResume()
+    {
+        base.OnResume();
+        if (!isFingerprintChecked)
+        {
+            CommonFunctions objCommon = new CommonFunctions();
+            bool isAuthenticated = await objCommon.AuthenticateWithBiometricsAsync();
+            if(isAuthenticated)
+            {
+                isFingerprintChecked = true;
+            }
+            else
+            {
+                Finish();
+            }
+        }
     }
 }
