@@ -130,6 +130,8 @@ public partial class ManageUsersPage : ContentPage
                 var recordsUpdatedIncomeExpense = await _dbConnection.ExecuteAsync($"Update IncomeExpenseModel set OwnerName='{entryOwnerName.Text.Trim()}' where OwnerName='{OldOwnerName}'");
                 //update all records in Assets table
                 var recordsUpdateAssets = await _dbConnection.ExecuteAsync($"Update Assets set Holder='{entryOwnerName.Text.Trim()}' where Holder='{OldOwnerName}'");
+                //update all records in Assets table where nominee is the selected user
+                var recordsUpdateNomineeAssets = await _dbConnection.ExecuteAsync($"Update Assets set Nominee='{entryOwnerName.Text.Trim()}' where Holder='{OldOwnerName}'");
                 ClearOwnersForm();
                 await LoadOwnersInPage();
             }
