@@ -222,6 +222,11 @@ public partial class ExpensePage : ContentPage
 
         pickerExpenseCategory.SelectedItem = textCell[0].Trim();
 
+        if (pickerExpenseCategory.SelectedItem == null)
+        {
+            DisplayAlert("Info", textCell[0].Trim()+" - Please make this category visible from Manage Category page in order to edit.", "OK");
+        }
+
         if (tappedViewCell.Detail.Contains("-"))
         {
             dpDateExpense.Date = new DateTime(year, month, day);
@@ -273,6 +278,8 @@ public partial class ExpensePage : ContentPage
 
         if (hint == "Last5")
         {
+            PageNumber = 0;
+            tblscExpenses.Title = "Last 5 Transactions";
             expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
         }
         else if (hint == "Pagewise")
