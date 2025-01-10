@@ -28,7 +28,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             InitializeComponent();
             //_dbConnection = dbConnection;
             onLoad = true;
-            LoadIncomeExpenseReport(DateTime.Now.Year.ToString());
+            LoadIncomeExpenseReport(DateTime.Now.Year.ToString(), false);
             dpFromDateIncomeReport.Format = "dd-MM-yyyy";
             dpTODateIncomeReport.Format = "dd-MM-yyyy";
         }
@@ -47,7 +47,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
         }
     }
 
-    private async void LoadIncomeExpenseReport(string selectedYear)
+    private async void LoadIncomeExpenseReport(string selectedYear,bool oneTimeExpense)
     {
         try
         {
@@ -56,7 +56,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             tblscCategoryWiseReport.Clear();
             await SetUpDb();
 
-            PopulateTableSection(selectedYear);
+            PopulateTableSection(selectedYear, oneTimeExpense);
             SummaryByCategory(selectedYear);
             onLoad = false;
         }
@@ -66,7 +66,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
         }
     }
 
-    public async void PopulateTableSection(string selectedYear)
+    public async void PopulateTableSection(string selectedYear,bool oneTimeExpense)
     {
         try
         {
@@ -91,9 +91,20 @@ public partial class IncomeExpenseReportsPage : ContentPage
                 //    .Where(e => e.TransactionType == "Expense" && e.Date >= startOfMonth && e.Date <= endOfMonth)
                 //    .ToListAsync();
                 var parameters = new object[] { startOfMonth, endOfMonth };
-                var expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
+
+                List<IncomeExpenseModel> expenses = new List<IncomeExpenseModel>();
+                if (oneTimeExpense)
+                {
+                    expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
+                     "IncomeExpenseCategories iec ON iem.CategoryName = iec.CategoryName Where iem.TransactionType='Expense'" +
+                     "and iem.Date >= ? and iem.Date<= ? ", parameters);
+                }
+                else
+                {
+                    expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
                     "IncomeExpenseCategories iec ON iem.CategoryName = iec.CategoryName Where iem.TransactionType='Expense' and (iec.IsOneTimeExpense=0 or iec.IsOneTimeExpense is null) " +
                     "and iem.Date >= ? and iem.Date<= ? ", parameters);
+                }
 
                 decimal expenseAmount = (decimal)expenses.Sum(s => s.Amount);
 
@@ -146,6 +157,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
 
     private async void ObjCell_Tapped(object sender, EventArgs e)
     {
+        bool oneTimeExpense = chkOnTimeExpense.IsChecked;
         var tappedViewCell = (TextCell)sender;
         string displayText = "";
         string month= tappedViewCell.Text.ToString();
@@ -207,10 +219,37 @@ public partial class IncomeExpenseReportsPage : ContentPage
         DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
         endOfMonth = new DateTime(endOfMonth.Year, endOfMonth.Month, endOfMonth.Day, 23, 59, 59); //24 hour format
 
-        var manualAddedExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && (e.Mode == "" || e.Mode == null || e.Mode=="manual") && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
+        List<IncomeExpenseModel> manualAddedExpenseList = new List<IncomeExpenseModel>();
+        List<IncomeExpenseModel> fileUploadExpenseList = new List<IncomeExpenseModel>();
+        var parameters = new object[] { startOfMonth, endOfMonth };
+        if (oneTimeExpense)
+        {
+            manualAddedExpenseList = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
+             "IncomeExpenseCategories iec ON iem.CategoryName = iec.CategoryName Where iem.TransactionType='Expense' and (Mode is null or Mode = '' or Mode='manual') " +
+             "and iem.Date >= ? and iem.Date<= ? ", parameters);
+        }
+        else
+        {
+            manualAddedExpenseList = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
+            "IncomeExpenseCategories iec ON iem.CategoryName = iec.CategoryName Where iem.TransactionType='Expense' and (Mode is null or Mode = '' or Mode='manual') and (iec.IsOneTimeExpense=0 or iec.IsOneTimeExpense is null) " +
+            "and iem.Date >= ? and iem.Date<= ? ", parameters);
+        }
+        //var manualAddedExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && (e.Mode == "" || e.Mode == null || e.Mode=="manual") && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();      
         var totalManualAddedExpenses = manualAddedExpenseList.Select(s => s.Amount).Sum();
 
-        var fileUploadExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && e.Mode == "file_upload" && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
+        if (oneTimeExpense)
+        {
+            fileUploadExpenseList = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
+            "IncomeExpenseCategories iec ON iem.CategoryName = iec.CategoryName Where iem.TransactionType='Expense' and  Mode='file_upload' " +
+            "and iem.Date >= ? and iem.Date<= ? ", parameters);
+        }
+        else
+        {
+            fileUploadExpenseList = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
+           "IncomeExpenseCategories iec ON iem.CategoryName = iec.CategoryName Where iem.TransactionType='Expense' and  Mode='file_upload' and (iec.IsOneTimeExpense=0 or iec.IsOneTimeExpense is null) " +
+           "and iem.Date >= ? and iem.Date<= ? ", parameters);
+        }
+        //var fileUploadExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && e.Mode == "file_upload" && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
         var totalFileUploadExpenses = fileUploadExpenseList.Select(s => s.Amount).Sum();
 
         var monthlyIncomeList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Income" && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
@@ -231,7 +270,18 @@ public partial class IncomeExpenseReportsPage : ContentPage
         if (onLoad == false)
         {
             string selectedYear = yearPicker.SelectedItem.ToString();
-            LoadIncomeExpenseReport(selectedYear);
+            bool oneTimeExpense = chkOnTimeExpense.IsChecked;
+            LoadIncomeExpenseReport(selectedYear, oneTimeExpense);
+        }
+    }
+
+    private void chkOnTimeExpense_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    {
+        if (onLoad == false)
+        {
+            string selectedYear = yearPicker.SelectedItem.ToString();
+            bool oneTimeExpense = chkOnTimeExpense.IsChecked;
+            LoadIncomeExpenseReport(selectedYear, oneTimeExpense);
         }
     }
 
