@@ -325,32 +325,28 @@ public partial class IncomeExpenseReportsPage : ContentPage
             if (total > 0)
             {
                 objCategoryWiseAmount.CategoryName = category.CategoryName;
+                var incomeExpenseCategory = await _dbConnection.Table<IncomeExpenseCategories>().Where(c => c.CategoryName == category.CategoryName).FirstOrDefaultAsync();
+                objCategoryWiseAmount.OneTimeExpense = incomeExpenseCategory != null ? incomeExpenseCategory.IsOneTimeExpense : false;
                 objCategoryWiseAmount.TransactionType = category.TransactionType;
                 objCategoryWiseAmount.Amount = total;
                 categoryWiseAmountList.Add(objCategoryWiseAmount);
             }
-            //if (total > 0)
-            //{
-            //    TextCell objCategory = new TextCell();
-            //    objCategory.Text = category.CategoryName;
-            //    if (currentTheme == AppTheme.Dark)
-            //    {
-            //        //set to white color
-            //        objCategory.TextColor = Color.FromArgb("#FFFFFF");
-            //    }
-            //    objCategory.Detail = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", total + " - " + category.TransactionType);
-            //    objCategory.Height = 40;
-            //    tblscCategoryWiseReport.Add(objCategory);
-            //}
         }
 
         if (categoryWiseAmountList.Count > 0)
         {
             categoryWiseAmountList = categoryWiseAmountList.OrderBy(o => o.TransactionType).ThenByDescending(o => o.Amount).ToList();
+            if (!chkOnTimeExpense.IsChecked)
+            {
+                List<CategoryWiseAmountDTO> itemsToRemove = new List<CategoryWiseAmountDTO>();
+                itemsToRemove = categoryWiseAmountList.Where(c => c.OneTimeExpense == true).ToList();
+                categoryWiseAmountList.RemoveAll(item => itemsToRemove.Contains(item));
+            }
             foreach (var item in categoryWiseAmountList)
             {
+                string oneTimeExpenseText = item.OneTimeExpense == null ? "" : ((bool)item.OneTimeExpense ? "(One Time)" : "");
                 TextCell objCategory = new TextCell();
-                objCategory.Text = item.CategoryName + " - " + item.TransactionType;
+                objCategory.Text = item.CategoryName + " - " + oneTimeExpenseText + item.TransactionType;
                 if (currentTheme == AppTheme.Dark)
                 {
                     //set to white color

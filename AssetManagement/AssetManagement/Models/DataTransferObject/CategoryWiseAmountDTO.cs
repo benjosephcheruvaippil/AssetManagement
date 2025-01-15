@@ -10,6 +10,7 @@ namespace AssetManagement.Models.DataTransferObject
     {
         public string CategoryName { get; set; }
         public string TransactionType { get; set; }
+        public bool? OneTimeExpense { get; set; }
         public double Amount { get; set; }
     }
 }
