@@ -224,14 +224,14 @@ public partial class AssetPage : TabbedPage
         //this method can be removed after some months.(by 2025 January)
         await AssetUpdatesOnLoad();
         //this method can be removed after some months.(by 2025 January)
-        await LoadAssets();
+        await LoadAssets("");
     }
 
-    private async Task LoadAssets()
+    private async Task LoadAssets(string searchText)
     {
         try
         {
-            await _viewModel.LoadAssets("");
+            await _viewModel.LoadAssets(searchText);
         }
         catch
         {
@@ -560,7 +560,7 @@ public partial class AssetPage : TabbedPage
                 SaveAssetAuditLog(objAssetAuditLog);
                 //add asset audit log
                 await DisplayAlert("Message", "Asset Saved", "OK");
-                await LoadAssets();
+                await LoadAssets(entAssetSearch.Text.Trim());
             }
         }
         catch(Exception)
@@ -614,7 +614,7 @@ public partial class AssetPage : TabbedPage
                     //add asset audit log
                     await DisplayAlert("Message", "Asset Deleted", "OK");
                     ClearManageAssetForm();
-                    await LoadAssets();
+                    await LoadAssets(entAssetSearch.Text.Trim());
                 }
             }
         }
@@ -1071,6 +1071,18 @@ public partial class AssetPage : TabbedPage
         if (e.IsExpanded)
         {
             manageAssetsScroll.ScrollToAsync(expanderAdditionalDetails, ScrollToPosition.Start, true);
+        }
+    }
+
+    private void OnEditTapped(object sender, EventArgs e)
+    {
+        if (sender is Element element && element.BindingContext is MaturingAssets asset)
+        {
+            int id = (int)asset.AssetId; // Get the ID from the BindingContext
+            DisplayAlert("Edit Clicked", $"Editing Asset with ID: {id}", "OK");
+
+            // Call your function with the ID
+            //EditAsset(id);
         }
     }
 }

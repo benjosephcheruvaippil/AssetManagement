@@ -159,13 +159,16 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                                                 <Label Text="Edit" 
                                            HorizontalTextAlignment="Center" 
                                            VerticalTextAlignment="Center" FontAttributes="Bold" TextColor="White" />
+                                                <VerticalStackLayout.GestureRecognizers>
+                                                    <TapGestureRecognizer Tapped="OnEditTapped" CommandParameter="{Binding AssetId}" />
+                                                </VerticalStackLayout.GestureRecognizers>
                                             </VerticalStackLayout>
                                         </SwipeItemView>
-                                        <SwipeItemView>
+                                        <!--<SwipeItemView>
                                             <VerticalStackLayout BackgroundColor="Red">
                                                 <Label Text="Delete" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontAttributes="Bold" TextColor="White" />
                                             </VerticalStackLayout>
-                                        </SwipeItemView>
+                                        </SwipeItemView>-->
                                     </SwipeItems>
                                 </SwipeView.LeftItems>
                                 <Frame Margin="10" Padding="10" BackgroundColor="Aqua">
