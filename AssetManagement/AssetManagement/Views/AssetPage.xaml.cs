@@ -560,7 +560,14 @@ public partial class AssetPage : TabbedPage
                 SaveAssetAuditLog(objAssetAuditLog);
                 //add asset audit log
                 await DisplayAlert("Message", "Asset Saved", "OK");
-                await LoadAssets(entAssetSearch.Text.Trim());
+                if (!string.IsNullOrEmpty(entAssetSearch.Text))
+                {
+                    await LoadAssets(entAssetSearch.Text.Trim());
+                }
+                else
+                {
+                    await LoadAssets("");
+                }
             }
         }
         catch(Exception)
@@ -1005,30 +1012,58 @@ public partial class AssetPage : TabbedPage
         {
             Assets obj = _viewModel.GetSelectedRecordDetail();
 
-            if (obj.AssetId != 0)
-            {
-                entEntityName.Text = obj.InvestmentEntity;
-                entType.SelectedItem = obj.Type;
-                entAmount.Text = Convert.ToString(obj.Amount);
-                entInterestRate.Text = Convert.ToString(obj.InterestRate);
-                entInterestFrequency.SelectedItem = obj.InterestFrequency;
-                entHolder.SelectedItem = obj.Holder;
-                entStartDate.Date = obj.StartDate;
-                entMaturityDate.Date = obj.MaturityDate;
-                entAsOfDate.Date = obj.AsOfDate;
-                entRemarks.Text = obj.Remarks;
-                entNominee.SelectedItem = obj.Nominee;
-                entRiskValue.Text = Convert.ToString(obj.RiskNumber);
+            await SetDataInManageAssets(obj);
+            //if (obj.AssetId != 0)
+            //{
+            //    entEntityName.Text = obj.InvestmentEntity;
+            //    entType.SelectedItem = obj.Type;
+            //    entAmount.Text = Convert.ToString(obj.Amount);
+            //    entInterestRate.Text = Convert.ToString(obj.InterestRate);
+            //    entInterestFrequency.SelectedItem = obj.InterestFrequency;
+            //    entHolder.SelectedItem = obj.Holder;
+            //    entStartDate.Date = obj.StartDate;
+            //    entMaturityDate.Date = obj.MaturityDate;
+            //    entAsOfDate.Date = obj.AsOfDate;
+            //    entRemarks.Text = obj.Remarks;
+            //    entNominee.SelectedItem = obj.Nominee;
+            //    entRiskValue.Text = Convert.ToString(obj.RiskNumber);
 
-                lblAssetId.Text = Convert.ToString(obj.AssetId);
+            //    lblAssetId.Text = Convert.ToString(obj.AssetId);
 
-                //ScrollView scroll = new ScrollView();
-                await manageAssetsScroll.ScrollToAsync(0, 0, true);
-            }
-            else
-            {
-                await DisplayAlert("Message", "Please select an asset", "OK");
-            }
+            //    //ScrollView scroll = new ScrollView();
+            //    await manageAssetsScroll.ScrollToAsync(0, 0, true);
+            //}
+            //else
+            //{
+            //    await DisplayAlert("Message", "Please select an asset", "OK");
+            //}
+        }
+    }
+
+    public async Task SetDataInManageAssets(Assets objAsset)
+    {
+        if (objAsset.AssetId != 0)
+        {
+            entEntityName.Text = objAsset.InvestmentEntity;
+            entType.SelectedItem = objAsset.Type;
+            entAmount.Text = Convert.ToString(objAsset.Amount);
+            entInterestRate.Text = Convert.ToString(objAsset.InterestRate);
+            entInterestFrequency.SelectedItem = objAsset.InterestFrequency;
+            entHolder.SelectedItem = objAsset.Holder;
+            entStartDate.Date = objAsset.StartDate;
+            entMaturityDate.Date = objAsset.MaturityDate;
+            entAsOfDate.Date = objAsset.AsOfDate;
+            entRemarks.Text = objAsset.Remarks;
+            entNominee.SelectedItem = objAsset.Nominee;
+            entRiskValue.Text = Convert.ToString(objAsset.RiskNumber);
+
+            lblAssetId.Text = Convert.ToString(objAsset.AssetId);
+
+            await manageAssetsScroll.ScrollToAsync(0, 0, true);
+        }
+        else
+        {
+            await DisplayAlert("Message", "Please select an asset", "OK");
         }
     }
 
@@ -1074,15 +1109,16 @@ public partial class AssetPage : TabbedPage
         }
     }
 
-    private void OnEditTapped(object sender, EventArgs e)
+    private async void OnEditTapped(object sender, EventArgs e)
     {
         if (sender is Element element && element.BindingContext is MaturingAssets asset)
         {
-            int id = (int)asset.AssetId; // Get the ID from the BindingContext
-            DisplayAlert("Edit Clicked", $"Editing Asset with ID: {id}", "OK");
+            int assetId = (int)asset.AssetId; // Get the ID from the BindingContext
 
-            // Call your function with the ID
-            //EditAsset(id);
+            Assets objAsset = await _dbConnection.Table<Assets>().Where(a => a.AssetId == assetId).FirstOrDefaultAsync();
+
+            this.CurrentPage = this.Children[1];
+            await SetDataInManageAssets(objAsset);
         }
     }
 }
