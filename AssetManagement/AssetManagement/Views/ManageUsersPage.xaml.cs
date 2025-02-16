@@ -61,7 +61,7 @@ public partial class ManageUsersPage : ContentPage
             //check if duplicate names exist
             if (!string.IsNullOrEmpty(entryOwnerName.Text))
             {
-                string inputtedOwnerNameFormatted = entryOwnerName.Text;
+                string inputtedOwnerNameFormatted = entryOwnerName.Text.ToLower();
                 //string inputtedOwnerNameFormatted = Regex.Replace(entryOwnerName.Text.ToLower().Trim(), @"\s+", "");
 
                 await SetUpDb();
@@ -70,7 +70,7 @@ public partial class ManageUsersPage : ContentPage
                 //{
                 //    owner.OwnerName = Regex.Replace(owner.OwnerName.ToLower().Trim(), @"\s+", "");
                 //}
-                if (owners.Where(o => o.OwnerName == inputtedOwnerNameFormatted).Count() > 0)
+                if (owners.Where(o => o.OwnerName.ToLower() == inputtedOwnerNameFormatted).Count() > 0)
                 {
                     await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
                     return;
@@ -97,10 +97,11 @@ public partial class ManageUsersPage : ContentPage
         }
         else //update
         {
+            int ownerId = Convert.ToInt32(txtOwnerId.Text);
             //check if duplicate names exist
             if (!string.IsNullOrEmpty(entryOwnerName.Text))
             {
-                string inputtedOwnerNameFormatted = entryOwnerName.Text.Trim();
+                string inputtedOwnerNameFormatted = entryOwnerName.Text.Trim().ToLower();
                 //string inputtedOwnerNameFormatted = Regex.Replace(entryOwnerName.Text.ToLower().Trim(), @"\s+", "");
 
                 await SetUpDb();
@@ -109,14 +110,14 @@ public partial class ManageUsersPage : ContentPage
                 //{
                 //    owner.OwnerName = Regex.Replace(owner.OwnerName.ToLower().Trim(), @"\s+", "");
                 //}
-                if (owners.Where(o => o.OwnerName == inputtedOwnerNameFormatted).Count() > 1)
+                if (owners.Where(o => o.OwnerName.ToLower() == inputtedOwnerNameFormatted && o.OwnerId != ownerId).Count() >= 1)
                 {
                     await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
                     return;
                 }
             }
             //check if duplicate names exist
-            int ownerId = Convert.ToInt32(txtOwnerId.Text);
+
             Owners objOwner = new Owners
             {
                 OwnerId = ownerId,
@@ -130,6 +131,8 @@ public partial class ManageUsersPage : ContentPage
                 var recordsUpdatedIncomeExpense = await _dbConnection.ExecuteAsync($"Update IncomeExpenseModel set OwnerName='{entryOwnerName.Text.Trim()}' where OwnerName='{OldOwnerName}'");
                 //update all records in Assets table
                 var recordsUpdateAssets = await _dbConnection.ExecuteAsync($"Update Assets set Holder='{entryOwnerName.Text.Trim()}' where Holder='{OldOwnerName}'");
+                //update all records in Assets table where nominee is the selected user
+                var recordsUpdateNomineeAssets = await _dbConnection.ExecuteAsync($"Update Assets set Nominee='{entryOwnerName.Text.Trim()}' where Nominee='{OldOwnerName}'");
                 ClearOwnersForm();
                 await LoadOwnersInPage();
             }
@@ -200,6 +203,12 @@ public partial class ManageUsersPage : ContentPage
                     }
                     var assetsRecord = await _dbConnection.Table<Assets>().Where(a => a.Holder == entryOwnerName.Text).ToListAsync();
                     if (assetsRecord.Count > 0)
+                    {
+                        await DisplayAlert("Info", "Cannot delete owner since there are records with this owner.", "Ok");
+                        return;
+                    }
+                    var assetsNomineeRecord = await _dbConnection.Table<Assets>().Where(a => a.Nominee == entryOwnerName.Text).ToListAsync();
+                    if (assetsNomineeRecord.Count > 0)
                     {
                         await DisplayAlert("Info", "Cannot delete owner since there are records with this owner.", "Ok");
                         return;

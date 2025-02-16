@@ -114,6 +114,8 @@ public partial class IncomePage : ContentPage
 
         if (hint == "Last5")
         {
+            PageNumber = 0;
+            tblscIncome.Title = "Last 5 Transactions";
             income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 5");
         }
         else if(hint == "Pagewise")
@@ -187,6 +189,12 @@ public partial class IncomePage : ContentPage
         //call database to get corresponding Id details
 
         pickerIncomeCategory.SelectedItem = textCell[0].Trim();
+
+        if (pickerIncomeCategory.SelectedItem == null)
+        {
+            DisplayAlert("Info", textCell[0].Trim() + " - Please make this category visible from Manage Category page in order to edit.", "OK");
+        }
+
         pickerOwnerName.SelectedItem = incomeDetail.Result.OwnerName;
         entryTaxAmount.Text = Convert.ToString(incomeDetail.Result.TaxAmountCut);      
 

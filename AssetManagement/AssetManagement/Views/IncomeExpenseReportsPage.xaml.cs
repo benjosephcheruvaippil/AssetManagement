@@ -23,12 +23,19 @@ public partial class IncomeExpenseReportsPage : ContentPage
     private bool onLoad = false;
     public IncomeExpenseReportsPage()
     {
-        InitializeComponent();
-        //_dbConnection = dbConnection;
-        onLoad = true;
-        LoadIncomeExpenseReport(DateTime.Now.Year.ToString());
-        dpFromDateIncomeReport.Format = "dd-MM-yyyy";
-        dpTODateIncomeReport.Format = "dd-MM-yyyy";
+        try
+        {
+            InitializeComponent();
+            //_dbConnection = dbConnection;
+            onLoad = true;
+            LoadIncomeExpenseReport(DateTime.Now.Year.ToString(), false);
+            dpFromDateIncomeReport.Format = "dd-MM-yyyy";
+            dpTODateIncomeReport.Format = "dd-MM-yyyy";
+        }
+        catch(Exception ex)
+        {
+            DisplayAlert("Something went wrong: ", ex.Message, "Ok");
+        }
     }
 
     private async Task SetUpDb()
@@ -40,86 +47,117 @@ public partial class IncomeExpenseReportsPage : ContentPage
         }
     }
 
-    private async void LoadIncomeExpenseReport(string selectedYear)
+    private async void LoadIncomeExpenseReport(string selectedYear,bool oneTimeExpense)
     {
-        yearPicker.SelectedItem = selectedYear;
-        tblscIncomeExpenseReport.Clear();
-        tblscCategoryWiseReport.Clear();
-        await SetUpDb();
+        try
+        {
+            yearPicker.SelectedItem = selectedYear;
+            tblscIncomeExpenseReport.Clear();
+            tblscCategoryWiseReport.Clear();
+            await SetUpDb();
 
-        PopulateTableSection(selectedYear);
-        SummaryByCategory(selectedYear);
-        onLoad = false;
+            PopulateTableSection(selectedYear, oneTimeExpense);
+            SummaryByCategory(selectedYear);
+            onLoad = false;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Something went wrong: ", ex.Message, "Ok");
+        }
     }
 
-    public async void PopulateTableSection(string selectedYear)
+    public async void PopulateTableSection(string selectedYear,bool oneTimeExpense)
     {
-        List<IncomeExpenseReport> objReportList = new List<IncomeExpenseReport>();
-
-        tblscIncomeExpenseReport.Title = "Income & Expense - Year " + selectedYear;
-
-        yearlyIncome = 0;
-        yearlyExpense = 0;
-        yearlyBalance = 0;
-
-        for (int i = 1; i <= 12; i++)
+        try
         {
-            string currentMonth = DateTimeFormatInfo.CurrentInfo.GetMonthName(i);
-            DateTime startOfMonth = new DateTime(Convert.ToInt32(selectedYear), i, 1, 0, 0, 0); //24 hour format
-            DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
-            endOfMonth = new DateTime(endOfMonth.Year, endOfMonth.Month, endOfMonth.Day, 23, 59, 59); //24 hour format
+            List<IncomeExpenseReport> objReportList = new List<IncomeExpenseReport>();
 
-            IncomeExpenseReport objReport = new IncomeExpenseReport();
+            tblscIncomeExpenseReport.Title = "Income & Expense - Year " + selectedYear;
 
-            var expenses = await _dbConnection.Table<IncomeExpenseModel>()
-                .Where(e => e.TransactionType == "Expense" && e.Date >= startOfMonth && e.Date <= endOfMonth)
-                .ToListAsync();
-            decimal expenseAmount = (decimal)expenses.Sum(s => s.Amount);
+            yearlyIncome = 0;
+            yearlyExpense = 0;
+            yearlyBalance = 0;
 
-            var income = await _dbConnection.Table<IncomeExpenseModel>()
-                .Where(e => e.TransactionType == "Income" && e.Date >= startOfMonth && e.Date <= endOfMonth)
-                .ToListAsync();
-            decimal incomeAmount = (decimal)income.Sum(s => s.Amount);
-
-            decimal balance = incomeAmount - expenseAmount;
-            yearlyIncome = yearlyIncome + incomeAmount;
-            yearlyExpense = yearlyExpense + expenseAmount;
-            yearlyBalance = yearlyBalance + balance;
-
-            objReport.Month = currentMonth;
-            objReport.ExpenseAmount = expenseAmount.ToString("#,#.##", new CultureInfo(0x0439));
-            objReport.IncomeAmount = incomeAmount.ToString("#,#.##", new CultureInfo(0x0439));
-            objReport.BalanceAmount = balance.ToString("#,#.##", new CultureInfo(0x0439));
-            objReportList.Add(objReport);
-        }
-
-        foreach (var item in objReportList)
-        {
-            TextCell objCell = new TextCell();
-            objCell.Text = item.Month;
-            if (currentTheme == AppTheme.Dark)
+            for (int i = 1; i <= 12; i++)
             {
-                //set to white color
-                objCell.TextColor = Color.FromArgb("#FFFFFF");
+                string currentMonth = DateTimeFormatInfo.CurrentInfo.GetMonthName(i);
+                DateTime startOfMonth = new DateTime(Convert.ToInt32(selectedYear), i, 1, 0, 0, 0); //24 hour format
+                DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+                endOfMonth = new DateTime(endOfMonth.Year, endOfMonth.Month, endOfMonth.Day, 23, 59, 59); //24 hour format
+
+                IncomeExpenseReport objReport = new IncomeExpenseReport();
+
+                //var expensesOld = await _dbConnection.Table<IncomeExpenseModel>()
+                //    .Where(e => e.TransactionType == "Expense" && e.Date >= startOfMonth && e.Date <= endOfMonth)
+                //    .ToListAsync();
+                var parameters = new object[] { startOfMonth, endOfMonth };
+
+                List<IncomeExpenseModel> expenses = new List<IncomeExpenseModel>();
+                if (oneTimeExpense)
+                {
+                    expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
+                     "IncomeExpenseCategories iec ON iem.CategoryName = iec.CategoryName Where iem.TransactionType='Expense'" +
+                     "and iem.Date >= ? and iem.Date<= ? ", parameters);
+                }
+                else
+                {
+                    expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
+                    "IncomeExpenseCategories iec ON iem.CategoryName = iec.CategoryName Where iem.TransactionType='Expense' and (iec.IsOneTimeExpense=0 or iec.IsOneTimeExpense is null) " +
+                    "and iem.Date >= ? and iem.Date<= ? ", parameters);
+                }
+
+                decimal expenseAmount = (decimal)expenses.Sum(s => s.Amount);
+
+                var income = await _dbConnection.Table<IncomeExpenseModel>()
+                    .Where(e => e.TransactionType == "Income" && e.Date >= startOfMonth && e.Date <= endOfMonth)
+                    .ToListAsync();
+                decimal incomeAmount = (decimal)income.Sum(s => s.Amount);
+
+                decimal balance = incomeAmount - expenseAmount;
+                yearlyIncome = yearlyIncome + incomeAmount;
+                yearlyExpense = yearlyExpense + expenseAmount;
+                yearlyBalance = yearlyBalance + balance;
+
+                objReport.Month = currentMonth;
+                objReport.ExpenseAmount = expenseAmount.ToString("#,#.##", new CultureInfo(0x0439));
+                objReport.IncomeAmount = incomeAmount.ToString("#,#.##", new CultureInfo(0x0439));
+                objReport.BalanceAmount = balance.ToString("#,#.##", new CultureInfo(0x0439));
+                objReportList.Add(objReport);
             }
-            objCell.Detail = "Expense: " + item.ExpenseAmount + " | " + "Income: " + item.IncomeAmount + " | " + "Balance: " + item.BalanceAmount;
-            objCell.Height = 40;
-            tblscIncomeExpenseReport.Add(objCell);
 
-            objCell.Tapped += ObjCell_Tapped;
+            foreach (var item in objReportList)
+            {
+                TextCell objCell = new TextCell();
+                objCell.Text = item.Month;
+                if (currentTheme == AppTheme.Dark)
+                {
+                    //set to white color
+                    objCell.TextColor = Color.FromArgb("#FFFFFF");
+                }
+                objCell.Detail = "Expense: " + item.ExpenseAmount + " | " + "Income: " + item.IncomeAmount + " | " + "Balance: " + item.BalanceAmount;
+                objCell.Height = 40;
+                tblscIncomeExpenseReport.Add(objCell);
+
+                objCell.Tapped += ObjCell_Tapped;
+            }
+
+            TextCell objCellYearly = new TextCell();
+            objCellYearly.Text = "Summary - " + selectedYear;
+            objCellYearly.TextColor = Colors.Brown;
+            objCellYearly.Detail = "Expense: " + yearlyExpense.ToString("#,#.##", new CultureInfo(0x0439)) + " | " + "Income: " + yearlyIncome.ToString("#,#.##", new CultureInfo(0x0439)) + " | " + "Balance: " + yearlyBalance.ToString("#,#.##", new CultureInfo(0x0439));
+            objCellYearly.Height = 40;
+            tblscIncomeExpenseReport.Add(objCellYearly);
+            objCellYearly.Tapped += ObjCell_Tapped;
         }
-
-        TextCell objCellYearly = new TextCell();
-        objCellYearly.Text = "Summary - " + selectedYear;
-        objCellYearly.TextColor = Colors.Brown;
-        objCellYearly.Detail = "Expense: " + yearlyExpense.ToString("#,#.##", new CultureInfo(0x0439)) + " | " + "Income: " + yearlyIncome.ToString("#,#.##", new CultureInfo(0x0439)) + " | " + "Balance: " + yearlyBalance.ToString("#,#.##", new CultureInfo(0x0439));
-        objCellYearly.Height = 40;
-        tblscIncomeExpenseReport.Add(objCellYearly);
-        objCellYearly.Tapped += ObjCell_Tapped;
+        catch(Exception ex)
+        {
+            await DisplayAlert("Something went wrong: ", ex.Message, "Ok");
+        }
     }
 
     private async void ObjCell_Tapped(object sender, EventArgs e)
     {
+        bool oneTimeExpense = chkOnTimeExpense.IsChecked;
         var tappedViewCell = (TextCell)sender;
         string displayText = "";
         string month= tappedViewCell.Text.ToString();
@@ -181,10 +219,37 @@ public partial class IncomeExpenseReportsPage : ContentPage
         DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
         endOfMonth = new DateTime(endOfMonth.Year, endOfMonth.Month, endOfMonth.Day, 23, 59, 59); //24 hour format
 
-        var manualAddedExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && (e.Mode == "" || e.Mode == null || e.Mode=="manual") && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
+        List<IncomeExpenseModel> manualAddedExpenseList = new List<IncomeExpenseModel>();
+        List<IncomeExpenseModel> fileUploadExpenseList = new List<IncomeExpenseModel>();
+        var parameters = new object[] { startOfMonth, endOfMonth };
+        if (oneTimeExpense)
+        {
+            manualAddedExpenseList = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
+             "IncomeExpenseCategories iec ON iem.CategoryName = iec.CategoryName Where iem.TransactionType='Expense' and (Mode is null or Mode = '' or Mode='manual') " +
+             "and iem.Date >= ? and iem.Date<= ? ", parameters);
+        }
+        else
+        {
+            manualAddedExpenseList = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
+            "IncomeExpenseCategories iec ON iem.CategoryName = iec.CategoryName Where iem.TransactionType='Expense' and (Mode is null or Mode = '' or Mode='manual') and (iec.IsOneTimeExpense=0 or iec.IsOneTimeExpense is null) " +
+            "and iem.Date >= ? and iem.Date<= ? ", parameters);
+        }
+        //var manualAddedExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && (e.Mode == "" || e.Mode == null || e.Mode=="manual") && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();      
         var totalManualAddedExpenses = manualAddedExpenseList.Select(s => s.Amount).Sum();
 
-        var fileUploadExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && e.Mode == "file_upload" && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
+        if (oneTimeExpense)
+        {
+            fileUploadExpenseList = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
+            "IncomeExpenseCategories iec ON iem.CategoryName = iec.CategoryName Where iem.TransactionType='Expense' and  Mode='file_upload' " +
+            "and iem.Date >= ? and iem.Date<= ? ", parameters);
+        }
+        else
+        {
+            fileUploadExpenseList = await _dbConnection.QueryAsync<IncomeExpenseModel>("select Amount from IncomeExpenseModel iem LEFT JOIN " +
+           "IncomeExpenseCategories iec ON iem.CategoryName = iec.CategoryName Where iem.TransactionType='Expense' and  Mode='file_upload' and (iec.IsOneTimeExpense=0 or iec.IsOneTimeExpense is null) " +
+           "and iem.Date >= ? and iem.Date<= ? ", parameters);
+        }
+        //var fileUploadExpenseList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense" && e.Mode == "file_upload" && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
         var totalFileUploadExpenses = fileUploadExpenseList.Select(s => s.Amount).Sum();
 
         var monthlyIncomeList = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Income" && e.Date >= startOfMonth && e.Date <= endOfMonth).ToListAsync();
@@ -205,7 +270,18 @@ public partial class IncomeExpenseReportsPage : ContentPage
         if (onLoad == false)
         {
             string selectedYear = yearPicker.SelectedItem.ToString();
-            LoadIncomeExpenseReport(selectedYear);
+            bool oneTimeExpense = chkOnTimeExpense.IsChecked;
+            LoadIncomeExpenseReport(selectedYear, oneTimeExpense);
+        }
+    }
+
+    private void chkOnTimeExpense_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    {
+        if (onLoad == false)
+        {
+            string selectedYear = yearPicker.SelectedItem.ToString();
+            bool oneTimeExpense = chkOnTimeExpense.IsChecked;
+            LoadIncomeExpenseReport(selectedYear, oneTimeExpense);
         }
     }
 
@@ -249,32 +325,28 @@ public partial class IncomeExpenseReportsPage : ContentPage
             if (total > 0)
             {
                 objCategoryWiseAmount.CategoryName = category.CategoryName;
+                var incomeExpenseCategory = await _dbConnection.Table<IncomeExpenseCategories>().Where(c => c.CategoryName == category.CategoryName).FirstOrDefaultAsync();
+                objCategoryWiseAmount.OneTimeExpense = incomeExpenseCategory != null ? incomeExpenseCategory.IsOneTimeExpense : false;
                 objCategoryWiseAmount.TransactionType = category.TransactionType;
                 objCategoryWiseAmount.Amount = total;
                 categoryWiseAmountList.Add(objCategoryWiseAmount);
             }
-            //if (total > 0)
-            //{
-            //    TextCell objCategory = new TextCell();
-            //    objCategory.Text = category.CategoryName;
-            //    if (currentTheme == AppTheme.Dark)
-            //    {
-            //        //set to white color
-            //        objCategory.TextColor = Color.FromArgb("#FFFFFF");
-            //    }
-            //    objCategory.Detail = string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", total + " - " + category.TransactionType);
-            //    objCategory.Height = 40;
-            //    tblscCategoryWiseReport.Add(objCategory);
-            //}
         }
 
         if (categoryWiseAmountList.Count > 0)
         {
             categoryWiseAmountList = categoryWiseAmountList.OrderBy(o => o.TransactionType).ThenByDescending(o => o.Amount).ToList();
+            if (!chkOnTimeExpense.IsChecked)
+            {
+                List<CategoryWiseAmountDTO> itemsToRemove = new List<CategoryWiseAmountDTO>();
+                itemsToRemove = categoryWiseAmountList.Where(c => c.OneTimeExpense == true).ToList();
+                categoryWiseAmountList.RemoveAll(item => itemsToRemove.Contains(item));
+            }
             foreach (var item in categoryWiseAmountList)
             {
+                string oneTimeExpenseText = item.OneTimeExpense == null ? "" : ((bool)item.OneTimeExpense ? "(One Time)" : "");
                 TextCell objCategory = new TextCell();
-                objCategory.Text = item.CategoryName + " - " + item.TransactionType;
+                objCategory.Text = item.CategoryName + " - " + oneTimeExpenseText + item.TransactionType;
                 if (currentTheme == AppTheme.Dark)
                 {
                     //set to white color

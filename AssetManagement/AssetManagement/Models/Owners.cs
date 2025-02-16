@@ -12,5 +12,7 @@ namespace AssetManagement.Models
         [PrimaryKey, AutoIncrement]
         public int OwnerId { get; set; }
         public string OwnerName { get; set; }
+        public bool? IsAdmin { get; set; }
+        public bool? Locked { get; set; }
     }
 }

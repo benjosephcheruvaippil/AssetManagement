@@ -29,6 +29,7 @@ public static class MauiProgram
 
 		builder.Services.AddSingleton<IFileSaver>(FileSaver.Default);
         builder.Services.AddSingleton<IAssetService, AssetService>();
+		builder.Services.AddSingleton<IAppRestarter, AppRestarter>();
 		//builder.Services.AddSingleton<IPopupNavigation>(MopupService.Instance);
 
         //builder.Services.AddSingleton<AssetListPage>();

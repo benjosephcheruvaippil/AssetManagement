@@ -12,31 +12,58 @@ public partial class SettingsPage : ContentPage
     private SQLiteAsyncConnection _dbConnection;
     private AssetListPageViewModel _viewModel;
     private readonly IAssetService _assetService;
-    public SettingsPage(AssetListPageViewModel viewModel, IAssetService assetService)
-	{
-		InitializeComponent();
+    private readonly IAppRestarter _appRestarter;
+    public SettingsPage(AssetListPageViewModel viewModel, IAssetService assetService, IAppRestarter appRestarter)
+    {
+        InitializeComponent();
         _viewModel = viewModel;
         _assetService = assetService;
+        _appRestarter = appRestarter;
     }
 
-    //private async Task SetUpDb()
-    //{
-    //    try
-    //    {
-    //        if (_dbConnection == null)
-    //        {
-    //            string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
-    //            _dbConnection = new SQLiteAsyncConnection(dbPath);
-    //            await _dbConnection.CreateTableAsync<Assets>();
-    //            await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
-    //            await _dbConnection.CreateTableAsync<DataSyncAudit>();
-    //        }
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        await DisplayAlert("Error", ex.Message, "OK");
-    //    }
-    //}
+    protected async override void OnAppearing()
+    {
+        base.OnAppearing();
+        await SetUpDb();
+        var lockDetails = await _dbConnection.Table<Owners>().FirstOrDefaultAsync();
+        if (lockDetails != null)
+        {
+            lockSwitch.IsToggled = lockDetails.Locked == null ? false : (bool)lockDetails.Locked;
+
+            if (lockSwitch.IsToggled)
+            {
+                lblLockText.Text = "App Lock On";
+            }
+            else if(!lockSwitch.IsToggled)
+            {
+                lblLockText.Text = "App Lock Off";
+            }
+        }
+    }
+
+    private async Task SetUpDb()
+    {
+        try
+        {
+            if (_dbConnection == null)
+            {
+                string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
+                _dbConnection = new SQLiteAsyncConnection(dbPath);
+                await _dbConnection.CreateTableAsync<Assets>();
+                await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
+                await _dbConnection.CreateTableAsync<IncomeExpenseCategories>();
+                await _dbConnection.CreateTableAsync<DataSyncAudit>();
+                await _dbConnection.CreateTableAsync<AssetAuditLog>();
+                await _dbConnection.CreateTableAsync<Owners>();
+                await _dbConnection.CreateTableAsync<UserCurrency>();
+                await _dbConnection.CreateTableAsync<Currency>();
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", ex.Message, "OK");
+        }
+    }
 
     private async void btnBackup_Clicked(object sender, EventArgs e)
     {
@@ -109,7 +136,10 @@ public partial class SettingsPage : ContentPage
             //await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
             //await _dbConnection.CreateTableAsync<DataSyncAudit>();
 
-            await DisplayAlert("Info", "Database restored successfully", "OK");
+            await DisplayAlert("Info", "Database restored successfully. App will get restarted to load the database.", "OK");
+            //this code is android specific for restarting the app programmatically
+            _appRestarter.RestartApp();
+            //this code is android specific for restarting the app programmatically
         }
         catch (Exception ex)
         {
@@ -130,5 +160,24 @@ public partial class SettingsPage : ContentPage
     private async void btnSelectCurrency_Clicked(object sender, EventArgs e)
     {
         await Navigation.PushAsync(new AppLaunchPage(_viewModel, _assetService, Constants.FromSettingsPage));
+    }
+
+    private async void lockSwitch_Toggled(object sender, ToggledEventArgs e)
+    {
+        await SetUpDb();
+        if (e.Value)
+        {
+            lblLockText.Text = "App Lock On";
+            int rowsAffected = await _dbConnection.ExecuteAsync("Update Owners set Locked=?", true);
+            
+            //await DisplayAlert("Message", "App locked using pattern/fingerprint", "OK");
+        }
+        else
+        {
+            lblLockText.Text = "App Lock Off";
+            int rowsAffected = await _dbConnection.ExecuteAsync("Update Owners set Locked=?", false);
+
+            //await DisplayAlert("Message", "App lock is removed", "OK");
+        }
     }
 }

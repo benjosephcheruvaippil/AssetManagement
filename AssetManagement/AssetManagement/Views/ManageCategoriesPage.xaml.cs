@@ -8,6 +8,7 @@ public partial class ManageCategoriesPage : ContentPage
     private SQLiteAsyncConnection _dbConnection;
     AppTheme currentTheme = Application.Current.RequestedTheme;
     public string OldCategoryName = "";
+    private bool isProgrammaticChange = false;
     public ManageCategoriesPage()
 	{
 		InitializeComponent();
@@ -17,7 +18,7 @@ public partial class ManageCategoriesPage : ContentPage
         try
         {
             base.OnAppearing();
-            await LoadCategoriesInPage();
+            await LoadCategoriesInPage("");
         }
         catch (Exception)
         {
@@ -43,99 +44,119 @@ public partial class ManageCategoriesPage : ContentPage
     }
 
     private async void btnSaveCategory_Clicked(object sender, EventArgs e)
-    {     
-        if (string.IsNullOrEmpty(entryCategoryName.Text) || categoryTypePicker.SelectedIndex == -1)
+    {
+        try
         {
-            await DisplayAlert("Message", "Please input category name and select category type", "OK");
-            return;
-        }
-        entryCategoryName.Text = entryCategoryName.Text.Trim();
-        if (string.IsNullOrEmpty(txtIncomeExpenseCategoryId.Text))//insert
-        {
-            //check if duplicate names exist
-            if (!string.IsNullOrEmpty(entryCategoryName.Text))
+            if (string.IsNullOrEmpty(entryCategoryName.Text) || categoryTypePicker.SelectedIndex == -1)
             {
-                string inputtedCategoryNameFormatted = entryCategoryName.Text;
-
-                await SetUpDb();
-                var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
-                if (categories.Where(o => o.CategoryName == inputtedCategoryNameFormatted).Count() > 0)
+                await DisplayAlert("Message", "Please input category name and select category type", "OK");
+                return;
+            }
+            entryCategoryName.Text = entryCategoryName.Text.Trim();
+            if (string.IsNullOrEmpty(txtIncomeExpenseCategoryId.Text))//insert
+            {
+                //check if duplicate names exist
+                if (!string.IsNullOrEmpty(entryCategoryName.Text))
                 {
-                    await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
-                    return;
+                    string inputtedCategoryNameFormatted = entryCategoryName.Text.ToLower();
+
+                    await SetUpDb();
+                    var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
+                    if (categories.Where(o => o.CategoryName.ToLower() == inputtedCategoryNameFormatted).Count() > 0)
+                    {
+                        await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
+                        return;
+                    }
                 }
-            }
-            //check if duplicate names exist
+                //check if duplicate names exist
 
-            IncomeExpenseCategories objIncomeExpenseCat = new IncomeExpenseCategories
-            {
-                CategoryName = entryCategoryName.Text.Trim(),
-                CategoryType = categoryTypePicker.SelectedItem.ToString(),
-                IsVisible = chkIsVisible.IsChecked
-            };
-            await SetUpDb();
-            int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpenseCat);
-            ClearCategoriesForm();
-            if (rowsAffected > 0)
-            {
-
-                await LoadCategoriesInPage();
-            }
-            else
-            {
-                await DisplayAlert("Error", "Something went wrong", "OK");
-            }
-        }
-        else //update
-        {
-            //check if duplicate names exist
-            if (!string.IsNullOrEmpty(entryCategoryName.Text))
-            {
-                string inputtedCategoryNameFormatted = entryCategoryName.Text.Trim();
-
-                await SetUpDb();
-                var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
-                if (categories.Where(o => o.CategoryName == inputtedCategoryNameFormatted).Count() > 1)
+                IncomeExpenseCategories objIncomeExpenseCat = new IncomeExpenseCategories
                 {
-                    await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
-                    return;
-                }
-            }
-            //check if duplicate names exist
-            int incomeExpenseCategoryId = Convert.ToInt32(txtIncomeExpenseCategoryId.Text);
-            IncomeExpenseCategories objIncomeExpenseCat = new IncomeExpenseCategories
-            {
-                IncomeExpenseCategoryId = incomeExpenseCategoryId,
-                CategoryName = entryCategoryName.Text.Trim(),
-                CategoryType = categoryTypePicker.SelectedItem.ToString(),
-                IsVisible = chkIsVisible.IsChecked
-            };
-            await SetUpDb();
-            int rowsAffected = await _dbConnection.UpdateAsync(objIncomeExpenseCat);
-            if (rowsAffected > 0)
-            {
-                //update all records in IncomeExpenseModel table
-                var recordsUpdatedIncomeExpense = await _dbConnection.ExecuteAsync($"Update IncomeExpenseModel set CategoryName='{entryCategoryName.Text.Trim()}' where CategoryName='{OldCategoryName}'");
-                //update all records in Assets table
-                //var recordsUpdateAssets = await _dbConnection.ExecuteAsync($"Update Assets set Holder='{entryOwnerName.Text.Trim()}' where Holder='{OldOwnerName}'");
+                    CategoryName = entryCategoryName.Text.Trim(),
+                    CategoryType = categoryTypePicker.SelectedItem.ToString(),
+                    IsOneTimeExpense = chkIsOneTimeExpense.IsChecked,
+                    IsVisible = chkIsVisible.IsChecked
+                };
+                await SetUpDb();
+                int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpenseCat);
                 ClearCategoriesForm();
-                await LoadCategoriesInPage();
+                if (rowsAffected > 0)
+                {
+
+                    await LoadCategoriesInPage("");
+                }
+                else
+                {
+                    await DisplayAlert("Error", "Something went wrong", "OK");
+                }
             }
-            else
+            else //update
             {
-                await DisplayAlert("Error", "Something went wrong", "OK");
+                int incomeExpenseCategoryId = Convert.ToInt32(txtIncomeExpenseCategoryId.Text);
+                //check if duplicate names exist
+                if (!string.IsNullOrEmpty(entryCategoryName.Text))
+                {
+                    string inputtedCategoryNameFormatted = entryCategoryName.Text.ToLower().Trim();
+
+                    await SetUpDb();
+                    var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
+                    
+                    if (categories.Where(o => o.CategoryName.ToLower() == inputtedCategoryNameFormatted && o.IncomeExpenseCategoryId != incomeExpenseCategoryId).Count() >= 1)
+                    {
+                        await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
+                        return;
+                    }
+                }
+                //check if duplicate names exist
+                
+                IncomeExpenseCategories objIncomeExpenseCat = new IncomeExpenseCategories
+                {
+                    IncomeExpenseCategoryId = incomeExpenseCategoryId,
+                    CategoryName = entryCategoryName.Text.Trim(),
+                    CategoryType = categoryTypePicker.SelectedItem.ToString(),
+                    IsOneTimeExpense = chkIsOneTimeExpense.IsChecked,
+                    IsVisible = chkIsVisible.IsChecked
+                };
+                await SetUpDb();
+                int rowsAffected = await _dbConnection.UpdateAsync(objIncomeExpenseCat);
+                if (rowsAffected > 0)
+                {
+                    //update all records in IncomeExpenseModel table
+                    var recordsUpdatedIncomeExpense = await _dbConnection.ExecuteAsync($"Update IncomeExpenseModel set CategoryName='{entryCategoryName.Text.Trim()}' where CategoryName='{OldCategoryName}'");
+                    //update all records in Assets table
+                    //var recordsUpdateAssets = await _dbConnection.ExecuteAsync($"Update Assets set Holder='{entryOwnerName.Text.Trim()}' where Holder='{OldOwnerName}'");
+                    ClearCategoriesForm();
+                    await LoadCategoriesInPage("");
+                }
+                else
+                {
+                    await DisplayAlert("Error", "Something went wrong", "OK");
+                }
             }
+        }
+        catch(Exception ex)
+        {
+            await DisplayAlert("Error", "Something went wrong", "OK");
         }
     }
 
-    private async Task LoadCategoriesInPage()
+    private async Task LoadCategoriesInPage(string categoryName)
     {
         try
         {
             List<IncomeExpenseCategories> categories = new List<IncomeExpenseCategories>();
+            isProgrammaticChange = false;
             tblscCategories.Clear();
             await SetUpDb();
-            categories = await _dbConnection.QueryAsync<IncomeExpenseCategories>("select IncomeExpenseCategoryId, CategoryName, CategoryType from IncomeExpenseCategories order by CategoryType asc, CategoryName asc");
+            if (string.IsNullOrEmpty(categoryName))
+            {
+                categories = await _dbConnection.QueryAsync<IncomeExpenseCategories>("select IncomeExpenseCategoryId, CategoryName, CategoryType from IncomeExpenseCategories order by CategoryType asc, CategoryName asc");
+            }
+            else 
+            {
+                categories = await _dbConnection.QueryAsync<IncomeExpenseCategories>("select IncomeExpenseCategoryId, CategoryName, CategoryType from IncomeExpenseCategories where CategoryName like '%" + categoryName + "%' order by CategoryType asc, CategoryName asc");
+            }
+            
             foreach (var item in categories)
             {
                 TextCell objCell = new TextCell();
@@ -174,7 +195,8 @@ public partial class ManageCategoriesPage : ContentPage
         //    int result = await _dbConnection.ExecuteAsync("update IncomeExpenseCategories set IsVisible=1 where IncomeExpenseCategoryId=?", incomeExpenseCategoryId);
         //    incomeExpenseRecord.IsVisible = true;
         //}
-        chkIsVisible.IsChecked = (bool)incomeExpenseRecord.IsVisible;
+        chkIsOneTimeExpense.IsChecked = incomeExpenseRecord.IsOneTimeExpense == null ? false : (bool)incomeExpenseRecord.IsOneTimeExpense;
+        chkIsVisible.IsChecked = incomeExpenseRecord.IsVisible == null ? false : (bool)incomeExpenseRecord.IsVisible;
         OldCategoryName = entryCategoryName.Text;
     }
 
@@ -204,7 +226,7 @@ public partial class ManageCategoriesPage : ContentPage
                     await SetUpDb();
                     int rowsAffected = await _dbConnection.DeleteAsync(objIncomeExpenseCat);
                     ClearCategoriesForm();
-                    await LoadCategoriesInPage();
+                    await LoadCategoriesInPage("");
                 }
             }
             else
@@ -220,8 +242,48 @@ public partial class ManageCategoriesPage : ContentPage
 
     public void ClearCategoriesForm()
     {
+        isProgrammaticChange = true;
+        entCategorySearch.Text = "";
         txtIncomeExpenseCategoryId.Text = "";
         entryCategoryName.Text = "";
         categoryTypePicker.SelectedIndex = -1;
+    }
+
+    private void categoryTypePicker_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            if (categoryTypePicker.SelectedItem != null)
+            {
+                string categoryType = categoryTypePicker.SelectedItem.ToString();
+                if (categoryType == "Expense")
+                {
+                    lblOneTimeExpense.IsVisible = true;
+                    chkIsOneTimeExpense.IsVisible = true;
+                }
+                else
+                {
+                    lblOneTimeExpense.IsVisible = false;
+                    chkIsOneTimeExpense.IsVisible = false;
+                }
+            }
+            else
+            {
+                lblOneTimeExpense.IsVisible = false;
+                chkIsOneTimeExpense.IsVisible = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert("Error", "Something went wrong: " + ex.Message.ToString(), "Ok");
+        }
+    }
+
+    private async void entCategorySearch_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (!isProgrammaticChange)
+        {
+            await LoadCategoriesInPage(entCategorySearch.Text.Trim());
+        }
     }
 }

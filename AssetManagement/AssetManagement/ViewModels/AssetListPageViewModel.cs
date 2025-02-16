@@ -108,6 +108,7 @@ namespace AssetManagement.ViewModels
                                                            where (rec.MaturityDate < DateTime.Now.AddDays(20) || rec.MaturityDate < DateTime.Now)
                                                            select new MaturingAssets
                                                            {
+                                                               AssetId = rec.AssetId,
                                                                InvestmentEntity = rec.InvestmentEntity,
                                                                HolderName = rec.Holder,
                                                                Amount = Convert.ToString(rec.Amount),
@@ -140,6 +141,7 @@ namespace AssetManagement.ViewModels
                                                            where (rec.MaturityDate < DateTime.Now.AddDays(daysLeft) || rec.MaturityDate < DateTime.Now)
                                                            select new MaturingAssets
                                                            {
+                                                               AssetId = rec.AssetId,
                                                                InvestmentEntity = rec.InvestmentEntity,
                                                                HolderName = rec.Holder,
                                                                Amount = Convert.ToString(rec.Amount),
