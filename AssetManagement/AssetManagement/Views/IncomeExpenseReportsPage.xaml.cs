@@ -378,15 +378,20 @@ public partial class IncomeExpenseReportsPage : ContentPage
             DateTime toDate = new DateTime(toDateIncomeReport.Year, toDateIncomeReport.Month, toDateIncomeReport.Day, 23, 59, 59);
             List<IncomeExpenseModel> inexpList = new List<IncomeExpenseModel>();
             string type = typePicker.SelectedItem.ToString();
+            string categoryName = pickerCategory.SelectedItem.ToString();
             if (type == "Income")
             {
-                inexpList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Income" && (i.Date >= fromDate && i.Date <= toDate))
+                inexpList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Income"
+                && (categoryName=="All" || i.CategoryName == categoryName)
+                && (i.Date >= fromDate && i.Date <= toDate))
                     .OrderBy(i => i.Date)
                     .ToListAsync();
             }
             else if (type == "Expense")
             {
-                inexpList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Expense" && (i.Date >= fromDate && i.Date <= toDate))
+                inexpList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Expense"
+                && (categoryName == "All" || i.CategoryName == categoryName)
+                && (i.Date >= fromDate && i.Date <= toDate))
                     .OrderBy(i => i.Date)
                     .ToListAsync();
             }
@@ -499,6 +504,69 @@ public partial class IncomeExpenseReportsPage : ContentPage
         {
             await DisplayAlert("Error", ex.Message, "Ok");
             await DisplayAlert("Error", ex.InnerException.ToString(), "Ok");            
+        }
+    }
+
+    private void typePicker_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (typePicker.SelectedItem != null)
+        {
+            if (typePicker.SelectedItem.ToString() == "Expense")
+            {
+                LoadExpenseCategoriesInDropdown();
+            }
+            else if (typePicker.SelectedItem.ToString() == "Income")
+            {
+                LoadIncomeCategoriesInDropdown();
+            }
+        }
+    }
+
+    private async void LoadExpenseCategoriesInDropdown()
+    {
+        try
+        {
+            var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
+            IncomeExpenseCategories objCategories = new IncomeExpenseCategories
+            {
+                IncomeExpenseCategoryId = 0,
+                CategoryName = "All",
+                CategoryType = "Expense"
+            };
+            expenseCategories.Insert(0, objCategories);
+            pickerCategory.ItemsSource = expenseCategories.Select(i => i.CategoryName).ToList();
+            if (expenseCategories.Count > 1)
+            {
+                pickerCategory.SelectedIndex = 0;
+            }
+        }
+        catch (Exception)
+        {
+            return;
+        }
+    }
+
+    private async void LoadIncomeCategoriesInDropdown()
+    {
+        try
+        {
+            var incomeCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Income").ToListAsync();
+            IncomeExpenseCategories objCategories = new IncomeExpenseCategories
+            {
+                IncomeExpenseCategoryId = 0,
+                CategoryName = "All",
+                CategoryType = "Income"
+            };
+            incomeCategories.Insert(0, objCategories);
+            pickerCategory.ItemsSource = incomeCategories.Select(i => i.CategoryName).ToList();
+            if (incomeCategories.Count > 1)
+            {
+                pickerCategory.SelectedIndex = 0;
+            }
+        }
+        catch (Exception)
+        {
+            return;
         }
     }
 }
