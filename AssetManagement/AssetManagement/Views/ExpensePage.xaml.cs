@@ -42,6 +42,7 @@ public partial class ExpensePage : ContentPage
             LoadExpensesInPage("Last5");// show expenses in the expense tab          
             await ShowCurrentMonthExpenses();
             LoadExpenseCategoriesInDropdown();
+            await CheckForAppUpdate();
             //SetLastUploadedDate();
         }
         catch(Exception)
@@ -75,6 +76,26 @@ public partial class ExpensePage : ContentPage
         }
     }
 
+    public async Task CheckForAppUpdate()
+    {
+        try
+        {
+            CommonFunctions objCommon = new CommonFunctions();
+            if (await objCommon.IsAppUpdateAvailable())
+            {
+                bool update = await DisplayAlert("Update Available","A new version of the app is available. Please update.", "Update", "Later");
+
+                if (update)
+                {
+                    await Launcher.OpenAsync($"https://play.google.com/store/apps/details?id=com.companyname.assetmanagement");
+                }
+            }
+        }
+        catch(Exception)
+        {
+            return;
+        }
+    }
     public async void SetLastUploadedDate()
     {
         await SetUpDb();
