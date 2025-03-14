@@ -83,11 +83,15 @@ public partial class ExpensePage : ContentPage
             CommonFunctions objCommon = new CommonFunctions();
             if (await objCommon.IsAppUpdateAvailable())
             {
-                bool update = await DisplayAlert("Update Available","A new version of the app is available. Please update.", "Update", "Later");
+                bool update = await DisplayAlert("Update Available","A new version of the app is available. Please update. We recommend you take a backup before updation.", "Update", "Later");
 
                 if (update)
                 {
                     await Launcher.OpenAsync($"https://play.google.com/store/apps/details?id=com.companyname.assetmanagement");
+                }
+                else
+                {
+                    await _dbConnection.ExecuteAsync("UPDATE Owners SET UpdateAvailableLastChecked = ?", DateTime.Today);
                 }
             }
         }

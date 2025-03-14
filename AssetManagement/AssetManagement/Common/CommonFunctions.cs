@@ -195,16 +195,31 @@ namespace AssetManagement.Common
         {
             string installedVersion = AppInfo.VersionString;
             HttpClient client = new HttpClient();
-            string url = "https://networthtrackerapi20240213185304.azurewebsites.net/api/general/getPublishedAppVersionNo";
-            HttpResponseMessage response = await client.GetAsync(url);
-            if (response.IsSuccessStatusCode)
+
+            await SetUpDb();
+            var ownerDetails = await _dbConnection.Table<Owners>().FirstOrDefaultAsync();
+            if (ownerDetails != null)
             {
-                string result = await response.Content.ReadAsStringAsync();
-                if (installedVersion != result)
+                DateTime? updateAvailableLastChecked = ownerDetails.UpdateAvailableLastChecked;
+                if (updateAvailableLastChecked == null)
                 {
-                    return true;
+                    updateAvailableLastChecked = DateTime.Today.AddDays(-35);
+                }
+                if ((DateTime.Today - updateAvailableLastChecked).Value.Days > 30)
+                {
+                    string url = "https://networthtrackerapi20240213185304.azurewebsites.net/api/general/getPublishedAppVersionNo";
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string result = await response.Content.ReadAsStringAsync();
+                        if (installedVersion != result)
+                        {
+                            return true;
+                        }
+                    }
                 }
             }
+
             return false;
         }
     }

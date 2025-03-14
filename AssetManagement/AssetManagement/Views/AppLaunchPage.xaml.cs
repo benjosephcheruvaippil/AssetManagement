@@ -116,7 +116,9 @@ public partial class AppLaunchPage : ContentPage
         {
             Owners objOwner = new Owners
             {
-                OwnerName = entryOwnerName.Text
+                OwnerName = entryOwnerName.Text,
+                IsAdmin = true,
+                UpdateAvailableLastChecked = DateTime.Now
             };
 
             await _dbConnection.InsertAsync(objOwner);

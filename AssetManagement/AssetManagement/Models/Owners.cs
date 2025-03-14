@@ -14,5 +14,6 @@ namespace AssetManagement.Models
         public string OwnerName { get; set; }
         public bool? IsAdmin { get; set; }
         public bool? Locked { get; set; }
+        public DateTime? UpdateAvailableLastChecked { get; set; }
     }
 }
