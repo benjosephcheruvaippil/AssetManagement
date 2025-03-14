@@ -57,11 +57,17 @@
 
             <DatePicker x:Name="dpFromDateIncomeReport"/>
             <DatePicker x:Name="dpTODateIncomeReport"/>
-            <Picker x:Name="typePicker" Title="Select type">
+            <Picker x:Name="typePicker" Title="Select type" SelectedIndexChanged="typePicker_SelectedIndexChanged">
                 <Picker.ItemsSource>
                     <x:Array Type="{x:Type x:String}">
                         <x:String>Income</x:String>
                         <x:String>Expense</x:String>
+                    </x:Array>
+                </Picker.ItemsSource>
+            </Picker>
+            <Picker x:Name="pickerCategory" Title="Select category">
+                <Picker.ItemsSource>
+                    <x:Array Type="{x:Type x:String}">
                     </x:Array>
                 </Picker.ItemsSource>
             </Picker>

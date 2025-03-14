@@ -645,6 +645,8 @@ public partial class AssetPage : TabbedPage
             StartDate = assetAuditLog.StartDate,
             MaturityDate = assetAuditLog.MaturityDate,
             Remarks = assetAuditLog.Remarks,
+            Nominee = assetAuditLog.Nominee,
+            RiskNumber = assetAuditLog.RiskNumber,
             AsOfDate = assetAuditLog.AsOfDate,
             LiquidAssetValue = assetAuditLog.NetAssetValue,
             NetAssetValue = assetAuditLog.NetAssetValue,

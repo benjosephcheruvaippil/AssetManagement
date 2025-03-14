@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SQLite;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace AssetManagement.Models
 {
     public class AssetAuditLog
     {
+        [PrimaryKey, AutoIncrement]
         public int AssetLogId { get; set; }
         public int AssetId { get; set; }
         public string InvestmentEntity { get; set; }

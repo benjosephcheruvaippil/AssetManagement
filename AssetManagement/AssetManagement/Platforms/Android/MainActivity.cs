@@ -50,7 +50,7 @@ public class MainActivity : MauiAppCompatActivity
             else
             {
                 Finish();
-            }
+            } 
         }
     }
 }
