@@ -35,6 +35,14 @@ Clicked="btnDownloadAssetsExcel_Clicked"
 FontSize="10"
 Margin="2"
 HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
+                    <Button
+x:Name="btnUploadAssetExcelToGoogleDrive"
+Text="Upload Excel"
+Clicked="btnUploadAssetExcelToGoogleDrive_Clicked"
+FontSize="10"
+Margin="2"
+IsVisible="False"
+HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
 
                 </StackLayout>
 

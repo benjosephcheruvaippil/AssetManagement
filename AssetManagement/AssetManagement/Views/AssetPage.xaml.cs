@@ -1,5 +1,6 @@
 using AssetManagement.Models;
 using AssetManagement.Models.Constants;
+using AssetManagement.Models.DataTransferObject;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using CommunityToolkit.Maui.Storage;
@@ -289,6 +290,7 @@ public partial class AssetPage : TabbedPage
     {
         base.OnAppearing();
 
+        ShowOrHideUploadExcelButton();
         LoadOwnersInDropdown();
         lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", await _viewModel.GetAssetsList());
         await ShowPrimaryAssetDetails();
@@ -303,6 +305,15 @@ public partial class AssetPage : TabbedPage
             await _dbConnection.CreateTableAsync<Assets>();
             await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
             await _dbConnection.CreateTableAsync<DataSyncAudit>();
+        }
+    }
+
+    public void ShowOrHideUploadExcelButton()
+    {
+        string deviceInfo = DeviceInfo.Current.Manufacturer + "-" + DeviceInfo.Current.Idiom.ToString() + "-" + DeviceInfo.Current.Model;
+        if (deviceInfo == "samsung-Phone-SM-S911B")
+        {
+            btnUploadAssetExcelToGoogleDrive.IsVisible = true;
         }
     }
 
@@ -902,10 +913,18 @@ public partial class AssetPage : TabbedPage
 
     private async void btnDownloadAssetsExcel_Clicked(object sender, EventArgs e)
     {
+        activityIndicator.IsVisible = true;
+        activityIndicator.IsRunning = true;
+        await DownloadAssetDetailsExcel("download");
+        activityIndicator.IsVisible = false;
+        activityIndicator.IsRunning = false;
+    }
+
+    public async Task<DownloadExcelDTO> DownloadAssetDetailsExcel(string type)
+    {
+        DownloadExcelDTO objResponse = new DownloadExcelDTO();
         try
         {
-            activityIndicator.IsVisible = true;
-            activityIndicator.IsRunning = true;
             var assetList = await _dbConnection.Table<Assets>()
                 .OrderBy(i => i.Type)
                 .ToListAsync();
@@ -990,28 +1009,31 @@ public partial class AssetPage : TabbedPage
             workSheet.Column(10).AutoFit();
 
             byte[] excelByteArray = excel.GetAsByteArray();
-            var stream = new MemoryStream(excelByteArray);
-            CancellationTokenSource Ctoken = new CancellationTokenSource();
-            string fileName = "Asset_Report_" + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt")+".xlsx";
-            var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
-            if (fileSaverResult.IsSuccessful)
+            string fileName = "Asset_Report_" + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt") + ".xlsx";
+            if (type == "download")
             {
-                await DisplayAlert("Message", "Excel saved in " + fileSaverResult.FilePath, "Ok");
+                var stream = new MemoryStream(excelByteArray);
+                CancellationTokenSource Ctoken = new CancellationTokenSource();
+                var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
+                if (fileSaverResult.IsSuccessful)
+                {
+                    await DisplayAlert("Message", "Excel saved in " + fileSaverResult.FilePath, "Ok");
+                }
             }
-
             excel.Dispose();
-            activityIndicator.IsVisible = false;
-            activityIndicator.IsRunning = false;
-            await UploadExcelToGoogleDrive(excelByteArray, fileName);
+
+            objResponse.ExcelByteArray = excelByteArray;
+            objResponse.FileName = fileName;
         }
         catch (Exception ex)
         {
             await DisplayAlert("Error", ex.Message, "Ok");
             await DisplayAlert("Error", ex.InnerException.ToString(), "Ok");
         }
+        return objResponse;
     }
 
-    public async Task UploadExcelToGoogleDrive(byte[] fileBytes, string fileName)
+    public async Task<bool> UploadExcelToGoogleDrive(byte[] fileBytes, string fileName)
     {
         string apiUrl = "https://networthtrackerapi20240213185304.azurewebsites.net/api/general/uploadExcelFileToGoogleDrive";
         using (HttpClient client = new HttpClient())
@@ -1024,8 +1046,10 @@ public partial class AssetPage : TabbedPage
             string result = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
-                //do something if needed
+                //upload to google drive success.
+                return true;
             }
+            return false;
         }
     }
 
@@ -1142,6 +1166,19 @@ public partial class AssetPage : TabbedPage
 
             this.CurrentPage = this.Children[1];
             await SetDataInManageAssets(objAsset);
+        }
+    }
+
+    private async void btnUploadAssetExcelToGoogleDrive_Clicked(object sender, EventArgs e)
+    {
+        activityIndicator.IsVisible = true;
+        activityIndicator.IsRunning = true;
+        var excelResponse = await DownloadAssetDetailsExcel("upload");
+        if (await UploadExcelToGoogleDrive(excelResponse.ExcelByteArray, excelResponse.FileName))
+        {
+            activityIndicator.IsVisible = false;
+            activityIndicator.IsRunning = false;
+            await DisplayAlert("Info", "File uploaded to Google Drive.", "Ok");
         }
     }
 }
