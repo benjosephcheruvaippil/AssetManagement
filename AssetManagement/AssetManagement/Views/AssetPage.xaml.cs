@@ -13,6 +13,7 @@ using SQLite;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace AssetManagement.Views;
@@ -988,7 +989,8 @@ public partial class AssetPage : TabbedPage
             workSheet.Column(9).AutoFit();
             workSheet.Column(10).AutoFit();
 
-            var stream = new MemoryStream(excel.GetAsByteArray());
+            byte[] excelByteArray = excel.GetAsByteArray();
+            var stream = new MemoryStream(excelByteArray);
             CancellationTokenSource Ctoken = new CancellationTokenSource();
             string fileName = "Asset_Report_" + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt")+".xlsx";
             var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
@@ -1000,11 +1002,30 @@ public partial class AssetPage : TabbedPage
             excel.Dispose();
             activityIndicator.IsVisible = false;
             activityIndicator.IsRunning = false;
+            await UploadExcelToGoogleDrive(excelByteArray, fileName);
         }
         catch (Exception ex)
         {
             await DisplayAlert("Error", ex.Message, "Ok");
             await DisplayAlert("Error", ex.InnerException.ToString(), "Ok");
+        }
+    }
+
+    public async Task UploadExcelToGoogleDrive(byte[] fileBytes, string fileName)
+    {
+        string apiUrl = "https://networthtrackerapi20240213185304.azurewebsites.net/api/general/uploadExcelFileToGoogleDrive";
+        using (HttpClient client = new HttpClient())
+        using(MultipartFormDataContent formData=new MultipartFormDataContent())
+        {
+            ByteArrayContent fileContent = new ByteArrayContent(fileBytes);
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            formData.Add(fileContent, "fileRequest", fileName);
+            HttpResponseMessage response = await client.PostAsync(apiUrl, formData);
+            string result = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                //do something if needed
+            }
         }
     }
 
