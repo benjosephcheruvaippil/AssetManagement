@@ -33,6 +33,12 @@ public partial class AssetPage : TabbedPage
     private double currentScale = 1, startScale = 1;
     private AbsoluteLayout fullScreenLayout;
 
+    private List<string> imageUrls = new List<string>
+    {
+        "https://drive.google.com/uc?export=view&id=1GJ-RmzWWtYaZwTpKe7CG4di6e5n8xYrh",
+        "https://drive.google.com/uc?export=view&id=1GJ-RmzWWtYaZwTpKe7CG4di6e5n8xYrh"
+    };
+
     //public bool IsRefreshing { get; set; } = true;
     //public ObservableCollection<Assets> Assets { get; set; } = new();
     //public Command RefreshCommand { get; set; }
@@ -139,6 +145,8 @@ public partial class AssetPage : TabbedPage
             ShowBankAssetsPopup("Stocks");
         };
         lblStocks.GestureRecognizers.Add(labelStocks);
+
+        LoadImages();
     }
 
     public async Task ShowBankAssetsPopup(string labelText)
@@ -1210,5 +1218,80 @@ public partial class AssetPage : TabbedPage
                 await DisplayAlert("Error", "Image source not recognized.", "OK");
             }
         }
+    }
+
+    private void LoadImages()
+    {
+        // Keep the first child (Label), remove others (Images + X buttons)
+        for (int i = imageContainer.Children.Count - 1; i > 0; i--)
+        {
+            imageContainer.Children.RemoveAt(i);
+        }
+
+        // Create a horizontal container for images
+        var horizontalStack = new HorizontalStackLayout
+        {
+            Spacing = 10
+        };
+
+        foreach (var imageUrl in imageUrls)
+        {
+            var grid = new Grid();
+
+            // Image
+            var image = new Image
+            {
+                Source = ImageSource.FromUri(new Uri(imageUrl)),
+                HeightRequest = 100,
+                WidthRequest = 100,
+                Aspect = Aspect.AspectFill
+            };
+
+            var tapGesture = new TapGestureRecognizer();
+            tapGesture.Tapped += (s, e) => OpenFullScreenImage(imageUrl);
+            image.GestureRecognizers.Add(tapGesture);
+
+            // "X" Button (Label)
+            var deleteLabel = new Label
+            {
+                Text = "X",
+                TextColor = Colors.Red,
+                FontSize = 20,
+                FontAttributes = FontAttributes.Bold,
+                BackgroundColor = Colors.Transparent,
+                Padding = new Thickness(3),
+                HorizontalTextAlignment = TextAlignment.Center,
+                VerticalTextAlignment = TextAlignment.Center
+            };
+
+            var tapDelete = new TapGestureRecognizer();
+            tapDelete.Tapped += (s, e) => RemoveImage(imageUrl);
+            deleteLabel.GestureRecognizers.Add(tapDelete);
+
+            // Arrange Image & "X" Button inside Grid
+            grid.Children.Add(image);
+            grid.Children.Add(deleteLabel);
+            Grid.SetRow(deleteLabel, 0);
+            Grid.SetColumn(deleteLabel, 1);
+            deleteLabel.HorizontalOptions = LayoutOptions.End;
+            deleteLabel.VerticalOptions = LayoutOptions.Start;
+
+            horizontalStack.Children.Add(grid);
+        }
+
+        // Add the horizontal stack to the main container
+        imageContainer.Children.Add(horizontalStack);
+    }
+
+
+    private void RemoveImage(string imageUrl)
+    {
+        imageUrls.Remove(imageUrl);
+        LoadImages(); // Refresh UI
+    }
+
+    private async void OpenFullScreenImage(string imageUrl)
+    {
+        await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl));
     }
 }
