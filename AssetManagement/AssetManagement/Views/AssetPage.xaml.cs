@@ -7,6 +7,8 @@ using CommunityToolkit.Maui.Storage;
 using ExcelDataReader;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Layouts;
+
 //using Mopups.Interfaces;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -26,6 +28,11 @@ public partial class AssetPage : TabbedPage
     //private IPopupNavigation _popupNavigation;
     private readonly IAssetService _assetService;
     private readonly HttpClient httpClient = new();
+
+    private Image fullScreenImage;
+    private double currentScale = 1, startScale = 1;
+    private AbsoluteLayout fullScreenLayout;
+
     //public bool IsRefreshing { get; set; } = true;
     //public ObservableCollection<Assets> Assets { get; set; } = new();
     //public Command RefreshCommand { get; set; }
@@ -1179,6 +1186,29 @@ public partial class AssetPage : TabbedPage
             activityIndicator.IsVisible = false;
             activityIndicator.IsRunning = false;
             await DisplayAlert("Info", "File uploaded to Google Drive.", "Ok");
+        }
+    }
+
+    private async void TapGestureRecognizer_Tapped(object sender, TappedEventArgs e)
+    {
+        if (sender is Image image)
+        {
+            //string imageUrl = image.Source.ToString();
+            //await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl));
+            if (image.Source is UriImageSource uriImageSource)
+            {
+                string imageUrl = uriImageSource.Uri.ToString();
+                await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl));
+            }
+            else if (image.Source is FileImageSource fileImageSource)
+            {
+                string imageUrl = fileImageSource.File;
+                await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl));
+            }
+            else
+            {
+                await DisplayAlert("Error", "Image source not recognized.", "OK");
+            }
         }
     }
 }
