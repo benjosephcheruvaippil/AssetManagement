@@ -2,37 +2,26 @@ namespace AssetManagement.Views;
 
 public partial class FullScreenImagePage : ContentPage
 {
-    private double currentScale = 1, startScale = 1;
-
-    //private readonly PinchGestureRecognizer pinchGesture;
-    //private readonly TapGestureRecognizer tapGesture;
+    private double currentScale = 1;  // Current zoom level
+    private double startScale = 1;    // Zoom level when pinch starts
+    private const double MinZoom = 1;  // Minimum zoom (normal size)
+    private const double MaxZoom = 10; // Maximum zoom
 
     public FullScreenImagePage(string imageUrl)
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
+
         if (!string.IsNullOrEmpty(imageUrl))
         {
             fullScreenImage.Source = ImageSource.FromUri(new Uri(imageUrl));
 
             // Ensure image starts at normal size
-            fullScreenImage.Scale = 1;
-            fullScreenImage.TranslationX = 0;
-            fullScreenImage.TranslationY = 0;
-            currentScale = 1;
+            fullScreenImage.Scale = MinZoom;
         }
         else
         {
             DisplayAlert("Error", "Image URL is empty!", "OK");
         }
-
-        // Adjust image size dynamically
-        this.SizeChanged += OnPageSizeChanged;
-    }
-
-    private void OnPageSizeChanged(object sender, EventArgs e)
-    {
-        fullScreenImage.WidthRequest = this.Width;
-        fullScreenImage.HeightRequest = this.Height;
     }
 
     private void OnPinchUpdated(object sender, PinchGestureUpdatedEventArgs e)
@@ -43,35 +32,21 @@ public partial class FullScreenImagePage : ContentPage
         }
         else if (e.Status == GestureStatus.Running)
         {
-            double scale = Math.Max(1, Math.Min(startScale * e.Scale, 5)); // Limit zoom between 1x and 5x
-            fullScreenImage.Scale = scale;
-
-            // Enable scrolling when zoomed-in
-            scrollView.InputTransparent = scale == 1;
+            // Smooth zooming with proper range (1x to 10x)
+            double newScale = Math.Max(MinZoom, Math.Min(startScale * e.Scale, MaxZoom));
+            fullScreenImage.Scale = newScale;
         }
-    }
-
-    private void fullScreenImage_SizeChanged(object sender, EventArgs e)
-    {
-        fullScreenImage.Scale = 1;
-        fullScreenImage.TranslationX = 0;
-        fullScreenImage.TranslationY = 0;
-        currentScale = 1;
+        else if (e.Status == GestureStatus.Completed)
+        {
+            currentScale = fullScreenImage.Scale;
+        }
     }
 
     private async void OnCloseTapped(object sender, EventArgs e)
     {
         await Navigation.PopModalAsync(); // Close modal on tap
     }
-
-    //protected override void OnDisappearing()
-    //{
-    //    base.OnDisappearing();
-
-    //    // Detach events to prevent disposed object exceptions
-    //    pinchGesture.PinchUpdated -= OnPinchUpdated;
-    //    tapGesture.Tapped -= OnCloseTapped;
-
-    //    fullScreenImage.GestureRecognizers.Clear(); // Remove all gestures
-    //}
 }
+
+
+

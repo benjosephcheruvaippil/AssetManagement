@@ -15,20 +15,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AssetManagement.Views.FullScreenImagePage"
              BackgroundColor="Black">
-    <Grid>
-        <ScrollView x:Name="scrollView" Orientation="Both">
-            <Grid>
-                <Image x:Name="fullScreenImage"
-                       Aspect="AspectFit"
-                       VerticalOptions="FillAndExpand"
-                       HorizontalOptions="FillAndExpand"
-                       SizeChanged="fullScreenImage_SizeChanged">
-                    <Image.GestureRecognizers>
-                        <PinchGestureRecognizer PinchUpdated="OnPinchUpdated"/>
-                        <TapGestureRecognizer Tapped="OnCloseTapped"/>
-                    </Image.GestureRecognizers>
-                </Image>
-            </Grid>
-        </ScrollView>
-    </Grid>
+    <ScrollView x:Name="scrollView"
+                Orientation="Both">
+
+        <Grid>
+            <Image x:Name="fullScreenImage"
+                   Aspect="AspectFit"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center"
+                   Scale="1">
+                <Image.GestureRecognizers>
+                    <PinchGestureRecognizer PinchUpdated="OnPinchUpdated"/>
+                    <TapGestureRecognizer Tapped="OnCloseTapped"/>
+                </Image.GestureRecognizers>
+            </Image>
+        </Grid>
+
+    </ScrollView>
 </ContentPage>
