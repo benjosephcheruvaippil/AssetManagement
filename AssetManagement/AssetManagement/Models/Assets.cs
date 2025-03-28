@@ -9,6 +9,7 @@ namespace AssetManagement.Models
 {
     public class Assets
     {
+        //AssetDocuments table has the images or documents related to this table.
         [PrimaryKey, AutoIncrement]
         public int AssetId { get; set; }
         public string InvestmentEntity { get; set; }

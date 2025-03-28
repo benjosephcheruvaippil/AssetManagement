@@ -61,6 +61,7 @@ public partial class ExpensePage : ContentPage
                 string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
                 _dbConnection = new SQLiteAsyncConnection(dbPath);
                 await _dbConnection.CreateTableAsync<Assets>();
+                await _dbConnection.CreateTableAsync<AssetDocuments>();
                 await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
                 await _dbConnection.CreateTableAsync<IncomeExpenseCategories>();
                 await _dbConnection.CreateTableAsync<DataSyncAudit>();

@@ -1,4 +1,5 @@
 using AssetManagement.Models;
+using AssetManagement.Models.Api.Response;
 using AssetManagement.Models.Constants;
 using AssetManagement.Models.DataTransferObject;
 using AssetManagement.Services;
@@ -12,12 +13,15 @@ using Microsoft.Maui.Layouts;
 //using Mopups.Interfaces;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
+using Org.Apache.Http.Conn;
 using SQLite;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AssetManagement.Views;
 
@@ -29,17 +33,9 @@ public partial class AssetPage : TabbedPage
     private readonly IAssetService _assetService;
     private readonly HttpClient httpClient = new();
 
-    private Image fullScreenImage;
-    private double currentScale = 1, startScale = 1;
-    private AbsoluteLayout fullScreenLayout;
-
-    private List<string> imageUrls = new List<string>
-    {
-        "https://drive.google.com/uc?export=view&id=1GJ-RmzWWtYaZwTpKe7CG4di6e5n8xYrh",
-        "https://drive.google.com/uc?export=view&id=1GJ-RmzWWtYaZwTpKe7CG4di6e5n8xYrh",
-        "https://drive.google.com/uc?export=view&id=1GJ-RmzWWtYaZwTpKe7CG4di6e5n8xYrh",
-        "https://drive.google.com/uc?export=view&id=1GJ-RmzWWtYaZwTpKe7CG4di6e5n8xYrh"
-    };
+    //private Image fullScreenImage;
+    //private double currentScale = 1, startScale = 1;
+    //private AbsoluteLayout fullScreenLayout;
 
     //public bool IsRefreshing { get; set; } = true;
     //public ObservableCollection<Assets> Assets { get; set; } = new();
@@ -147,8 +143,6 @@ public partial class AssetPage : TabbedPage
             ShowBankAssetsPopup("Stocks");
         };
         lblStocks.GestureRecognizers.Add(labelStocks);
-
-        LoadImages();
     }
 
     public async Task ShowBankAssetsPopup(string labelText)
@@ -275,33 +269,33 @@ public partial class AssetPage : TabbedPage
         }
     }
 
-    private async void btnGetDetail_Clicked(object sender, EventArgs e)
-    {
-        Assets obj = _viewModel.GetSelectedRecordDetail();
+    //private async void btnGetDetail_Clicked(object sender, EventArgs e)
+    //{
+    //    Assets obj = _viewModel.GetSelectedRecordDetail();
 
-        if (obj.AssetId != 0)
-        {
+    //    if (obj.AssetId != 0)
+    //    {
 
-            entEntityName.Text = obj.InvestmentEntity;
-            entType.SelectedItem = obj.Type;
-            entAmount.Text = Convert.ToString(obj.Amount);
-            entInterestRate.Text = Convert.ToString(obj.InterestRate);
-            entInterestFrequency.SelectedItem = obj.InterestFrequency;
-            entHolder.SelectedItem = obj.Holder;
-            entStartDate.Date = obj.StartDate;
-            entMaturityDate.Date = obj.MaturityDate;
-            entAsOfDate.Date = obj.AsOfDate;
-            entRemarks.Text = obj.Remarks;
+    //        entEntityName.Text = obj.InvestmentEntity;
+    //        entType.SelectedItem = obj.Type;
+    //        entAmount.Text = Convert.ToString(obj.Amount);
+    //        entInterestRate.Text = Convert.ToString(obj.InterestRate);
+    //        entInterestFrequency.SelectedItem = obj.InterestFrequency;
+    //        entHolder.SelectedItem = obj.Holder;
+    //        entStartDate.Date = obj.StartDate;
+    //        entMaturityDate.Date = obj.MaturityDate;
+    //        entAsOfDate.Date = obj.AsOfDate;
+    //        entRemarks.Text = obj.Remarks;
 
-            lblAssetId.Text = Convert.ToString(obj.AssetId);
-        }
-        else
-        {
-            await DisplayAlert("Message", "Please select an asset", "OK");
-        }
-        //btnSave.IsVisible = true;
-        //btnDelete.IsVisible = true;
-    }
+    //        lblAssetId.Text = Convert.ToString(obj.AssetId);
+    //    }
+    //    else
+    //    {
+    //        await DisplayAlert("Message", "Please select an asset", "OK");
+    //    }
+    //    //btnSave.IsVisible = true;
+    //    //btnDelete.IsVisible = true;
+    //}
 
     protected async override void OnAppearing()
     {
@@ -328,7 +322,7 @@ public partial class AssetPage : TabbedPage
     public void ShowOrHideUploadExcelButton()
     {
         string deviceInfo = DeviceInfo.Current.Manufacturer + "-" + DeviceInfo.Current.Idiom.ToString() + "-" + DeviceInfo.Current.Model;
-        if (deviceInfo == "samsung-Phone-SM-S911B")
+        if (deviceInfo == Constants.DeviceNumber || Constants.DeviceNumber == "")
         {
             btnUploadAssetExcelToGoogleDrive.IsVisible = true;
         }
@@ -1070,11 +1064,52 @@ public partial class AssetPage : TabbedPage
         }
     }
 
+    public async Task<UploadFileResponse> UploadImageToGoogleDrive(string filePath)
+    {
+        UploadFileResponse uploadResponse = new UploadFileResponse();
+        uploadResponse.IsSuccess = false;
+
+        string apiUrl = "https://networthtrackerapi20240213185304.azurewebsites.net/api/general/uploadImageFileToGoogleDrive";
+        using (HttpClient client = new HttpClient())
+        using (MultipartFormDataContent formData = new MultipartFormDataContent())
+        {
+            byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
+            string fileName = Path.GetFileName(filePath);
+            string contentType = GetMimeType(filePath);
+
+            ByteArrayContent fileContent = new ByteArrayContent(fileBytes);
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+            formData.Add(fileContent, "fileRequest", fileName);
+            HttpResponseMessage response = await client.PostAsync(apiUrl, formData);
+            string result = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                //upload to google drive success.
+                uploadResponse = JsonSerializer.Deserialize<UploadFileResponse>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                uploadResponse.IsSuccess = true;
+                return uploadResponse;
+            }
+            return uploadResponse;
+        }
+    }
+
+    private string GetMimeType(string filePath)
+    {
+        string extension = Path.GetExtension(filePath).ToLower();
+        return extension switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            _ => "application/octet-stream" // Default fallback
+        };
+    }
+
     private async void dgAssetsDataTable_ItemSelected(object sender, SelectionChangedEventArgs e)
     {
         if (e.CurrentSelection.Count > 0)
         {
-            Assets obj = _viewModel.GetSelectedRecordDetail();
+            AssetDTO obj = await _viewModel.GetSelectedRecordDetail("tab2", null);
 
             await SetDataInManageAssets(obj);
             //if (obj.AssetId != 0)
@@ -1104,7 +1139,7 @@ public partial class AssetPage : TabbedPage
         }
     }
 
-    public async Task SetDataInManageAssets(Assets objAsset)
+    public async Task SetDataInManageAssets(AssetDTO objAsset)
     {
         if (objAsset.AssetId != 0)
         {
@@ -1114,14 +1149,22 @@ public partial class AssetPage : TabbedPage
             entInterestRate.Text = Convert.ToString(objAsset.InterestRate);
             entInterestFrequency.SelectedItem = objAsset.InterestFrequency;
             entHolder.SelectedItem = objAsset.Holder;
-            entStartDate.Date = objAsset.StartDate;
-            entMaturityDate.Date = objAsset.MaturityDate;
-            entAsOfDate.Date = objAsset.AsOfDate;
+            entStartDate.Date = (DateTime)objAsset.StartDate;
+            entMaturityDate.Date = (DateTime)objAsset.MaturityDate;
+            entAsOfDate.Date = (DateTime)objAsset.AsOfDate;
             entRemarks.Text = objAsset.Remarks;
             entNominee.SelectedItem = objAsset.Nominee;
             entRiskValue.Text = Convert.ToString(objAsset.RiskNumber);
 
             lblAssetId.Text = Convert.ToString(objAsset.AssetId);
+
+            List<string> imageUrls = new List<string>();
+            if (objAsset.AssetDocumentsList.Count > 0)
+            {
+                imageUrls = objAsset.AssetDocumentsList.Select(d => d.FilePath).ToList();
+            }
+
+            LoadImages(imageUrls);
 
             await manageAssetsScroll.ScrollToAsync(0, 0, true);
         }
@@ -1178,11 +1221,9 @@ public partial class AssetPage : TabbedPage
         if (sender is Element element && element.BindingContext is MaturingAssets asset)
         {
             int assetId = (int)asset.AssetId; // Get the ID from the BindingContext
-
-            Assets objAsset = await _dbConnection.Table<Assets>().Where(a => a.AssetId == assetId).FirstOrDefaultAsync();
-
+            var assetDTO = await _viewModel.GetSelectedRecordDetail("tab1", assetId);
             this.CurrentPage = this.Children[1];
-            await SetDataInManageAssets(objAsset);
+            await SetDataInManageAssets(assetDTO);
         }
     }
 
@@ -1233,9 +1274,26 @@ public partial class AssetPage : TabbedPage
 
             if (result != null)
             {
+                List<string> imageUrls = new List<string>();
                 string filePath = result.FullPath; // Get file path
                 imageUrls.Add(filePath); // Add to list
-                LoadImages(); // Refresh UI
+                var uploadToGoogleDriveResult = await UploadImageToGoogleDrive(filePath);
+                LoadImages(imageUrls); // Refresh UI
+
+                if ((bool)uploadToGoogleDriveResult.IsSuccess)
+                {
+                    AssetDocuments docs = new AssetDocuments();
+                    docs.AssetId = Convert.ToInt32(lblAssetId.Text);
+                    docs.FileId = uploadToGoogleDriveResult.FileId;
+                    docs.FilePath = $"https://drive.google.com/uc?export=view&id={uploadToGoogleDriveResult.FileId}";
+                    await _dbConnection.InsertAsync(docs);
+
+                    await DisplayAlert("Success", $"File uploaded to google drive.", "Ok");
+                }
+                else
+                {
+                    await DisplayAlert("Failed", $"File upload failed.", "Ok");
+                }
             }
         }
         catch (Exception ex)
@@ -1244,7 +1302,7 @@ public partial class AssetPage : TabbedPage
         }
     }
 
-    private void LoadImages()
+    private void LoadImages(List<string> imageUrls)
     {
         // Keep the first child (Label), remove others (Images + X buttons)
         //for (int i = imageContainer.Children.Count - 1; i > 0; i--)
@@ -1265,9 +1323,17 @@ public partial class AssetPage : TabbedPage
             var grid = new Grid();
 
             // Image
+            //var image = new Image
+            //{
+            //    Source = ImageSource.FromFile(imageUrl), // Load from file path
+            //    HeightRequest = 100,
+            //    WidthRequest = 100,
+            //    Aspect = Aspect.AspectFill
+            //};
+
             var image = new Image
             {
-                Source = ImageSource.FromFile(imageUrl), // Load from file path
+                Source = ImageSource.FromUri(new Uri(imageUrl)), // Load from file path
                 HeightRequest = 100,
                 WidthRequest = 100,
                 Aspect = Aspect.AspectFill
@@ -1312,8 +1378,8 @@ public partial class AssetPage : TabbedPage
 
     private void RemoveImage(string imageUrl)
     {
-        imageUrls.Remove(imageUrl);
-        LoadImages(); // Refresh UI
+        //imageUrls.Remove(imageUrl);
+        //LoadImages(); // Refresh UI
     }
 
     private async void OpenFullScreenImage(string imageUrl)

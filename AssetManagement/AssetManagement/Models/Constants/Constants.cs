@@ -17,6 +17,9 @@ namespace AssetManagement.Models.Constants
         public const string FromLaunchPage = "LaunchPage";
         public const string FromSettingsPage = "SettingsPage";
 
+        public const string DeviceNumber = "samsung-Phone-SM-S911B";
+        //samsung-Phone-SM-S911B
+
         public static string _currency = "en-IN";
         public static string GetCurrency()
         {
