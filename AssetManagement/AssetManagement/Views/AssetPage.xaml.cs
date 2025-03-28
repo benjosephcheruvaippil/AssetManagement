@@ -36,6 +36,8 @@ public partial class AssetPage : TabbedPage
     private List<string> imageUrls = new List<string>
     {
         "https://drive.google.com/uc?export=view&id=1GJ-RmzWWtYaZwTpKe7CG4di6e5n8xYrh",
+        "https://drive.google.com/uc?export=view&id=1GJ-RmzWWtYaZwTpKe7CG4di6e5n8xYrh",
+        "https://drive.google.com/uc?export=view&id=1GJ-RmzWWtYaZwTpKe7CG4di6e5n8xYrh",
         "https://drive.google.com/uc?export=view&id=1GJ-RmzWWtYaZwTpKe7CG4di6e5n8xYrh"
     };
 
@@ -1220,19 +1222,43 @@ public partial class AssetPage : TabbedPage
         }
     }
 
+    private async void SelectImages_Clicked(object sender, EventArgs e)
+    {
+        try
+        {
+            var result = await MediaPicker.PickPhotoAsync(new MediaPickerOptions
+            {
+                Title = "Select an Image"
+            });
+
+            if (result != null)
+            {
+                string filePath = result.FullPath; // Get file path
+                imageUrls.Add(filePath); // Add to list
+                LoadImages(); // Refresh UI
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to pick image: {ex.Message}", "OK");
+        }
+    }
+
     private void LoadImages()
     {
         // Keep the first child (Label), remove others (Images + X buttons)
-        for (int i = imageContainer.Children.Count - 1; i > 0; i--)
-        {
-            imageContainer.Children.RemoveAt(i);
-        }
+        //for (int i = imageContainer.Children.Count - 1; i > 0; i--)
+        //{
+        //    imageContainer.Children.RemoveAt(i);
+        //}
+
+        imageStack.Children.Clear();
 
         // Create a horizontal container for images
-        var horizontalStack = new HorizontalStackLayout
-        {
-            Spacing = 10
-        };
+        //var horizontalStack = new HorizontalStackLayout
+        //{
+        //    Spacing = 10
+        //};
 
         foreach (var imageUrl in imageUrls)
         {
@@ -1241,7 +1267,7 @@ public partial class AssetPage : TabbedPage
             // Image
             var image = new Image
             {
-                Source = ImageSource.FromUri(new Uri(imageUrl)),
+                Source = ImageSource.FromFile(imageUrl), // Load from file path
                 HeightRequest = 100,
                 WidthRequest = 100,
                 Aspect = Aspect.AspectFill
@@ -1259,7 +1285,7 @@ public partial class AssetPage : TabbedPage
                 FontSize = 20,
                 FontAttributes = FontAttributes.Bold,
                 BackgroundColor = Colors.Transparent,
-                Padding = new Thickness(3),
+                Padding = new Thickness(5),
                 HorizontalTextAlignment = TextAlignment.Center,
                 VerticalTextAlignment = TextAlignment.Center
             };
@@ -1276,11 +1302,11 @@ public partial class AssetPage : TabbedPage
             deleteLabel.HorizontalOptions = LayoutOptions.End;
             deleteLabel.VerticalOptions = LayoutOptions.Start;
 
-            horizontalStack.Children.Add(grid);
+            imageStack.Children.Add(grid);
         }
 
         // Add the horizontal stack to the main container
-        imageContainer.Children.Add(horizontalStack);
+        //imageContainer.Children.Add(horizontalStack);
     }
 
 
