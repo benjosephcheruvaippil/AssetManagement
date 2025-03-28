@@ -940,6 +940,30 @@ public partial class AssetPage : TabbedPage
                 .OrderBy(i => i.Type)
                 .ToListAsync();
 
+            AssetDTO objAssetDTO = new AssetDTO();
+            List<AssetDTO> objAssetDTOList = new List<AssetDTO>();
+
+            foreach (var asset in assetList)
+            {
+                objAssetDTO = new AssetDTO
+                {
+                    InvestmentEntity = asset.InvestmentEntity,
+                    Type = asset.Type,
+                    Amount = asset.Amount,
+                    InterestRate = asset.InterestRate,
+                    InterestFrequency = asset.InterestFrequency,
+                    Holder = asset.Holder,
+                    StartDate = asset.StartDate,
+                    MaturityDate = asset.MaturityDate,
+                    AsOfDate = asset.AsOfDate,
+                    Nominee = asset.Nominee,
+                    RiskNumber = asset.RiskNumber,
+                    Remarks = asset.Remarks,
+                    AssetDocumentsList = await _dbConnection.Table<AssetDocuments>().Where(d => d.AssetId == asset.AssetId).ToListAsync()
+                };
+                objAssetDTOList.Add(objAssetDTO);
+            }
+
             // Creating an instance
             // of ExcelPackage
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -969,6 +993,8 @@ public partial class AssetPage : TabbedPage
             workSheet.Column(8).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
             workSheet.Column(9).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
             workSheet.Column(10).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(11).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Column(12).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
 
             // Header of the Excel sheet
@@ -981,11 +1007,13 @@ public partial class AssetPage : TabbedPage
             workSheet.Cells[1, 7].Value = "Start Date";
             workSheet.Cells[1, 8].Value = "Maturity Date";
             workSheet.Cells[1, 9].Value = "As Of Date";
-            workSheet.Cells[1, 10].Value = "Remarks";
+            workSheet.Cells[1, 10].Value = "Nominee";
+            workSheet.Cells[1, 11].Value = "Supporting Documents";
+            workSheet.Cells[1, 12].Value = "Remarks";
 
             int recordIndex = 2;
             //decimal totalIncome = 0, totalTaxCut = 0;
-            foreach (var asset in assetList)
+            foreach (var asset in objAssetDTOList)
             {
                 workSheet.Cells[recordIndex, 1].Value = asset.InvestmentEntity;
                 workSheet.Cells[recordIndex, 2].Value = asset.Type;
@@ -993,20 +1021,15 @@ public partial class AssetPage : TabbedPage
                 workSheet.Cells[recordIndex, 4].Value = asset.InterestRate;
                 workSheet.Cells[recordIndex, 5].Value = asset.InterestFrequency;
                 workSheet.Cells[recordIndex, 6].Value = asset.Holder;
-                workSheet.Cells[recordIndex, 7].Value = asset.StartDate.ToString("dd-MM-yyyy");
-                workSheet.Cells[recordIndex, 8].Value = asset.MaturityDate.ToString("dd-MM-yyyy");
-                workSheet.Cells[recordIndex, 9].Value = asset.AsOfDate.ToString("dd-MM-yyyy");
-                workSheet.Cells[recordIndex, 10].Value = asset.Remarks;
+                workSheet.Cells[recordIndex, 7].Value = asset.StartDate?.ToString("dd-MM-yyyy");
+                workSheet.Cells[recordIndex, 8].Value = asset.MaturityDate?.ToString("dd-MM-yyyy");
+                workSheet.Cells[recordIndex, 9].Value = asset.AsOfDate?.ToString("dd-MM-yyyy");
+                workSheet.Cells[recordIndex, 10].Value = asset.Nominee;
+                workSheet.Cells[recordIndex, 11].Value = string.Join(",", asset.AssetDocumentsList.Select(s => s.FilePath));
+                workSheet.Cells[recordIndex, 12].Value = asset.Remarks;
                 workSheet.Row(recordIndex).Height = 16;
                 recordIndex++;
             }
-
-            //recordIndex++;
-            //workSheet.Cells[recordIndex, 5].Value = totalTaxCut;
-            //workSheet.Cells[recordIndex, 5].Style.Font.Bold = true;
-            //workSheet.Cells[recordIndex, 6].Value = totalIncome;
-            //workSheet.Cells[recordIndex, 6].Style.Font.Bold = true;
-
 
             workSheet.Column(1).AutoFit();
             workSheet.Column(2).AutoFit();
@@ -1018,6 +1041,8 @@ public partial class AssetPage : TabbedPage
             workSheet.Column(8).AutoFit();
             workSheet.Column(9).AutoFit();
             workSheet.Column(10).AutoFit();
+            workSheet.Column(11).AutoFit();
+            workSheet.Column(12).AutoFit();
 
             byte[] excelByteArray = excel.GetAsByteArray();
             string fileName = "Asset_Report_" + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt") + ".xlsx";
