@@ -983,20 +983,6 @@ public partial class AssetPage : TabbedPage
             workSheet.Row(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
             workSheet.Row(1).Style.Font.Bold = true;
 
-            workSheet.Column(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            workSheet.Column(2).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            workSheet.Column(3).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            workSheet.Column(4).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            workSheet.Column(5).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            workSheet.Column(6).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            workSheet.Column(7).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            workSheet.Column(8).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            workSheet.Column(9).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            workSheet.Column(10).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            workSheet.Column(11).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            workSheet.Column(12).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-
-
             // Header of the Excel sheet
             workSheet.Cells[1, 1].Value = "Investment Entity";
             workSheet.Cells[1, 2].Value = "Type";
@@ -1008,7 +994,7 @@ public partial class AssetPage : TabbedPage
             workSheet.Cells[1, 8].Value = "Maturity Date";
             workSheet.Cells[1, 9].Value = "As Of Date";
             workSheet.Cells[1, 10].Value = "Nominee";
-            workSheet.Cells[1, 11].Value = "Supporting Documents";
+            workSheet.Cells[1, 11].Value = "Supporting Documents(Link)";
             workSheet.Cells[1, 12].Value = "Remarks";
 
             int recordIndex = 2;
@@ -1025,9 +1011,10 @@ public partial class AssetPage : TabbedPage
                 workSheet.Cells[recordIndex, 8].Value = asset.MaturityDate?.ToString("dd-MM-yyyy");
                 workSheet.Cells[recordIndex, 9].Value = asset.AsOfDate?.ToString("dd-MM-yyyy");
                 workSheet.Cells[recordIndex, 10].Value = asset.Nominee;
-                workSheet.Cells[recordIndex, 11].Value = string.Join(",", asset.AssetDocumentsList.Select(s => s.FilePath));
+                workSheet.Cells[recordIndex, 11].Value = string.Join("\n", asset.AssetDocumentsList.Select(s => s.FilePath));
                 workSheet.Cells[recordIndex, 12].Value = asset.Remarks;
-                workSheet.Row(recordIndex).Height = 16;
+                workSheet.Row(recordIndex).CustomHeight = false;
+                //workSheet.Row(recordIndex).Height = 16;
                 recordIndex++;
             }
 
@@ -1042,7 +1029,13 @@ public partial class AssetPage : TabbedPage
             workSheet.Column(9).AutoFit();
             workSheet.Column(10).AutoFit();
             workSheet.Column(11).AutoFit();
-            workSheet.Column(12).AutoFit();
+            workSheet.Column(11).Width = Math.Min(workSheet.Column(11).Width, 100);
+            workSheet.Column(12).AutoFit();     
+            workSheet.Column(12).Width = Math.Min(workSheet.Column(12).Width, 120);
+
+            workSheet.Cells[workSheet.Dimension.Address].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Cells[workSheet.Dimension.Address].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+
 
             byte[] excelByteArray = excel.GetAsByteArray();
             string fileName = "Asset_Report_" + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt") + ".xlsx";
