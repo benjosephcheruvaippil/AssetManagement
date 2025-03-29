@@ -86,14 +86,16 @@ public partial class ExpensePage : ContentPage
             {
                 bool update = await DisplayAlert("Update Available","A new version of the app is available. Please update. We recommend you take a backup before updation.", "Update", "Later");
 
+                await _dbConnection.ExecuteAsync("UPDATE Owners SET UpdateAvailableLastChecked = ?", DateTime.Today);
+
                 if (update)
                 {
                     await Launcher.OpenAsync($"https://play.google.com/store/apps/details?id=com.companyname.assetmanagement");
                 }
-                else
-                {
-                    await _dbConnection.ExecuteAsync("UPDATE Owners SET UpdateAvailableLastChecked = ?", DateTime.Today);
-                }
+                //else
+                //{
+                //    await _dbConnection.ExecuteAsync("UPDATE Owners SET UpdateAvailableLastChecked = ?", DateTime.Today);
+                //}
             }
         }
         catch(Exception)

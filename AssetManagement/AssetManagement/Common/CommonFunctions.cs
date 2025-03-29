@@ -203,9 +203,9 @@ namespace AssetManagement.Common
                 DateTime? updateAvailableLastChecked = ownerDetails.UpdateAvailableLastChecked;
                 if (updateAvailableLastChecked == null)
                 {
-                    updateAvailableLastChecked = DateTime.Today.AddDays(-35);
+                    updateAvailableLastChecked = DateTime.Today.AddDays(-7);
                 }
-                if ((DateTime.Today - updateAvailableLastChecked).Value.Days > 30)
+                if ((DateTime.Today - updateAvailableLastChecked).Value.Days > 7)
                 {
                     string url = "https://networthtrackerapi20240213185304.azurewebsites.net/api/general/getPublishedAppVersionNo";
                     HttpResponseMessage response = await client.GetAsync(url);
