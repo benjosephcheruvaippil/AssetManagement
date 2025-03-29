@@ -17,7 +17,7 @@ namespace AssetManagement.Models.Constants
         public const string FromLaunchPage = "LaunchPage";
         public const string FromSettingsPage = "SettingsPage";
 
-        public const string DeviceNumber = "";
+        public const string DeviceNumber = "samsung-Phone-SM-S911B";
         //Ben's Samsung: samsung-Phone-SM-S911B
         //Ben's Redmi: 
 
