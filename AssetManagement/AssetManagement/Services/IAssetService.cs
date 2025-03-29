@@ -9,6 +9,8 @@ namespace AssetManagement.Services
 {
     public interface IAssetService
     {
+        Task<Assets> GetAssetsById(int assetId);
         Task<List<Assets>> GetAssetsList();
+        Task<List<AssetDocuments>> GetAssetDocumentsList(int assetId);
     }
 }

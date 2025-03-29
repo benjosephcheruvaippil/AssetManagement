@@ -61,6 +61,7 @@ public partial class ExpensePage : ContentPage
                 string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
                 _dbConnection = new SQLiteAsyncConnection(dbPath);
                 await _dbConnection.CreateTableAsync<Assets>();
+                await _dbConnection.CreateTableAsync<AssetDocuments>();
                 await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
                 await _dbConnection.CreateTableAsync<IncomeExpenseCategories>();
                 await _dbConnection.CreateTableAsync<DataSyncAudit>();
@@ -85,14 +86,16 @@ public partial class ExpensePage : ContentPage
             {
                 bool update = await DisplayAlert("Update Available","A new version of the app is available. Please update. We recommend you take a backup before updation.", "Update", "Later");
 
+                await _dbConnection.ExecuteAsync("UPDATE Owners SET UpdateAvailableLastChecked = ?", DateTime.Today);
+
                 if (update)
                 {
                     await Launcher.OpenAsync($"https://play.google.com/store/apps/details?id=com.companyname.assetmanagement");
                 }
-                else
-                {
-                    await _dbConnection.ExecuteAsync("UPDATE Owners SET UpdateAvailableLastChecked = ?", DateTime.Today);
-                }
+                //else
+                //{
+                //    await _dbConnection.ExecuteAsync("UPDATE Owners SET UpdateAvailableLastChecked = ?", DateTime.Today);
+                //}
             }
         }
         catch(Exception)

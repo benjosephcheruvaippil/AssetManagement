@@ -398,6 +398,27 @@ VerticalOptions="Center" />
                     Placeholder="Enter additional details like nominee, remarks etc." 
                     AutoSize="TextChanges" Grid.Column="1" />
                         </Grid>
+                        <VerticalStackLayout x:Name="imageContainer" Spacing="10" Padding="10" IsVisible="False">
+                            <Grid ColumnDefinitions="Auto, Auto" VerticalOptions="Center">
+                                <!-- "Uploaded Images" Label -->
+                                <Label Text="Image(s)" 
+                                   FontAttributes="Bold" 
+                                   FontSize="Medium" 
+                                   Grid.Column="0" />
+
+                                <Button x:Name="btnUploadImages"
+                                    Text="Upload Image" 
+                                    Clicked="SelectImages_Clicked" 
+                                    FontSize="Small"                              
+                                    Padding="2"
+                                    Margin="2,2,2,2"
+                                    Grid.Column="1"
+                                    IsVisible="False" />   
+                            </Grid>
+                            <ScrollView Orientation="Horizontal">
+                                <HorizontalStackLayout x:Name="imageStack" Spacing="10"/>
+                            </ScrollView>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </toolkit:Expander>
                 <!--expander-->
