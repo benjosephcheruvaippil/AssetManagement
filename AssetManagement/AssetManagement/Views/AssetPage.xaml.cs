@@ -1126,8 +1126,7 @@ public partial class AssetPage : TabbedPage
     }
 
     private async void dgAssetsDataTable_ItemSelected(object sender, SelectionChangedEventArgs e)
-    {
-        btnUploadImages.IsVisible = true;
+    {        
         if (e.CurrentSelection.Count > 0)
         {
             AssetDTO obj = await _viewModel.GetSelectedRecordDetail("tab2", null);
@@ -1164,6 +1163,8 @@ public partial class AssetPage : TabbedPage
     {
         if (objAsset.AssetId != 0)
         {
+            btnUploadImages.IsVisible = true;
+
             entEntityName.Text = objAsset.InvestmentEntity;
             entType.SelectedItem = objAsset.Type;
             entAmount.Text = Convert.ToString(objAsset.Amount);

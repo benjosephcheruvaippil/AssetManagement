@@ -401,13 +401,13 @@ VerticalOptions="Center" />
                         <VerticalStackLayout x:Name="imageContainer" Spacing="10" Padding="10" IsVisible="False">
                             <Grid ColumnDefinitions="Auto, Auto" VerticalOptions="Center">
                                 <!-- "Uploaded Images" Label -->
-                                <Label Text="Uploaded Images" 
+                                <Label Text="Image(s)" 
                                    FontAttributes="Bold" 
                                    FontSize="Medium" 
                                    Grid.Column="0" />
 
                                 <Button x:Name="btnUploadImages"
-                                    Text="Select Images" 
+                                    Text="Upload Image" 
                                     Clicked="SelectImages_Clicked" 
                                     FontSize="Small"                              
                                     Padding="2"
