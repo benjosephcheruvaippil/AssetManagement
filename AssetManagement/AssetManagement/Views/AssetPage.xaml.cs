@@ -15,6 +15,7 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using Org.Apache.Http.Conn;
 using SQLite;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
@@ -301,7 +302,7 @@ public partial class AssetPage : TabbedPage
     {
         base.OnAppearing();
 
-        ShowOrHideUploadExcelButton();
+        ShowOrHideComponents();
         LoadOwnersInDropdown();
         lblMaturingAssetsTotalValue.Text = "Total Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", await _viewModel.GetAssetsList());
         await ShowPrimaryAssetDetails();
@@ -319,12 +320,13 @@ public partial class AssetPage : TabbedPage
         }
     }
 
-    public void ShowOrHideUploadExcelButton()
+    public void ShowOrHideComponents()
     {
         string deviceInfo = DeviceInfo.Current.Manufacturer + "-" + DeviceInfo.Current.Idiom.ToString() + "-" + DeviceInfo.Current.Model;
         if (deviceInfo == Constants.DeviceNumber || Constants.DeviceNumber == "")
         {
             btnUploadAssetExcelToGoogleDrive.IsVisible = true;
+            imageContainer.IsVisible = true;
         }
     }
 
@@ -1125,6 +1127,7 @@ public partial class AssetPage : TabbedPage
 
     private async void dgAssetsDataTable_ItemSelected(object sender, SelectionChangedEventArgs e)
     {
+        btnUploadImages.IsVisible = true;
         if (e.CurrentSelection.Count > 0)
         {
             AssetDTO obj = await _viewModel.GetSelectedRecordDetail("tab2", null);
@@ -1176,13 +1179,23 @@ public partial class AssetPage : TabbedPage
 
             lblAssetId.Text = Convert.ToString(objAsset.AssetId);
 
-            List<string> imageUrls = new List<string>();
+            
+            List<FileList> imageUrlList = new List<FileList>();
             if (objAsset.AssetDocumentsList.Count > 0)
             {
-                imageUrls = objAsset.AssetDocumentsList.Select(d => d.FilePath).ToList();
+                foreach(var item in objAsset.AssetDocumentsList)
+                {
+                    FileList imageUrls = new FileList
+                    {
+                        FileId = item.FileId,
+                        FilePath = item.FilePath
+                    };
+
+                    imageUrlList.Add(imageUrls);
+                }                
             }
 
-            LoadImages(imageUrls);
+            await LoadImages(imageUrlList);
 
             await manageAssetsScroll.ScrollToAsync(0, 0, true);
         }
@@ -1219,6 +1232,9 @@ public partial class AssetPage : TabbedPage
             entAsOfDate.Date = DateTime.Now;
             entRemarks.Text = "";
             entRiskValue.Text = "";
+
+            btnUploadImages.IsVisible = false;
+            imageStack.Children.Clear();
         }
         catch (Exception ex)
         {
@@ -1285,6 +1301,12 @@ public partial class AssetPage : TabbedPage
     {
         try
         {
+            if (string.IsNullOrEmpty(lblAssetId.Text))
+            {
+                await DisplayAlert("Message", "Please select an asset to add images.", "Ok");
+                return;
+            }
+
             var result = await MediaPicker.PickPhotoAsync(new MediaPickerOptions
             {
                 Title = "Select an Image"
@@ -1292,19 +1314,36 @@ public partial class AssetPage : TabbedPage
 
             if (result != null)
             {
-                List<string> imageUrls = new List<string>();
                 string filePath = result.FullPath; // Get file path
-                imageUrls.Add(filePath); // Add to list
                 var uploadToGoogleDriveResult = await UploadImageToGoogleDrive(filePath);
-                LoadImages(imageUrls); // Refresh UI
 
                 if ((bool)uploadToGoogleDriveResult.IsSuccess)
                 {
+                    int assetId = Convert.ToInt32(lblAssetId.Text);
+
                     AssetDocuments docs = new AssetDocuments();
-                    docs.AssetId = Convert.ToInt32(lblAssetId.Text);
+                    docs.AssetId = assetId;
                     docs.FileId = uploadToGoogleDriveResult.FileId;
                     docs.FilePath = $"https://drive.google.com/uc?export=view&id={uploadToGoogleDriveResult.FileId}";
                     await _dbConnection.InsertAsync(docs);
+
+                    var getFileList = await _dbConnection.Table<AssetDocuments>().Where(d => d.AssetId == assetId).ToListAsync();
+                    List<FileList> imageUrlList = new List<FileList>();
+                    if (getFileList.Count > 0)
+                    {
+                        foreach (var item in getFileList)
+                        {
+                            FileList imageUrls = new FileList
+                            {
+                                FileId = item.FileId,
+                                FilePath = item.FilePath
+                            };
+
+                            imageUrlList.Add(imageUrls);
+                        }
+                    }
+
+                    await LoadImages(imageUrlList);
 
                     await DisplayAlert("Success", $"File uploaded to google drive.", "Ok");
                 }
@@ -1320,25 +1359,16 @@ public partial class AssetPage : TabbedPage
         }
     }
 
-    private void LoadImages(List<string> imageUrls)
+    private async Task LoadImages(List<FileList> imageUrls)
     {
-        // Keep the first child (Label), remove others (Images + X buttons)
-        //for (int i = imageContainer.Children.Count - 1; i > 0; i--)
-        //{
-        //    imageContainer.Children.RemoveAt(i);
-        //}
-
         imageStack.Children.Clear();
-
-        // Create a horizontal container for images
-        //var horizontalStack = new HorizontalStackLayout
-        //{
-        //    Spacing = 10
-        //};
 
         foreach (var imageUrl in imageUrls)
         {
-            var grid = new Grid();
+            var grid = new Grid
+            {
+                BindingContext = imageUrl.FileId
+            };
 
             // Image
             //var image = new Image
@@ -1351,14 +1381,14 @@ public partial class AssetPage : TabbedPage
 
             var image = new Image
             {
-                Source = ImageSource.FromUri(new Uri(imageUrl)), // Load from file path
+                Source = ImageSource.FromUri(new Uri(imageUrl.FilePath)), // Load from file path
                 HeightRequest = 100,
                 WidthRequest = 100,
                 Aspect = Aspect.AspectFill
             };
 
             var tapGesture = new TapGestureRecognizer();
-            tapGesture.Tapped += (s, e) => OpenFullScreenImage(imageUrl);
+            tapGesture.Tapped += (s, e) => OpenFullScreenImage(imageUrl.FilePath);
             image.GestureRecognizers.Add(tapGesture);
 
             // "X" Button (Label)
@@ -1375,7 +1405,7 @@ public partial class AssetPage : TabbedPage
             };
 
             var tapDelete = new TapGestureRecognizer();
-            tapDelete.Tapped += (s, e) => RemoveImage(imageUrl);
+            tapDelete.Tapped += async (s, e) => await RemoveImage(imageUrl.FileId, imageUrls);
             deleteLabel.GestureRecognizers.Add(tapDelete);
 
             // Arrange Image & "X" Button inside Grid
@@ -1388,16 +1418,36 @@ public partial class AssetPage : TabbedPage
 
             imageStack.Children.Add(grid);
         }
-
-        // Add the horizontal stack to the main container
-        //imageContainer.Children.Add(horizontalStack);
     }
 
 
-    private void RemoveImage(string imageUrl)
+    private async Task RemoveImage(string fileId, List<FileList> imageUrls)
     {
-        //imageUrls.Remove(imageUrl);
-        //LoadImages(); // Refresh UI
+        var itemToRemove = imageUrls.FirstOrDefault(img => img.FileId == fileId);
+
+        if (itemToRemove != null)
+        {
+            var recordToBeDeleted = await _dbConnection.Table<AssetDocuments>().Where(d => d.FileId == fileId).FirstOrDefaultAsync();        
+            AssetDocuments objDocs = new AssetDocuments
+            {
+                AssetDocumentsId = recordToBeDeleted.AssetDocumentsId
+            };
+            await _dbConnection.DeleteAsync(objDocs);
+
+            imageUrls.Remove(itemToRemove); // Remove the matching image
+            await LoadImages(imageUrls); // Refresh UI
+
+            string apiUrl = "https://networthtrackerapi20240213185304.azurewebsites.net/api/general/deleteFileFromGoogleDrive?fileId=" + fileId;
+            using (HttpClient client = new HttpClient())
+            {
+                HttpResponseMessage response = await client.DeleteAsync(apiUrl);
+                //string result = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    //delete from google drive success.
+                }
+            }
+        }
     }
 
     private async void OpenFullScreenImage(string imageUrl)

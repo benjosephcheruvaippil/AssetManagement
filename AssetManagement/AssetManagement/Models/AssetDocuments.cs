@@ -16,4 +16,10 @@ namespace AssetManagement.Models
         public string FilePath { get; set; }
         public string FileFormat { get; set; }
     }
+
+    public class FileList
+    {
+        public string FileId { get; set; }
+        public string FilePath { get; set; }
+    }
 }

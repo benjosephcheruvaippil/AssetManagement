@@ -398,7 +398,7 @@ VerticalOptions="Center" />
                     Placeholder="Enter additional details like nominee, remarks etc." 
                     AutoSize="TextChanges" Grid.Column="1" />
                         </Grid>
-                        <VerticalStackLayout x:Name="imageContainer" Spacing="10" Padding="10">
+                        <VerticalStackLayout x:Name="imageContainer" Spacing="10" Padding="10" IsVisible="False">
                             <Grid ColumnDefinitions="Auto, Auto" VerticalOptions="Center">
                                 <!-- "Uploaded Images" Label -->
                                 <Label Text="Uploaded Images" 
@@ -406,12 +406,14 @@ VerticalOptions="Center" />
                                    FontSize="Medium" 
                                    Grid.Column="0" />
 
-                                <Button Text="Select Images" 
+                                <Button x:Name="btnUploadImages"
+                                    Text="Select Images" 
                                     Clicked="SelectImages_Clicked" 
-                                    FontSize="Small"
-                                    Padding="5,2"
-                                    Margin="10,0,0,0"
-                                    Grid.Column="1"/>   
+                                    FontSize="Small"                              
+                                    Padding="2"
+                                    Margin="2,2,2,2"
+                                    Grid.Column="1"
+                                    IsVisible="False" />   
                             </Grid>
                             <ScrollView Orientation="Horizontal">
                                 <HorizontalStackLayout x:Name="imageStack" Spacing="10"/>
