@@ -500,7 +500,8 @@ public partial class AssetPage : TabbedPage
     {
         try
         {
-            if (string.IsNullOrEmpty(entEntityName.Text) || entType.SelectedItem == null || string.IsNullOrEmpty(entAmount.Text))
+            string holder = entHolder.SelectedItem == null ? "" : entHolder.SelectedItem.ToString();
+            if (string.IsNullOrEmpty(entEntityName.Text) || entType.SelectedItem == null || string.IsNullOrEmpty(entAmount.Text) || string.IsNullOrEmpty(holder))
             {
                 await DisplayAlert("Message", "Please input all required fields", "OK");
                 return;
@@ -519,7 +520,7 @@ public partial class AssetPage : TabbedPage
                 Amount = Convert.ToDecimal(entAmount.Text),
                 InterestRate = Convert.ToDecimal(entInterestRate.Text),
                 InterestFrequency = entInterestFrequency.SelectedItem == null ? "" : entInterestFrequency.SelectedItem.ToString(),
-                Holder = entHolder.SelectedItem == null ? "" : entHolder.SelectedItem.ToString(),
+                Holder = holder,
                 //StartDate = entStartDate.Date,
                 //MaturityDate = entMaturityDate.Date,
                 //AsOfDate = entAsOfDate.Date,
@@ -1264,6 +1265,12 @@ public partial class AssetPage : TabbedPage
 
     private async void btnUploadAssetExcelToGoogleDrive_Clicked(object sender, EventArgs e)
     {
+        if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+        {
+            await DisplayAlert("Message", "Please connect to internet for file upload.", "Ok");
+            return;
+        }
+
         activityIndicator.IsVisible = true;
         activityIndicator.IsRunning = true;
         var excelResponse = await DownloadAssetDetailsExcel("upload");
@@ -1305,6 +1312,12 @@ public partial class AssetPage : TabbedPage
             if (string.IsNullOrEmpty(lblAssetId.Text))
             {
                 await DisplayAlert("Message", "Please select an asset to add images.", "Ok");
+                return;
+            }
+
+            if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+            {
+                await DisplayAlert("Message", "Please connect to internet for file upload.", "Ok");
                 return;
             }
 
