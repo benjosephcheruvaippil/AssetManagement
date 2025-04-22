@@ -45,21 +45,22 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="40" />
                     <Grid ColumnDefinitions="Auto, *, Auto, *" ColumnSpacing="10" Padding="10">
                         <Label Text="From Date" VerticalOptions="Center"  HorizontalOptions="Start" Grid.Column="0" />
 
-                        <DatePicker x:Name="dpFromDate" Grid.Column="1" HorizontalOptions="FillAndExpand" />
+                        <DatePicker x:Name="dpFromDateFilter"  Grid.Column="1" HorizontalOptions="FillAndExpand" />
 
                         <Label Text="To Date" VerticalOptions="Center" HorizontalOptions="Start" Grid.Column="2" />
 
-                        <DatePicker x:Name="dpToDate" Grid.Column="3" HorizontalOptions="FillAndExpand" />
+                        <DatePicker x:Name="dpToDateFilter" Grid.Column="3" HorizontalOptions="FillAndExpand" />
                     </Grid>
 
                     <Grid ColumnDefinitions="150, *">
                         <Label Text="Remarks Filter" VerticalOptions="Center" Grid.Column="0" />
-                        <Entry x:Name="entRiskValue" Grid.Column="1" />
+                        <Entry x:Name="entRemarksFilter" Grid.Column="1" />
                     </Grid>
                     <Button
                 x:Name="btnApplyFilters"
                 Text="Apply Filters"
-                Margin="0,0,0,0" />
+                Margin="0,0,0,0"
+                Clicked="btnApplyFilters_Clicked"/>
                 </VerticalStackLayout>
             </toolkit:Expander>
 

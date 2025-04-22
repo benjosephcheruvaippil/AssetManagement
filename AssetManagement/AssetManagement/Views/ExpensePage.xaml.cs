@@ -584,6 +584,65 @@ public partial class ExpensePage : ContentPage
         }
     }
 
+    private async void btnApplyFilters_Clicked(object sender, EventArgs e)
+    {
+        tblscExpenses.Clear();
+        DateTime? fromDate = dpFromDateFilter.Date;
+        DateTime? toDate = dpToDateFilter.Date;
+        if(fromDate==DateTime.Today && toDate == DateTime.Today)
+        {
+            fromDate = null;
+            toDate = null;
+        }
+        string remarks = entRemarksFilter.Text;
+        List<IncomeExpenseModel> expenses = new List<IncomeExpenseModel>();
+        
+        var query = @"select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense'";
+
+        var parameters = new List<object>();
+        if (fromDate != null && toDate != null)
+        {
+            query += "AND Date BETWEEN ? AND ? ";
+            parameters.Add(fromDate);
+            parameters.Add(toDate);
+        }
+        if (!string.IsNullOrEmpty(remarks))
+        {
+            query += "AND Remarks like ?";
+            parameters.Add($"%{remarks}%");
+        }
+
+        query += "ORDER BY Date DESC LIMIT 30";
+
+        expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>(query, parameters.ToArray());
+
+        foreach (var item in expenses)
+        {
+            TextCell objCell = new TextCell();
+            objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
+
+            if (!string.IsNullOrEmpty(item.Remarks))
+            {
+                objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
+            }
+            else
+            {
+                objCell.Detail = Convert.ToString(item.Amount);
+            }
+
+            if (currentTheme == AppTheme.Dark)
+            {
+                //set to white color
+                tblscExpenses.TextColor = Color.FromArgb("#FFFFFF");
+                objCell.TextColor = Color.FromArgb("#FFFFFF");
+            }
+
+            tblscExpenses.Add(objCell);
+
+            objCell.Tapped += ObjCell_Tapped;
+        }
+    }
+
     private async void pickexpensefile_Clicked(object sender, EventArgs e)
     {
         try
