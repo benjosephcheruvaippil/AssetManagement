@@ -51,7 +51,10 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="40" />
 
                         <DatePicker x:Name="dpToDateFilter" Grid.Column="3" HorizontalOptions="FillAndExpand" />
                     </Grid>
-
+                    <Grid ColumnDefinitions="150, *">
+                        <Label Text="Category Filter" VerticalOptions="Center" Grid.Column="0" />
+                        <Entry x:Name="entCategoryFilter" Grid.Column="1" />
+                    </Grid>
                     <Grid ColumnDefinitions="150, *">
                         <Label Text="Remarks Filter" VerticalOptions="Center" Grid.Column="0" />
                         <Entry x:Name="entRemarksFilter" Grid.Column="1" />

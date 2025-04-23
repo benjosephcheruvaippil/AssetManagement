@@ -18,6 +18,7 @@ public partial class ExpensePage : ContentPage
     //private IPopupNavigation _popupNavigation;
     ///private readonly IAssetService _assetService;
     public int PageNumber = 0, PageSize = 30, TotalExpenseRecordCount = 0;
+    public bool ApplyFilterClicked = false;
     public ExpensePage()
     {
         InitializeComponent();
@@ -307,12 +308,18 @@ public partial class ExpensePage : ContentPage
         if (hint == "Last5")
         {
             PageNumber = 0;
+            ApplyFilterClicked = false;
             tblscExpenses.Title = "Last 5 Transactions";
+            lblShowRemainingRecords.IsVisible = true;
             expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
         }
         else if (hint == "Pagewise")
         {
-            
+            if (ApplyFilterClicked)
+            {
+                btnApplyFilters_Clicked(null, EventArgs.Empty);
+                return;
+            }
             PageNumber = PageNumber + 1;
             int offset = (PageNumber - 1) * PageSize;
             if (TotalExpenseRecordCount == 0)
@@ -586,7 +593,11 @@ public partial class ExpensePage : ContentPage
 
     private async void btnApplyFilters_Clicked(object sender, EventArgs e)
     {
+        ApplyFilterClicked = true;
         tblscExpenses.Clear();
+        PageNumber = PageNumber + 1;
+        int offset = (PageNumber - 1) * PageSize; 
+
         DateTime? fromDate = dpFromDateFilter.Date;
         DateTime? toDate = dpToDateFilter.Date;
         if(fromDate==DateTime.Today && toDate == DateTime.Today)
@@ -594,7 +605,9 @@ public partial class ExpensePage : ContentPage
             fromDate = null;
             toDate = null;
         }
+        string category = entCategoryFilter.Text;
         string remarks = entRemarksFilter.Text;
+
         List<IncomeExpenseModel> expenses = new List<IncomeExpenseModel>();
         
         var query = @"select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense'";
@@ -606,15 +619,45 @@ public partial class ExpensePage : ContentPage
             parameters.Add(fromDate);
             parameters.Add(toDate);
         }
+        if (!string.IsNullOrEmpty(category))
+        {
+            query += "AND CategoryName like ? ";
+            parameters.Add($"%{category}%");
+        }
         if (!string.IsNullOrEmpty(remarks))
         {
             query += "AND Remarks like ?";
             parameters.Add($"%{remarks}%");
         }
 
-        query += "ORDER BY Date DESC LIMIT 30";
+        string pageCountQuery = query;
+        query += "ORDER BY Date DESC LIMIT 30 Offset " + offset;
 
         expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>(query, parameters.ToArray());
+
+        //pagination
+        if (TotalExpenseRecordCount == 0)
+        {
+            var totalRecords = await _dbConnection.QueryAsync<IncomeExpenseModel>(pageCountQuery, parameters.ToArray());
+            TotalExpenseRecordCount = totalRecords.Count();
+        }
+        int showRecordCount = 0;
+        if (offset == 0)
+        {
+            showRecordCount = PageSize;
+        }
+        else
+        {
+            showRecordCount = PageSize + offset;
+        }
+        if (TotalExpenseRecordCount - offset < PageSize)
+        {
+            showRecordCount = TotalExpenseRecordCount;
+            lblShowRemainingRecords.IsVisible = false;
+        }
+
+        tblscExpenses.Title = "Showing " + showRecordCount + " of " + TotalExpenseRecordCount + " records";
+        //pagination
 
         foreach (var item in expenses)
         {
