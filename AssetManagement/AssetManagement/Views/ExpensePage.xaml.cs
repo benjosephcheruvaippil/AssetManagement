@@ -317,7 +317,7 @@ public partial class ExpensePage : ContentPage
         {
             if (ApplyFilterClicked)
             {
-                btnApplyFilters_Clicked(null, EventArgs.Empty);
+                await ApplyFilterPagination();
                 return;
             }
             PageNumber = PageNumber + 1;
@@ -594,13 +594,21 @@ public partial class ExpensePage : ContentPage
     private async void btnApplyFilters_Clicked(object sender, EventArgs e)
     {
         ApplyFilterClicked = true;
+        PageNumber = 0;
+        TotalExpenseRecordCount = 0;
+        lblShowRemainingRecords.IsVisible = true;
+        await ApplyFilterPagination();
+    }
+
+    public async Task ApplyFilterPagination()
+    {
         tblscExpenses.Clear();
         PageNumber = PageNumber + 1;
-        int offset = (PageNumber - 1) * PageSize; 
+        int offset = (PageNumber - 1) * PageSize;
 
         DateTime? fromDate = dpFromDateFilter.Date;
         DateTime? toDate = dpToDateFilter.Date;
-        if(fromDate==DateTime.Today && toDate == DateTime.Today)
+        if (fromDate == DateTime.Today && toDate == DateTime.Today)
         {
             fromDate = null;
             toDate = null;
@@ -609,7 +617,7 @@ public partial class ExpensePage : ContentPage
         string remarks = entRemarksFilter.Text;
 
         List<IncomeExpenseModel> expenses = new List<IncomeExpenseModel>();
-        
+
         var query = @"select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense'";
 
         var parameters = new List<object>();
