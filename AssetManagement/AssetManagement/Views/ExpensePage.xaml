@@ -14,7 +14,7 @@ Clicked="pickexpensefile_Clicked"
         Margin="2"
 HorizontalOptions="Center" WidthRequest="120" HeightRequest="40" />
 
-            <toolkit:Expander Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" BackgroundColor="Gray" x:Name="expanderAdditionalDetails"  IsExpanded="False">
+            <toolkit:Expander Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" BackgroundColor="Gray" x:Name="expanderFilterDetails"  IsExpanded="False">
                 <toolkit:Expander.Header>
                     <Grid ColumnDefinitions="*, Auto">
                         <!-- Header Text -->
@@ -30,11 +30,11 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="40" />
    VerticalOptions="Center">
                             <Image.Triggers>
                                 <!-- When IsExpanded is True, show up icon -->
-                                <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference expanderAdditionalDetails}, Path=IsExpanded}" Value="True">
+                                <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference expanderFilterDetails}, Path=IsExpanded}" Value="True">
                                     <Setter Property="Source" Value="unfold.png" />
                                 </DataTrigger>
                                 <!-- When IsExpanded is False, show down icon -->
-                                <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference expanderAdditionalDetails}, Path=IsExpanded}" Value="False">
+                                <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference expanderFilterDetails}, Path=IsExpanded}" Value="False">
                                     <Setter Property="Source" Value="unfold.png" />
                                 </DataTrigger>
                             </Image.Triggers>
