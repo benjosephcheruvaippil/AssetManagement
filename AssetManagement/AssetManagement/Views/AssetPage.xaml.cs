@@ -604,56 +604,63 @@ public partial class AssetPage : TabbedPage
 
     private async void btnDelete_Clicked(object sender, EventArgs e)
     {
-        if (!string.IsNullOrEmpty(lblAssetId.Text))
+        try
         {
-            bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
-            if (userResponse)
+            if (!string.IsNullOrEmpty(lblAssetId.Text))
             {
-                int assetId = Convert.ToInt32(lblAssetId.Text);
-                var assetDeleted = await _dbConnection.GetAsync<Assets>(assetId);               
-                Models.Assets objAsset = new Assets()
+                bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
+                if (userResponse)
                 {
-                    AssetId = assetId
-                };
-
-                await SetUpDb();
-                int rowsAffected = await _dbConnection.DeleteAsync(objAsset);
-                if (rowsAffected > 0)
-                {
-                    //add asset audit log  
-                    double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>("select SUM(Amount) from Assets");
-
-                    AssetAuditLog objAssetAuditLog = new AssetAuditLog
+                    int assetId = Convert.ToInt32(lblAssetId.Text);
+                    var assetDeleted = await _dbConnection.GetAsync<Assets>(assetId);
+                    Models.Assets objAsset = new Assets()
                     {
-                        AssetId = assetDeleted.AssetId,
-                        InvestmentEntity = assetDeleted.InvestmentEntity,
-                        Type = assetDeleted.Type,
-                        Amount = assetDeleted.Amount,
-                        InterestRate = assetDeleted.InterestRate,
-                        InterestFrequency = assetDeleted.InterestFrequency,
-                        Holder = assetDeleted.Holder,
-                        StartDate = assetDeleted.StartDate,
-                        MaturityDate = assetDeleted.MaturityDate,
-                        Remarks = assetDeleted.Remarks,
-                        RiskNumber = assetDeleted.RiskNumber,
-                        Nominee = assetDeleted.Nominee,
-                        AsOfDate = assetDeleted.AsOfDate,
-                        LiquidAssetValue = netAssetValue,
-                        NetAssetValue = netAssetValue,
-                        ActionType = "Delete",
-                        CreatedDate = DateTime.Now
+                        AssetId = assetId
                     };
-                    SaveAssetAuditLog(objAssetAuditLog);
-                    //add asset audit log
-                    await DisplayAlert("Message", "Asset Deleted", "OK");
-                    ClearManageAssetForm();
-                    await LoadAssets(entAssetSearch.Text.Trim());
+
+                    await SetUpDb();
+                    int rowsAffected = await _dbConnection.DeleteAsync(objAsset);
+                    if (rowsAffected > 0)
+                    {
+                        //add asset audit log  
+                        double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>("select SUM(Amount) from Assets");
+
+                        AssetAuditLog objAssetAuditLog = new AssetAuditLog
+                        {
+                            AssetId = assetDeleted.AssetId,
+                            InvestmentEntity = assetDeleted.InvestmentEntity,
+                            Type = assetDeleted.Type,
+                            Amount = assetDeleted.Amount,
+                            InterestRate = assetDeleted.InterestRate,
+                            InterestFrequency = assetDeleted.InterestFrequency,
+                            Holder = assetDeleted.Holder,
+                            StartDate = assetDeleted.StartDate,
+                            MaturityDate = assetDeleted.MaturityDate,
+                            Remarks = assetDeleted.Remarks,
+                            RiskNumber = assetDeleted.RiskNumber,
+                            Nominee = assetDeleted.Nominee,
+                            AsOfDate = assetDeleted.AsOfDate,
+                            LiquidAssetValue = netAssetValue,
+                            NetAssetValue = netAssetValue,
+                            ActionType = "Delete",
+                            CreatedDate = DateTime.Now
+                        };
+                        SaveAssetAuditLog(objAssetAuditLog);
+                        //add asset audit log
+                        await DisplayAlert("Message", "Asset Deleted", "OK");
+                        ClearManageAssetForm();
+                        await LoadAssets(entAssetSearch.Text.Trim());
+                    }
                 }
             }
+            else
+            {
+                await DisplayAlert("Message", "Please select an asset", "OK");
+            }
         }
-        else
+        catch(Exception ex)
         {
-            await DisplayAlert("Message", "Please select an asset", "OK");
+            return;
         }
     }
 
