@@ -14,6 +14,7 @@ using Microsoft.Maui.Layouts;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using Org.Apache.Http.Conn;
+using SkiaSharp;
 using SQLite;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -328,6 +329,8 @@ public partial class AssetPage : TabbedPage
             btnUploadAssetExcelToGoogleDrive.IsVisible = true;
             imageContainer.IsVisible = true;
         }
+
+        imageContainer.IsVisible = true;
     }
 
     private async void LoadOwnersInDropdown()
@@ -1094,32 +1097,91 @@ public partial class AssetPage : TabbedPage
 
     public async Task<UploadFileResponse> UploadImageToGoogleDrive(string filePath)
     {
-        UploadFileResponse uploadResponse = new UploadFileResponse();
-        uploadResponse.IsSuccess = false;
-
+        UploadFileResponse uploadResponse = new UploadFileResponse { IsSuccess = false };
         string apiUrl = "https://networthtrackerapi20240213185304.azurewebsites.net/api/general/uploadImageFileToGoogleDrive";
-        using (HttpClient client = new HttpClient())
-        using (MultipartFormDataContent formData = new MultipartFormDataContent())
-        {
-            byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
-            string fileName = Path.GetFileName(filePath);
-            string contentType = GetMimeType(filePath);
 
-            ByteArrayContent fileContent = new ByteArrayContent(fileBytes);
-            fileContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-            formData.Add(fileContent, "fileRequest", fileName);
-            HttpResponseMessage response = await client.PostAsync(apiUrl, formData);
-            string result = await response.Content.ReadAsStringAsync();
-            if (response.IsSuccessStatusCode)
-            {
-                //upload to google drive success.
-                uploadResponse = JsonSerializer.Deserialize<UploadFileResponse>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                uploadResponse.IsSuccess = true;
-                return uploadResponse;
-            }
+        byte[] originalBytes = await File.ReadAllBytesAsync(filePath);
+
+        using var inputStream = new SKManagedStream(new MemoryStream(originalBytes));
+        using var original = SKBitmap.Decode(inputStream);
+
+        if (original == null)
+        {
+            Console.WriteLine("Image decoding failed. Possibly unsupported format.");
             return uploadResponse;
         }
+
+        // Resize if needed
+        int targetWidth = original.Width;
+        int targetHeight = original.Height;
+        if (original.Width > 1024)
+        {
+            targetWidth = 1024;
+            targetHeight = (int)(original.Height * (1024.0 / original.Width));
+        }
+
+        using var resized = original.Resize(new SKImageInfo(targetWidth, targetHeight), SKFilterQuality.Medium);
+        if (resized == null)
+        {
+            Console.WriteLine("Image resizing failed.");
+            return uploadResponse;
+        }
+
+        using var image = SKImage.FromBitmap(resized);
+        using var ms = new MemoryStream();
+        image.Encode(SKEncodedImageFormat.Jpeg, 75).SaveTo(ms); // Always output JPEG
+        ms.Position = 0;
+
+        // Build file name with .jpg extension regardless of input format
+        string fileName = Path.GetFileNameWithoutExtension(filePath) + ".jpg";
+
+        using var client = new HttpClient();
+        using var formData = new MultipartFormDataContent();
+
+        var fileContent = new ByteArrayContent(ms.ToArray());
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+        formData.Add(fileContent, "fileRequest", fileName);
+
+        HttpResponseMessage response = await client.PostAsync(apiUrl, formData);
+        string result = await response.Content.ReadAsStringAsync();
+
+        if (response.IsSuccessStatusCode)
+        {
+            uploadResponse = JsonSerializer.Deserialize<UploadFileResponse>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            uploadResponse.IsSuccess = true;
+        }
+
+        return uploadResponse;
     }
+
+    //public async Task<UploadFileResponse> UploadImageToGoogleDrive(string filePath)
+    //{
+    //    UploadFileResponse uploadResponse = new UploadFileResponse();
+    //    uploadResponse.IsSuccess = false;
+
+    //    string apiUrl = "https://networthtrackerapi20240213185304.azurewebsites.net/api/general/uploadImageFileToGoogleDrive";
+    //    using (HttpClient client = new HttpClient())
+    //    using (MultipartFormDataContent formData = new MultipartFormDataContent())
+    //    {
+    //        byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
+    //        string fileName = Path.GetFileName(filePath);
+    //        string contentType = GetMimeType(filePath);
+
+    //        ByteArrayContent fileContent = new ByteArrayContent(fileBytes);
+    //        fileContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+    //        formData.Add(fileContent, "fileRequest", fileName);
+    //        HttpResponseMessage response = await client.PostAsync(apiUrl, formData);
+    //        string result = await response.Content.ReadAsStringAsync();
+    //        if (response.IsSuccessStatusCode)
+    //        {
+    //            //upload to google drive success.
+    //            uploadResponse = JsonSerializer.Deserialize<UploadFileResponse>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+    //            uploadResponse.IsSuccess = true;
+    //            return uploadResponse;
+    //        }
+    //        return uploadResponse;
+    //    }
+    //}
 
     private string GetMimeType(string filePath)
     {
@@ -1444,6 +1506,16 @@ public partial class AssetPage : TabbedPage
 
     private async Task RemoveImage(string fileId, List<FileList> imageUrls)
     {
+        bool isConfirmed = await DisplayAlert(
+       "Confirm Delete",
+       "Are you sure you want to delete this image?",
+       "Yes",
+       "No"
+        );
+
+        if (!isConfirmed)
+            return;
+
         var itemToRemove = imageUrls.FirstOrDefault(img => img.FileId == fileId);
 
         if (itemToRemove != null)
