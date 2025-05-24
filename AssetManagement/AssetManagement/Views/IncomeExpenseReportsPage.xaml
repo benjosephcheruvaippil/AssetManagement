@@ -55,23 +55,73 @@
                 Stroke="orange"
                 StrokeThickness="5" />
 
-            <DatePicker x:Name="dpFromDateIncomeReport"/>
-            <DatePicker x:Name="dpTODateIncomeReport"/>
-            <Picker x:Name="typePicker" Title="Select type" SelectedIndexChanged="typePicker_SelectedIndexChanged">
-                <Picker.ItemsSource>
-                    <x:Array Type="{x:Type x:String}">
-                        <x:String>Income</x:String>
-                        <x:String>Expense</x:String>
-                    </x:Array>
-                </Picker.ItemsSource>
-            </Picker>
-            <Picker x:Name="pickerCategory" Title="Select category">
-                <Picker.ItemsSource>
-                    <x:Array Type="{x:Type x:String}">
-                    </x:Array>
-                </Picker.ItemsSource>
-            </Picker>
+            <Grid ColumnSpacing="10" Padding="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <VerticalStackLayout Grid.Column="0">
+                    <Label Text="From Date" FontAttributes="Bold" />
+                    <DatePicker x:Name="dpFromDateIncomeReport" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1">
+                    <Label Text="To Date" FontAttributes="Bold" />
+                    <DatePicker x:Name="dpTODateIncomeReport" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <Grid ColumnSpacing="10" Padding="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <VerticalStackLayout Grid.Column="0">
+                    <Label Text="Select Type" FontAttributes="Bold" />
+                    <Picker x:Name="typePicker" Title="Select type" SelectedIndexChanged="typePicker_SelectedIndexChanged">
+                        <Picker.ItemsSource>
+                            <x:Array Type="{x:Type x:String}">
+                                <x:String>Income</x:String>
+                                <x:String>Expense</x:String>
+                            </x:Array>
+                        </Picker.ItemsSource>
+                    </Picker>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1">
+                    <Label Text="Select Category" FontAttributes="Bold" />
+                    <Picker x:Name="pickerCategory" Title="Select category">
+                        <Picker.ItemsSource>
+                            <x:Array Type="{x:Type x:String}">
+                            </x:Array>
+                        </Picker.ItemsSource>
+                    </Picker>
+                </VerticalStackLayout>
+            </Grid>
+
+            <Label Text="Select Owner(s):" FontAttributes="Bold" />
+            <CollectionView x:Name="ItemsCollectionView"
+                        ItemsSource="{Binding Items}"
+                        SelectionMode="None"
+                        HeightRequest="150">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout Orientation="Horizontal" Padding="5">
+                            <CheckBox IsChecked="{Binding IsSelected}" />
+                            <Label Text="{Binding Name}"
+                               VerticalOptions="Center"
+                               Margin="10,0,0,0" />
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <Button Text="Show Selected" Clicked="OnShowSelectedClicked" IsVisible="False"/>
+            <Label x:Name="SelectedLabel" Text="Selected: None" IsVisible="False"/>
+            
             <ActivityIndicator x:Name="activityIndicator" IsRunning="False" Color="Blue"/>
+            
             <Button
             x:Name="btnGenerateIncomeReport"
             Text="Download Excel"
