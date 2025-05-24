@@ -1,11 +1,66 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="AssetManagement.Views.IncomePage"
              Title="Income">
     <ScrollView>
             <VerticalStackLayout>
-                <Entry x:Name="txtIncomeTransactionId"
+
+            <toolkit:Expander Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" BackgroundColor="Gray" x:Name="expanderFilterDetails"  IsExpanded="False">
+                <toolkit:Expander.Header>
+                    <Grid ColumnDefinitions="*, Auto">
+                        <!-- Header Text -->
+                        <Label Text="Click to filter data"
+                        FontAttributes="Bold"
+                        FontSize="Medium"
+                        VerticalOptions="Center" 
+                        Grid.Column="0" />
+                                                <!-- Up/Down Icon -->
+                                        <Image Grid.Column="1"
+                        WidthRequest="24"
+                        HeightRequest="24"
+                        VerticalOptions="Center">   
+                            <Image.Triggers>
+                                <!-- When IsExpanded is True, show up icon -->
+                                <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference expanderFilterDetails}, Path=IsExpanded}" Value="True">
+                                    <Setter Property="Source" Value="unfold.png" />
+                                </DataTrigger>
+                                <!-- When IsExpanded is False, show down icon -->
+                                <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference expanderFilterDetails}, Path=IsExpanded}" Value="False">
+                                    <Setter Property="Source" Value="unfold.png" />
+                                </DataTrigger>
+                            </Image.Triggers>
+                        </Image>
+                    </Grid>
+                </toolkit:Expander.Header>
+                <VerticalStackLayout>
+                    <Grid ColumnDefinitions="Auto, *, Auto, *" ColumnSpacing="10" Padding="10">
+                        <Label Text="From Date" VerticalOptions="Center"  HorizontalOptions="Start" Grid.Column="0" />
+
+                        <DatePicker x:Name="dpFromDateFilter"  Grid.Column="1" HorizontalOptions="FillAndExpand" />
+
+                        <Label Text="To Date" VerticalOptions="Center" HorizontalOptions="Start" Grid.Column="2" />
+
+                        <DatePicker x:Name="dpToDateFilter" Grid.Column="3" HorizontalOptions="FillAndExpand" />
+                    </Grid>
+                    <Grid ColumnDefinitions="150, *">
+                        <Label Text="Category Filter" VerticalOptions="Center" Grid.Column="0" />
+                        <Entry x:Name="entCategoryFilter" Grid.Column="1" />
+                    </Grid>
+                    <Grid ColumnDefinitions="150, *">
+                        <Label Text="Remarks Filter" VerticalOptions="Center" Grid.Column="0" />
+                        <Entry x:Name="entRemarksFilter" Grid.Column="1" />
+                    </Grid>
+                    <Button
+             x:Name="btnApplyFilters"
+             Text="Apply Filters"
+             Margin="0,0,0,0"
+             Clicked="btnApplyFilters_Clicked"/>
+                </VerticalStackLayout>
+            </toolkit:Expander>
+
+            <Entry x:Name="txtIncomeTransactionId"
            IsVisible="false" />
 
                 <Entry x:Name="entryIncomeAmount"

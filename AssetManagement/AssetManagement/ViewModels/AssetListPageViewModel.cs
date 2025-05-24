@@ -1,5 +1,6 @@
 ﻿using AssetManagement.Models;
 using AssetManagement.Models.Constants;
+using AssetManagement.Models.DataTransferObject;
 using AssetManagement.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -72,30 +73,60 @@ namespace AssetManagement.ViewModels
 
         //public string image { get; set; } = SelectedMonkey.Image;
         //public string location = SelectedMonkey.Location;
-        public Assets GetSelectedRecordDetail()
+        public async Task<AssetDTO> GetSelectedRecordDetail(string calledFrom, int? assetId)
         {
-            Assets obj = new Assets();
-            if (SelectedAsset != null)
+            AssetDTO objDTO = new AssetDTO();
+            if (calledFrom == "tab2")
             {
-                obj = new Assets()
+                if (SelectedAsset != null)
                 {
-                    AssetId = SelectedAsset.AssetId,
-                    InvestmentEntity = SelectedAsset.InvestmentEntity,
-                    Type = SelectedAsset.Type,
-                    Amount = SelectedAsset.Amount,
-                    InterestRate = SelectedAsset.InterestRate,
-                    InterestFrequency = SelectedAsset.InterestFrequency,
-                    Holder = SelectedAsset.Holder,
-                    StartDate = SelectedAsset.StartDate,
-                    MaturityDate = SelectedAsset.MaturityDate,
-                    AsOfDate = SelectedAsset.AsOfDate,
-                    Remarks = SelectedAsset.Remarks,
-                    Nominee = SelectedAsset.Nominee,
-                    RiskNumber = SelectedAsset.RiskNumber
-                };
+                    var documentList = await _assetService.GetAssetDocumentsList(SelectedAsset.AssetId);
+                    objDTO = new AssetDTO()
+                    {
+                        AssetId = SelectedAsset.AssetId,
+                        InvestmentEntity = SelectedAsset.InvestmentEntity,
+                        Type = SelectedAsset.Type,
+                        Amount = SelectedAsset.Amount,
+                        InterestRate = SelectedAsset.InterestRate,
+                        InterestFrequency = SelectedAsset.InterestFrequency,
+                        Holder = SelectedAsset.Holder,
+                        StartDate = SelectedAsset.StartDate,
+                        MaturityDate = SelectedAsset.MaturityDate,
+                        AsOfDate = SelectedAsset.AsOfDate,
+                        Remarks = SelectedAsset.Remarks,
+                        Nominee = SelectedAsset.Nominee,
+                        RiskNumber = SelectedAsset.RiskNumber,
+                        AssetDocumentsList = documentList
+                    };
+                }
+            }
+            else if (calledFrom == "tab1")
+            {
+                if (assetId != null)
+                {
+                    var assetDetails = await _assetService.GetAssetsById((int)assetId);
+                    var documentList = await _assetService.GetAssetDocumentsList((int)assetId);
+                    objDTO = new AssetDTO()
+                    {
+                        AssetId = assetDetails.AssetId,
+                        InvestmentEntity = assetDetails.InvestmentEntity,
+                        Type = assetDetails.Type,
+                        Amount = assetDetails.Amount,
+                        InterestRate = assetDetails.InterestRate,
+                        InterestFrequency = assetDetails.InterestFrequency,
+                        Holder = assetDetails.Holder,
+                        StartDate = assetDetails.StartDate,
+                        MaturityDate = assetDetails.MaturityDate,
+                        AsOfDate = assetDetails.AsOfDate,
+                        Remarks = assetDetails.Remarks,
+                        Nominee = assetDetails.Nominee,
+                        RiskNumber = assetDetails.RiskNumber,
+                        AssetDocumentsList = documentList
+                    };
+                }
             }
 
-            return obj;
+            return objDTO;
         }
 
         [RelayCommand]
