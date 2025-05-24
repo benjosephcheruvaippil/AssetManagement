@@ -329,8 +329,6 @@ public partial class AssetPage : TabbedPage
             btnUploadAssetExcelToGoogleDrive.IsVisible = true;
             imageContainer.IsVisible = true;
         }
-
-        imageContainer.IsVisible = true;
     }
 
     private async void LoadOwnersInDropdown()
