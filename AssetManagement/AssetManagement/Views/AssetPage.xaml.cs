@@ -652,7 +652,7 @@ public partial class AssetPage : TabbedPage
                         //add asset audit log
                         await DisplayAlert("Message", "Asset Deleted", "OK");
                         ClearManageAssetForm();
-                        await LoadAssets(entAssetSearch.Text.Trim());
+                        await LoadAssets(string.IsNullOrEmpty(entAssetSearch.Text) ? "" : entAssetSearch.Text.Trim());
                     }
                 }
             }
