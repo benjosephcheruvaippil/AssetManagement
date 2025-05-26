@@ -703,7 +703,7 @@ public partial class ExpensePage : ContentPage
             List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' and Mode='file_upload' order by Date desc Limit 1");
             if (expenses.Count > 0)
             {
-                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n- au: Automobile,hs: Household Items,le: Leisure,ex: Others.\n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
+                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n- au: Automobile,hs: Household Items,le: Leisure,eo: Eating Out,ex: Others.\n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
                 if (!userResponse)
                 {
                     return;
@@ -791,6 +791,11 @@ public partial class ExpensePage : ContentPage
                             addExpense = true;
                             category = "Leisure";
                         }
+                        else if (description.Contains("/eo/"))
+                        {
+                            addExpense = true;
+                            category = "Eating Out";
+                        }
                         else if (description.Contains("/ex/"))
                         {
                             addExpense = true;
@@ -829,7 +834,7 @@ public partial class ExpensePage : ContentPage
             }
             else
             {
-                await DisplayAlert("Info", "Something went wrong. No records were added.", "OK");
+                await DisplayAlert("Info", "No records were added.", "OK");
             }
             activityIndicator.IsRunning = false;
         }
