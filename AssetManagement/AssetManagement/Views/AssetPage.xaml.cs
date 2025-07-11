@@ -1347,6 +1347,12 @@ public partial class AssetPage : TabbedPage
             activityIndicator.IsRunning = false;
             await DisplayAlert("Info", "File uploaded to Google Drive.", "Ok");
         }
+        else
+        {
+            activityIndicator.IsVisible = false;
+            activityIndicator.IsRunning = false;
+            await DisplayAlert("Error", "Failed to upload to Google Drive.", "Ok");
+        }
     }
 
     private async void TapGestureRecognizer_Tapped(object sender, TappedEventArgs e)
