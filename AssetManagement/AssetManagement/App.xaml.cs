@@ -19,6 +19,7 @@ public partial class App : Application
         _viewModel= viewModel;
         //_popupNavigation= popupNavigation;
         _assetService= assetService;
+        Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JEaF5cXmRCeUx0R3xbf1x1ZFxMZVVbRHNPMyBoS35Rc0VkWHpeeXFcRmVUVUZ3VEFd");
 
         bool isFirstLaunch = Preferences.Get("IsFirstLaunch", true);
 

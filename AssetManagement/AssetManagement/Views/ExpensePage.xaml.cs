@@ -151,7 +151,14 @@ public partial class ExpensePage : ContentPage
             pickerExpenseCategory.ItemsSource = expenseCategories.Select(i => i.CategoryName).ToList();
             if (expenseCategories.Count > 1)
             {
-                pickerExpenseCategory.SelectedIndex = 0;
+                pickerExpenseCategory.Text = "";
+            }
+
+            if (currentTheme == AppTheme.Dark)
+            {
+                //set to white color
+                pickerExpenseCategory.TextColor = Color.FromArgb("#FFFFFF");
+                pickerExpenseCategory.BackgroundColor = Color.FromArgb("#000000");
             }
         }
         catch (Exception)
@@ -163,7 +170,7 @@ public partial class ExpensePage : ContentPage
 
     private async void btnSaveExpense_Clicked(object sender, EventArgs e)
     {
-        if (pickerExpenseCategory.Items.Count == 0)
+        if (((pickerExpenseCategory.ItemsSource as IEnumerable<object>)?.Cast<object>().Count() ?? 0) == 0)
         {
             await DisplayAlert("Message", "Please create categories under Settings -> Manage Categories before adding expenses", "OK");
             return;
@@ -173,7 +180,7 @@ public partial class ExpensePage : ContentPage
             await DisplayAlert("Message", "Please input required values", "OK");
             return;
         }
-        else if (pickerExpenseCategory.SelectedIndex == -1)
+        else if (string.IsNullOrEmpty(pickerExpenseCategory.Text))
         {
             await DisplayAlert("Message", "Please select a category", "OK");
             return;
@@ -381,7 +388,7 @@ public partial class ExpensePage : ContentPage
     {
         txtTransactionId.Text = "";
         entryExpenseAmount.Text = "";
-        pickerExpenseCategory.SelectedIndex = -1;
+        pickerExpenseCategory.Text = "";
         entryExpenseRemarks.Text = "";
         dpDateExpense.Date = DateTime.Now;
     }
@@ -845,7 +852,7 @@ public partial class ExpensePage : ContentPage
 
     }
 
-    private void pickerExpenseCategory_SelectedIndexChanged(object sender, EventArgs e)
+    private void pickerExpenseCategory_SelectedIndexChanged(object sender, Syncfusion.Maui.Inputs.SelectionChangedEventArgs e)
     {
         if (pickerExpenseCategory.SelectedItem != null)
         {

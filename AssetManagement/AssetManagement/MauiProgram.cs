@@ -5,6 +5,7 @@ using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Storage;
 using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
+using Syncfusion.Maui.Core.Hosting;
 //using Mopups.Hosting;
 //using Mopups.Interfaces;
 //using Mopups.Services;
@@ -25,9 +26,11 @@ public static class MauiProgram
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-			});
+			})
+			.ConfigureSyncfusionCore();
 
-		builder.Services.AddSingleton<IFileSaver>(FileSaver.Default);
+
+        builder.Services.AddSingleton<IFileSaver>(FileSaver.Default);
         builder.Services.AddSingleton<IAssetService, AssetService>();
 		builder.Services.AddSingleton<IAppRestarter, AppRestarter>();
 		//builder.Services.AddSingleton<IPopupNavigation>(MopupService.Instance);
