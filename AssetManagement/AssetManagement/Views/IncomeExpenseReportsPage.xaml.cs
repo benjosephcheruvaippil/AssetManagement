@@ -11,6 +11,9 @@ using System.Linq;
 using CommunityToolkit.Maui.Storage;
 using AssetManagement.Models.Constants;
 using AssetManagement.Models.DataTransferObject;
+using AssetManagement.ViewModels;
+using System.Collections.ObjectModel;
+using System;
 //using static Android.Content.ClipData;
 
 namespace AssetManagement.Views;
@@ -21,6 +24,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
     AppTheme currentTheme = Application.Current.RequestedTheme;
     decimal yearlyIncome = 0, yearlyExpense = 0, yearlyBalance = 0;
     private bool onLoad = false;
+    public ObservableCollection<SelectableItem> Items { get; set; }
     public IncomeExpenseReportsPage()
     {
         try
@@ -31,8 +35,9 @@ public partial class IncomeExpenseReportsPage : ContentPage
             LoadIncomeExpenseReport(DateTime.Now.Year.ToString(), false);
             dpFromDateIncomeReport.Format = "dd-MM-yyyy";
             dpTODateIncomeReport.Format = "dd-MM-yyyy";
+            LoadOwnersInDropdown();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             DisplayAlert("Something went wrong: ", ex.Message, "Ok");
         }
@@ -47,7 +52,31 @@ public partial class IncomeExpenseReportsPage : ContentPage
         }
     }
 
-    private async void LoadIncomeExpenseReport(string selectedYear,bool oneTimeExpense)
+    private async void LoadOwnersInDropdown()
+    {
+        try
+        {
+            await SetUpDb();
+            var owners = await _dbConnection.Table<Owners>().ToListAsync();
+            //Owners objOwner = new Owners
+            //{
+            //    OwnerId = 0,
+            //    OwnerName = Constants.AddNewOwnerOption
+            //};
+            //owners.Add(objOwner);
+            //pickerOwnerName.ItemsSource = owners.Select(s => s.OwnerName).ToList();
+
+            Items = new ObservableCollection<SelectableItem>(owners.Select(name => new SelectableItem { Name = name.OwnerName }));
+
+            BindingContext = this;
+        }
+        catch (Exception)
+        {
+            return;
+        }
+    }
+
+    private async void LoadIncomeExpenseReport(string selectedYear, bool oneTimeExpense)
     {
         try
         {
@@ -66,7 +95,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
         }
     }
 
-    public async void PopulateTableSection(string selectedYear,bool oneTimeExpense)
+    public async void PopulateTableSection(string selectedYear, bool oneTimeExpense)
     {
         try
         {
@@ -149,7 +178,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             tblscIncomeExpenseReport.Add(objCellYearly);
             objCellYearly.Tapped += ObjCell_Tapped;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             await DisplayAlert("Something went wrong: ", ex.Message, "Ok");
         }
@@ -160,7 +189,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
         bool oneTimeExpense = chkOnTimeExpense.IsChecked;
         var tappedViewCell = (TextCell)sender;
         string displayText = "";
-        string month= tappedViewCell.Text.ToString();
+        string month = tappedViewCell.Text.ToString();
         int monthInteger = 0;
         switch (month)
         {
@@ -214,7 +243,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             return;
         }
 
-        string year = yearPicker.SelectedItem.ToString();       
+        string year = yearPicker.SelectedItem.ToString();
         DateTime startOfMonth = new DateTime(Convert.ToInt32(year), monthInteger, 1, 0, 0, 0); //24 hour format
         DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
         endOfMonth = new DateTime(endOfMonth.Year, endOfMonth.Month, endOfMonth.Day, 23, 59, 59); //24 hour format
@@ -371,7 +400,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
                 await DisplayAlert("Message", "Please select report type.", "Ok");
                 return;
             }
-            activityIndicator.IsRunning = true;        
+            activityIndicator.IsRunning = true;
             DateTime fromDateIncomeReport = dpFromDateIncomeReport.Date;
             DateTime toDateIncomeReport = dpTODateIncomeReport.Date;
             DateTime fromDate = new DateTime(fromDateIncomeReport.Year, fromDateIncomeReport.Month, fromDateIncomeReport.Day, 0, 0, 0);
@@ -379,21 +408,48 @@ public partial class IncomeExpenseReportsPage : ContentPage
             List<IncomeExpenseModel> inexpList = new List<IncomeExpenseModel>();
             string type = typePicker.SelectedItem.ToString();
             string categoryName = pickerCategory.SelectedItem.ToString();
+
+            var selectedOwners = Items.Where(i => i.IsSelected).Select(i => i.Name).ToList();
+
             if (type == "Income")
             {
-                inexpList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Income"
-                && (categoryName=="All" || i.CategoryName == categoryName)
-                && (i.Date >= fromDate && i.Date <= toDate))
+                if (selectedOwners.Count > 0)
+                {
+                    inexpList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Income"
+                && (categoryName == "All" || i.CategoryName == categoryName)
+                && (i.Date >= fromDate && i.Date <= toDate)
+                && selectedOwners.Contains(i.OwnerName))
                     .OrderBy(i => i.Date)
                     .ToListAsync();
-            }
-            else if (type == "Expense")
-            {
-                inexpList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Expense"
+                }
+                else
+                {
+                    inexpList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Income"
                 && (categoryName == "All" || i.CategoryName == categoryName)
                 && (i.Date >= fromDate && i.Date <= toDate))
                     .OrderBy(i => i.Date)
                     .ToListAsync();
+                }
+            }
+            else if (type == "Expense")
+            {
+                if (selectedOwners.Count > 0)
+                {
+                    inexpList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Expense"
+                    && (categoryName == "All" || i.CategoryName == categoryName)
+                    && (i.Date >= fromDate && i.Date <= toDate)
+                    && selectedOwners.Contains(i.OwnerName))
+                        .OrderBy(i => i.Date)
+                        .ToListAsync();
+                }
+                else
+                {
+                    inexpList = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionType == "Expense"
+                    && (categoryName == "All" || i.CategoryName == categoryName)
+                    && (i.Date >= fromDate && i.Date <= toDate))
+                        .OrderBy(i => i.Date)
+                        .ToListAsync();
+                }   
             }
 
             // Creating an instance
@@ -412,7 +468,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             // Setting the properties
             // of the first row
             workSheet.Row(1).Height = 20;
-            workSheet.Row(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;           
+            workSheet.Row(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
             workSheet.Row(1).Style.Font.Bold = true;
 
             workSheet.Column(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
@@ -427,7 +483,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             // Header of the Excel sheet
             workSheet.Cells[1, 1].Value = "Transaction Type";
             workSheet.Cells[1, 2].Value = "Date";
-            workSheet.Cells[1, 3].Value = "Category Name";            
+            workSheet.Cells[1, 3].Value = "Category Name";
             workSheet.Cells[1, 4].Value = "Owner Name";
             workSheet.Cells[1, 5].Value = "Tax Cut";
             workSheet.Cells[1, 6].Value = "Amount";
@@ -435,7 +491,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             workSheet.Cells[1, 8].Value = "Remarks";
 
             int recordIndex = 2;
-            decimal totalIncome = 0,totalTaxCut=0;
+            decimal totalIncome = 0, totalTaxCut = 0;
             foreach (var income in inexpList)
             {
                 workSheet.Cells[recordIndex, 1].Value = income.TransactionType;
@@ -459,7 +515,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             workSheet.Cells[recordIndex, 5].Style.Font.Bold = true;
             workSheet.Cells[recordIndex, 6].Value = totalIncome;
             workSheet.Cells[recordIndex, 6].Style.Font.Bold = true;
-            
+
 
             workSheet.Column(1).AutoFit();
             workSheet.Column(2).AutoFit();
@@ -480,7 +536,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             //System.IO.File.WriteAllBytes(file, excel.GetAsByteArray());
 
 
-            var stream=new MemoryStream(excel.GetAsByteArray());
+            var stream = new MemoryStream(excel.GetAsByteArray());
             CancellationTokenSource Ctoken = new CancellationTokenSource();
             string fileName = "";
             if (type == "Income")
@@ -492,18 +548,18 @@ public partial class IncomeExpenseReportsPage : ContentPage
                 fileName = "Expense_Report_" + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt") + ".xlsx";
             }
             var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
-            if(fileSaverResult.IsSuccessful)
+            if (fileSaverResult.IsSuccessful)
             {
                 await DisplayAlert("Message", "Excel saved in " + fileSaverResult.FilePath, "Ok");
             }
 
             excel.Dispose();
-            activityIndicator.IsRunning = false;            
+            activityIndicator.IsRunning = false;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             await DisplayAlert("Error", ex.Message, "Ok");
-            await DisplayAlert("Error", ex.InnerException.ToString(), "Ok");            
+            await DisplayAlert("Error", ex.InnerException.ToString(), "Ok");
         }
     }
 
@@ -568,5 +624,13 @@ public partial class IncomeExpenseReportsPage : ContentPage
         {
             return;
         }
+    }
+
+    private void OnShowSelectedClicked(object sender, EventArgs e)
+    {
+        var selected = Items.Where(i => i.IsSelected).Select(i => i.Name).ToList();
+        SelectedLabel.Text = selected.Count > 0
+            ? $"Selected: {string.Join(", ", selected)}"
+            : "Selected: None";
     }
 }

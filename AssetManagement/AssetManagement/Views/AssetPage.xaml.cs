@@ -329,8 +329,6 @@ public partial class AssetPage : TabbedPage
             btnUploadAssetExcelToGoogleDrive.IsVisible = true;
             imageContainer.IsVisible = true;
         }
-
-        imageContainer.IsVisible = true;
     }
 
     private async void LoadOwnersInDropdown()
@@ -652,7 +650,7 @@ public partial class AssetPage : TabbedPage
                         //add asset audit log
                         await DisplayAlert("Message", "Asset Deleted", "OK");
                         ClearManageAssetForm();
-                        await LoadAssets(entAssetSearch.Text.Trim());
+                        await LoadAssets(string.IsNullOrEmpty(entAssetSearch.Text) ? "" : entAssetSearch.Text.Trim());
                     }
                 }
             }
@@ -1348,6 +1346,12 @@ public partial class AssetPage : TabbedPage
             activityIndicator.IsVisible = false;
             activityIndicator.IsRunning = false;
             await DisplayAlert("Info", "File uploaded to Google Drive.", "Ok");
+        }
+        else
+        {
+            activityIndicator.IsVisible = false;
+            activityIndicator.IsRunning = false;
+            await DisplayAlert("Error", "Failed to upload to Google Drive.", "Ok");
         }
     }
 
