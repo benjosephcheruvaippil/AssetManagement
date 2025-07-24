@@ -97,10 +97,13 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="40" />
                 </Picker>-->
 
             <syncfusion:SfAutocomplete
-    x:Name="pickerExpenseCategory"
-    ShowSuggestionsOnFocus="True"
-    SelectionChanged="pickerExpenseCategory_SelectedIndexChanged"
-    Placeholder="Select expense type" />
+            x:Name="pickerExpenseCategory"
+            ShowSuggestionsOnFocus="True"
+            TextSearchMode="Contains"
+            TextHighlightMode="FirstOccurrence"
+            HighlightedTextColor="{AppThemeBinding Light={StaticResource PrimaryBackgroundLight},Dark={StaticResource PrimaryBackground}}"
+            SelectionChanged="pickerExpenseCategory_SelectedIndexChanged"
+            Placeholder="Select expense type" />
 
 
             <DatePicker x:Name="dpDateExpense"/>

@@ -29,7 +29,7 @@ public partial class ExpensePage : ContentPage
             LoadExpensesInPage("Pagewise");
         };
         lblShowRemainingRecords.GestureRecognizers.Add(labelShowRemaining);
-    }
+        }
 
     protected async override void OnAppearing()
     {
@@ -184,7 +184,16 @@ public partial class ExpensePage : ContentPage
         {
             await DisplayAlert("Message", "Please select a category", "OK");
             return;
-        }       
+        }
+
+        //check if category present in master table
+        var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
+        if (!expenseCategories.Any(c => c.CategoryName == pickerExpenseCategory.Text.Trim()))
+        {
+            await DisplayAlert("Message", "Please create this category under Settings -> Manage Categories before adding expenses", "OK");
+            return;
+        }
+        //check if category present in master table
 
         if (string.IsNullOrEmpty(txtTransactionId.Text))//insert
         {
@@ -194,7 +203,7 @@ public partial class ExpensePage : ContentPage
                 Amount = Convert.ToDouble(entryExpenseAmount.Text),
                 TransactionType = "Expense",
                 Date = dpDateExpense.Date != DateTime.Now.Date ? dpDateExpense.Date : DateTime.Now,
-                CategoryName = Convert.ToString(pickerExpenseCategory.SelectedItem),
+                CategoryName = Convert.ToString(pickerExpenseCategory.Text.Trim()),
                 Remarks = entryExpenseRemarks.Text,
                 Mode = "manual"
             };
@@ -223,7 +232,7 @@ public partial class ExpensePage : ContentPage
                 Amount = Convert.ToDouble(entryExpenseAmount.Text),
                 TransactionType = "Expense",
                 Date = dpDateExpense.Date != DateTime.Now.Date ? dpDateExpense.Date : DateTime.Now,
-                CategoryName = Convert.ToString(pickerExpenseCategory.SelectedItem),
+                CategoryName = Convert.ToString(pickerExpenseCategory.Text.Trim()),
                 Mode = incExpResult.Mode,
                 Remarks = entryExpenseRemarks.Text
             };
@@ -256,9 +265,9 @@ public partial class ExpensePage : ContentPage
         int month = Convert.ToInt32(date.Split("-")[1]);
         int day = Convert.ToInt32(date.Split("-")[0]);
 
-        pickerExpenseCategory.SelectedItem = textCell[0].Trim();
+        pickerExpenseCategory.Text = textCell[0].Trim();
 
-        if (pickerExpenseCategory.SelectedItem == null)
+        if (string.IsNullOrEmpty(pickerExpenseCategory.Text))
         {
             DisplayAlert("Info", textCell[0].Trim()+" - Please make this category visible from Manage Category page in order to edit.", "OK");
         }
@@ -302,7 +311,7 @@ public partial class ExpensePage : ContentPage
 
     private async void LoadExpensesInPage(string hint)
     {  
-        pickerExpenseCategory.SelectedItem = "Household Items"; //set this value by default
+        pickerExpenseCategory.Text = "Household Items"; //set this value by default
         dpDateExpense.MinimumDate = new DateTime(2020, 1, 1);
         dpDateExpense.MaximumDate = new DateTime(2050, 12, 31);
         dpDateExpense.Date = DateTime.Now;
@@ -854,9 +863,9 @@ public partial class ExpensePage : ContentPage
 
     private void pickerExpenseCategory_SelectedIndexChanged(object sender, Syncfusion.Maui.Inputs.SelectionChangedEventArgs e)
     {
-        if (pickerExpenseCategory.SelectedItem != null)
+        if (!string.IsNullOrEmpty(pickerExpenseCategory.Text))
         {
-            if (pickerExpenseCategory.SelectedItem.ToString() == Constants.AddNewCategoryOption)
+            if (pickerExpenseCategory.Text == Constants.AddNewCategoryOption)
             {
                 Navigation.PushAsync(new ManageCategoriesPage());
             }
