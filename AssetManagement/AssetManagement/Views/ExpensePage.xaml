@@ -100,10 +100,12 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="40" />
             x:Name="pickerExpenseCategory"
             ShowSuggestionsOnFocus="True"
             TextSearchMode="Contains"
-            TextHighlightMode="FirstOccurrence"
-            HighlightedTextColor="{AppThemeBinding Light={StaticResource PrimaryBackgroundLight},Dark={StaticResource PrimaryBackground}}"
             SelectionChanged="pickerExpenseCategory_SelectedIndexChanged"
             Placeholder="Select expense type" />
+
+            <!--TextSearchMode="Contains"
+TextHighlightMode="FirstOccurrence"
+HighlightedTextColor="{AppThemeBinding Light={StaticResource PrimaryBackgroundLight},Dark={StaticResource PrimaryBackground}}"-->
 
 
             <DatePicker x:Name="dpDateExpense"/>

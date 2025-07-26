@@ -86,8 +86,6 @@
             x:Name="pickerIncomeCategory"
             ShowSuggestionsOnFocus="True"
             TextSearchMode="Contains"
-            TextHighlightMode="FirstOccurrence"
-            HighlightedTextColor="{AppThemeBinding Light={StaticResource PrimaryBackgroundLight},Dark={StaticResource PrimaryBackground}}"
             SelectionChanged="pickerIncomeCategory_SelectedIndexChanged"
             Placeholder="Select category" />
 
