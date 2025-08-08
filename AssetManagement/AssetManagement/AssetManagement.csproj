@@ -21,8 +21,8 @@
 		<ApplicationIdGuid>e44d9f3a-6397-4876-bf13-6606255cdef8</ApplicationIdGuid>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>4.8.8</ApplicationDisplayVersion>
-		<ApplicationVersion>34</ApplicationVersion>
+		<ApplicationDisplayVersion>4.8.9</ApplicationDisplayVersion>
+		<ApplicationVersion>35</ApplicationVersion>
 		<!--<PublishTrimmed>true</PublishTrimmed>-->
 		<AndroidLinkResources>false</AndroidLinkResources>
 
@@ -91,6 +91,9 @@
 		<PackageReference Include="SQLitePCLRaw.core" Version="2.1.6" />
 		<PackageReference Include="SQLitePCLRaw.provider.dynamic_cdecl" Version="2.1.6" />
 		<PackageReference Include="SQLitePCLRaw.provider.sqlite3" Version="2.1.6" />
+		<PackageReference Include="Syncfusion.Maui.Charts" Version="30.1.40" />
+		<PackageReference Include="Syncfusion.Maui.Core" Version="30.1.40" />
+		<PackageReference Include="Syncfusion.Maui.Inputs" Version="30.1.40" />
 	</ItemGroup>
 
 	<ItemGroup>

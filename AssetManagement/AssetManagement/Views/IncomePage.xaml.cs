@@ -93,6 +93,13 @@ public partial class IncomePage : ContentPage
             };
             incomeCategories.Add(objCategories);
             pickerIncomeCategory.ItemsSource = incomeCategories.Select(i => i.CategoryName).ToList();
+
+            if (currentTheme == AppTheme.Dark)
+            {
+                //set to white color
+                pickerIncomeCategory.TextColor = Color.FromArgb("#FFFFFF");
+                pickerIncomeCategory.BackgroundColor = Color.FromArgb("#000000");
+            }
         }
         catch(Exception)
         {
@@ -194,9 +201,9 @@ public partial class IncomePage : ContentPage
         var incomeDetail = _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionId == transactionId).FirstOrDefaultAsync();
         //call database to get corresponding Id details
 
-        pickerIncomeCategory.SelectedItem = textCell[0].Trim();
+        pickerIncomeCategory.Text = textCell[0].Trim();
 
-        if (pickerIncomeCategory.SelectedItem == null)
+        if (string.IsNullOrEmpty(pickerIncomeCategory.Text))
         {
             DisplayAlert("Info", textCell[0].Trim() + " - Please make this category visible from Manage Category page in order to edit.", "OK");
         }
@@ -243,7 +250,7 @@ public partial class IncomePage : ContentPage
 
     private async void btnSaveIncome_Clicked(object sender, EventArgs e)
     {
-        if (pickerIncomeCategory.Items.Count == 0)
+        if (((pickerIncomeCategory.ItemsSource as IEnumerable<object>)?.Cast<object>().Count() ?? 0) == 0)
         {
             await DisplayAlert("Message", "Please create income categories under Settings -> Manage Categories before adding expenses", "OK");
             return;
@@ -253,7 +260,7 @@ public partial class IncomePage : ContentPage
             await DisplayAlert("Message", "Please input required values", "OK");
             return;
         }
-        else if (pickerIncomeCategory.SelectedIndex == -1)
+        else if (string.IsNullOrEmpty(pickerIncomeCategory.Text))
         {
             await DisplayAlert("Message", "Please select a category", "OK");
             return;
@@ -274,6 +281,15 @@ public partial class IncomePage : ContentPage
             entryTaxAmount.Text = "0";
         }
 
+        //check if category present in master table
+        var incomeCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Income").ToListAsync();
+        if (!incomeCategories.Any(c => c.CategoryName == pickerIncomeCategory.Text.Trim()))
+        {
+            await DisplayAlert("Message", "Please create this category under Settings -> Manage Categories before adding income", "OK");
+            return;
+        }
+        //check if category present in master table
+
         if (string.IsNullOrEmpty(txtIncomeTransactionId.Text))//insert
         {
             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
@@ -282,7 +298,7 @@ public partial class IncomePage : ContentPage
                 TaxAmountCut=Convert.ToDouble(entryTaxAmount.Text),
                 TransactionType = "Income",
                 Date = dpDateIncome.Date != DateTime.Now.Date ? dpDateIncome.Date : DateTime.Now,
-                CategoryName = Convert.ToString(pickerIncomeCategory.SelectedItem),
+                CategoryName = Convert.ToString(pickerIncomeCategory.Text.Trim()),
                 OwnerName=Convert.ToString(pickerOwnerName.SelectedItem),
                 Remarks = entryIncomeRemarks.Text
             };
@@ -311,7 +327,7 @@ public partial class IncomePage : ContentPage
                 TaxAmountCut = Convert.ToDouble(entryTaxAmount.Text),
                 TransactionType = "Income",
                 Date = dpDateIncome.Date != DateTime.Now.Date ? dpDateIncome.Date : DateTime.Now,
-                CategoryName = Convert.ToString(pickerIncomeCategory.SelectedItem),
+                CategoryName = Convert.ToString(pickerIncomeCategory.Text.Trim()),
                 OwnerName = Convert.ToString(pickerOwnerName.SelectedItem),
                 Remarks = entryIncomeRemarks.Text
             };
@@ -345,7 +361,7 @@ public partial class IncomePage : ContentPage
         txtIncomeTransactionId.Text = "";
         entryIncomeAmount.Text = "";
         entryTaxAmount.Text = "";
-        pickerIncomeCategory.SelectedIndex = -1;
+        pickerIncomeCategory.Text = "";
         entryIncomeRemarks.Text = "";
         dpDateIncome.Date = DateTime.Now;
     }
@@ -474,11 +490,11 @@ public partial class IncomePage : ContentPage
         }
     }
 
-    private void pickerIncomeCategory_SelectedIndexChanged(object sender, EventArgs e)
+    private void pickerIncomeCategory_SelectedIndexChanged(object sender, Syncfusion.Maui.Inputs.SelectionChangedEventArgs e)
     {
-        if (pickerIncomeCategory.SelectedItem != null)
+        if (!string.IsNullOrEmpty(pickerIncomeCategory.Text))
         {
-            if (pickerIncomeCategory.SelectedItem.ToString() == Constants.AddNewCategoryOption)
+            if (pickerIncomeCategory.Text == Constants.AddNewCategoryOption)
             {
                 Navigation.PushAsync(new ManageCategoriesPage());
             }

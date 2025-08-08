@@ -8,6 +8,7 @@ using Microcharts;
 //using Mopups.Services;
 using SkiaSharp;
 using SQLite;
+using Syncfusion.Maui.Charts;
 using System.Data.Common;
 using System.Globalization;
 using System.Xml.Linq;
@@ -51,7 +52,7 @@ public partial class AssetReportPage : ContentPage
         //    await DisplayAlert("Welcome", "The secondary page has opened!", "OK");
         //});
         Task.Run(async () => { await CheckIfAssetsPresent(); });
-        
+
     }
     public async Task CheckIfAssetsPresent()
     {
@@ -59,8 +60,15 @@ public partial class AssetReportPage : ContentPage
         {
             if (await SummaryByHolderName())
             {
-                ShowAssetsByEquityAndDebt();
+                if (currentTheme == AppTheme.Dark)
+                {
+                    //set to white color
+                    lblNetWorthLabel.TextColor = Color.FromArgb("#FFFFFF");
+                    lblAssetAllocation.TextColor = Color.FromArgb("#FFFFFF");
+                }
+                //ShowAssetsByEquityAndDebt();
                 ShowNetWorthChart();
+                LoadPieChartData();
             }
         });
     }
@@ -144,6 +152,43 @@ public partial class AssetReportPage : ContentPage
         }
 
         await DisplayAlert("Asset Info", displayText, "Ok");
+    }
+
+    private async void LoadPieChartData()
+    {
+        var totalAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets");
+        if (totalAmount[0].Amount > 0)
+        {
+            var debtPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Bank'" +
+                    ",'NCD','MLD','PPF','Debt Mutual Fund')");
+
+            var equityPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Equity Mutual Fund','Stocks')");
+
+            var goldPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('SGB'" +
+                ",'Gold')");
+
+            var othersPortfolioAmount = await _dbConnection.QueryAsync<Assets>("select Sum(Amount) as Amount from Assets where Type in ('Insurance_MF'" +
+                ",'EPF','NPS','Others')");
+
+            var assetData = new List<AssetClassReport>
+            {
+                new AssetClassReport { AssetClass = "Debt/Fixed Income", Amount = Convert.ToDouble(debtPortfolioAmount[0].Amount) },
+                new AssetClassReport { AssetClass = "Equity", Amount = Convert.ToDouble(equityPortfolioAmount[0].Amount) },
+                new AssetClassReport { AssetClass = "Gold", Amount = Convert.ToDouble(goldPortfolioAmount[0].Amount) },
+                new AssetClassReport { AssetClass = "Others", Amount = Convert.ToDouble(othersPortfolioAmount[0].Amount) }
+            };
+
+            var brushes = new List<Brush>
+            {
+                new SolidColorBrush(Color.FromArgb("#4A90E2")),
+                new SolidColorBrush(Color.FromArgb("#27AE60")),
+                new SolidColorBrush(Color.FromArgb("#F1C40F")),
+                new SolidColorBrush(Color.FromArgb("#BDC3C7"))
+            };
+
+            pieSeries.ItemsSource = assetData;
+            pieSeries.PaletteBrushes = brushes;
+        }
     }
 
     public async void ShowAssetsByEquityAndDebt()
@@ -357,14 +402,14 @@ public partial class AssetReportPage : ContentPage
                 };
                 listChartEntry.Add(chartEntry);
             }
-            assetAllocationChart.Chart = new PieChart
-            {
-                HoleRadius = 2,
-                Entries = listChartEntry,
-                LabelTextSize = 30,
-                LabelMode = LabelMode.LeftAndRight,
-                GraphPosition = GraphPosition.AutoFill
-            };
+            //assetAllocationChart.Chart = new PieChart
+            //{
+            //    HoleRadius = 2,
+            //    Entries = listChartEntry,
+            //    LabelTextSize = 30,
+            //    LabelMode = LabelMode.LeftAndRight,
+            //    GraphPosition = GraphPosition.AutoFill
+            //};
         }
         catch (Exception ex)
         {
