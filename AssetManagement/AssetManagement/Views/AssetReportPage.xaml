@@ -2,7 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:micro="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
+             xmlns:control="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts"
              x:Class="AssetManagement.Views.AssetReportPage"
+             xmlns:local="clr-namespace:AssetManagement.ViewModels"
              Title="Asset Reports">
     <ScrollView>
         <VerticalStackLayout x:Name="stackLayout">
@@ -19,8 +21,12 @@
           Y2="0"
           Stroke="orange"
           StrokeThickness="5" /> <!--drawing a straight line-->
-            <BoxView HeightRequest="20" Color="Transparent"/>
-
+            <!--<BoxView HeightRequest="20" Color="Transparent"/>-->
+            <Label Text="Net Worth Changes" x:Name="lblNetWorthLabel"
+FontSize="20" 
+HorizontalOptions="Center" 
+HorizontalTextAlignment="Center"
+TextColor="Black"/>
             <micro:ChartView x:Name="netWorthChangeChart" HeightRequest="800" />
             <Line X1="-2"
 Y1="0"
@@ -29,13 +35,38 @@ Y2="0"
 Stroke="orange"
 StrokeThickness="5" />
             <!--drawing a straight line-->
-            <micro:ChartView x:Name="assetAllocationChart" HeightRequest="500" />
+            
+            <!--<micro:ChartView x:Name="assetAllocationChart" HeightRequest="500" />-->
             <Line X1="-2"
 Y1="0"
 X2="600"
 Y2="0"
 Stroke="orange"
 StrokeThickness="5" />
+
+            <control:SfCircularChart HeightRequest="500">
+                <control:SfCircularChart.Title>
+                    <Label Text="Asset Allocation" x:Name="lblAssetAllocation"
+               FontSize="20" 
+               HorizontalOptions="Center" 
+               HorizontalTextAlignment="Center"
+               TextColor="Black"/>
+                </control:SfCircularChart.Title>
+                <control:SfCircularChart.Legend>
+                    <control:ChartLegend></control:ChartLegend>
+                </control:SfCircularChart.Legend>
+                <control:PieSeries x:Name="pieSeries" XBindingPath="AssetClass" YBindingPath="Amount"
+                                   EnableTooltip="True"
+                                   Radius="1"
+                                   ShowDataLabels="True"
+                                   LabelContext="Percentage">
+
+                </control:PieSeries>
+                <!--<control:SfCircularChart.BindingContext>
+                    <local:AssetListPageViewModel></local:AssetListPageViewModel>
+                </control:SfCircularChart.BindingContext>-->
+            </control:SfCircularChart>
+
             <!--drawing a straight line-->
         </VerticalStackLayout>
     </ScrollView>
