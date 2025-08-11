@@ -167,21 +167,8 @@ public partial class SettingsPage : ContentPage
         await SetUpDb();
         if (e.Value)
         {
-            var biometricService = DependencyService.Get<IBiometricService>();
-
-            if (biometricService != null && biometricService.IsBiometricEnrolled())
-            {
-                lblLockText.Text = "App Lock On";
-                int rowsAffected = await _dbConnection.ExecuteAsync("Update Owners set Locked=?", true);
-            }
-            else
-            {
-                await DisplayAlert("Biometric Not Set", "Please add at least one Fingerprint or Face ID before enabling app lock.", "OK");
-                lockSwitch.IsToggled = false;
-            }
-
-            //lblLockText.Text = "App Lock On";
-            //int rowsAffected = await _dbConnection.ExecuteAsync("Update Owners set Locked=?", true);
+            lblLockText.Text = "App Lock On";
+            int rowsAffected = await _dbConnection.ExecuteAsync("Update Owners set Locked=?", true);
             //await DisplayAlert("Message", "App locked using pattern/fingerprint", "OK");
         }
         else
