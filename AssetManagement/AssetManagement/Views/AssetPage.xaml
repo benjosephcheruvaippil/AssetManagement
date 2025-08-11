@@ -440,7 +440,7 @@ VerticalOptions="Center" />
                 <BoxView Grid.Row="11"
 Grid.ColumnSpan="3"
 Color="White" />
-                <Entry x:Name="entAssetSearch" TextChanged="entAssetSearch_TextChanged" Grid.Row="11" Grid.ColumnSpan="3" Placeholder="Search by name,amount,holder"/>
+                <Entry x:Name="entAssetSearch" TextColor="Black" TextChanged="entAssetSearch_TextChanged" Grid.Row="11" Grid.ColumnSpan="3" Placeholder="Search by name,amount,holder"/>
 
                 <BoxView Grid.Row="12"
                  Grid.ColumnSpan="3"
