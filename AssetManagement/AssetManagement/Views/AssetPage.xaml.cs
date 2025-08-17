@@ -1232,6 +1232,7 @@ public partial class AssetPage : TabbedPage
         if (objAsset.AssetId != 0)
         {
             btnUploadImages.IsVisible = true;
+            btnCaptureImage.IsVisible = true;
 
             entEntityName.Text = objAsset.InvestmentEntity;
             entType.SelectedItem = objAsset.Type;
@@ -1303,6 +1304,7 @@ public partial class AssetPage : TabbedPage
             entRiskValue.Text = "";
 
             btnUploadImages.IsVisible = false;
+            btnCaptureImage.IsVisible = false;
             imageStack.Children.Clear();
         }
         catch (Exception ex)
@@ -1401,48 +1403,53 @@ public partial class AssetPage : TabbedPage
 
             if (result != null)
             {
-                string filePath = result.FullPath; // Get file path
-                var uploadToGoogleDriveResult = await UploadImageToGoogleDrive(filePath);
-
-                if ((bool)uploadToGoogleDriveResult.IsSuccess)
-                {
-                    int assetId = Convert.ToInt32(lblAssetId.Text);
-
-                    AssetDocuments docs = new AssetDocuments();
-                    docs.AssetId = assetId;
-                    docs.FileId = uploadToGoogleDriveResult.FileId;
-                    docs.FilePath = $"https://drive.google.com/uc?export=view&id={uploadToGoogleDriveResult.FileId}";
-                    await _dbConnection.InsertAsync(docs);
-
-                    var getFileList = await _dbConnection.Table<AssetDocuments>().Where(d => d.AssetId == assetId).ToListAsync();
-                    List<FileList> imageUrlList = new List<FileList>();
-                    if (getFileList.Count > 0)
-                    {
-                        foreach (var item in getFileList)
-                        {
-                            FileList imageUrls = new FileList
-                            {
-                                FileId = item.FileId,
-                                FilePath = item.FilePath
-                            };
-
-                            imageUrlList.Add(imageUrls);
-                        }
-                    }
-
-                    await LoadImages(imageUrlList);
-
-                    await DisplayAlert("Success", $"File uploaded to google drive.", "Ok");
-                }
-                else
-                {
-                    await DisplayAlert("Failed", $"File upload failed.", "Ok");
-                }
+                //string filePath = result.FullPath; // Get file path
+                await SaveImage(result.FullPath);
             }
         }
         catch (Exception ex)
         {
             await DisplayAlert("Error", $"Failed to pick image: {ex.Message}", "OK");
+        }
+    }
+
+    public async Task SaveImage(string filePath)
+    {
+        var uploadToGoogleDriveResult = await UploadImageToGoogleDrive(filePath);
+
+        if ((bool)uploadToGoogleDriveResult.IsSuccess)
+        {
+            int assetId = Convert.ToInt32(lblAssetId.Text);
+
+            AssetDocuments docs = new AssetDocuments();
+            docs.AssetId = assetId;
+            docs.FileId = uploadToGoogleDriveResult.FileId;
+            docs.FilePath = $"https://drive.google.com/uc?export=view&id={uploadToGoogleDriveResult.FileId}";
+            await _dbConnection.InsertAsync(docs);
+
+            var getFileList = await _dbConnection.Table<AssetDocuments>().Where(d => d.AssetId == assetId).ToListAsync();
+            List<FileList> imageUrlList = new List<FileList>();
+            if (getFileList.Count > 0)
+            {
+                foreach (var item in getFileList)
+                {
+                    FileList imageUrls = new FileList
+                    {
+                        FileId = item.FileId,
+                        FilePath = item.FilePath
+                    };
+
+                    imageUrlList.Add(imageUrls);
+                }
+            }
+
+            await LoadImages(imageUrlList);
+
+            await DisplayAlert("Success", $"File uploaded to google drive.", "Ok");
+        }
+        else
+        {
+            await DisplayAlert("Failed", $"File upload failed.", "Ok");
         }
     }
 
@@ -1550,5 +1557,39 @@ public partial class AssetPage : TabbedPage
     private async void OpenFullScreenImage(string imageUrl)
     {
         await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl));
+    }
+
+    private async void btnCaptureImage_Clicked(object sender, EventArgs e)
+    {
+        FileResult photo;
+        try
+        {
+            if (MediaPicker.Default.IsCaptureSupported)
+            {
+                photo = await MediaPicker.CapturePhotoAsync();
+                //await LoadPhotoAsync(photo);
+
+                if (photo == null)
+                    return;
+
+                // Save into local cache
+                var filePath = Path.Combine(FileSystem.CacheDirectory, photo.FileName);
+                using (var stream = await photo.OpenReadAsync())
+                using (var newStream = File.OpenWrite(filePath))
+                {
+                    await stream.CopyToAsync(newStream);
+                }
+
+                await SaveImage(filePath);
+            }
+            else
+            {
+                await DisplayAlert("Not Supported", "Camera capture is not supported on this device", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Capturing photo failed: {ex.Message}", "OK");
+        }
     }
 }
