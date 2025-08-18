@@ -21,8 +21,8 @@
 		<ApplicationIdGuid>e44d9f3a-6397-4876-bf13-6606255cdef8</ApplicationIdGuid>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>4.8.9</ApplicationDisplayVersion>
-		<ApplicationVersion>35</ApplicationVersion>
+		<ApplicationDisplayVersion>4.9.1</ApplicationDisplayVersion>
+		<ApplicationVersion>36</ApplicationVersion>
 		<!--<PublishTrimmed>true</PublishTrimmed>-->
 		<AndroidLinkResources>false</AndroidLinkResources>
 
