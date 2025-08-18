@@ -406,7 +406,7 @@ VerticalOptions="Center" />
                                    FontSize="Medium" 
                                    Grid.Column="0" />
 
-                                <Button x:Name="btnUploadImages"
+                                <!--<Button x:Name="btnUploadImages"
                                     Text="Upload Image" 
                                     Clicked="SelectImages_Clicked" 
                                     FontSize="Small"                              
@@ -421,7 +421,28 @@ VerticalOptions="Center" />
                                     Padding="2"
                                     Margin="2,2,2,2"
                                     Grid.Column="2"
-                                    IsVisible="False" />    
+                                    IsVisible="False" />-->
+
+                                <ImageButton x:Name="btnUploadImages"
+                                 Source="upload.png"
+                                 Clicked="SelectImages_Clicked"
+                                 WidthRequest="40"
+                                 HeightRequest="40"
+                                 BackgroundColor="Transparent"
+                                 Margin="2"
+                                 Grid.Column="1"
+                                 IsVisible="False" />
+
+                                        <ImageButton x:Name="btnCaptureImage"
+                                 Source="camera.png"
+                                 Clicked="btnCaptureImage_Clicked"
+                                 WidthRequest="40"
+                                 HeightRequest="40"
+                                 BackgroundColor="Transparent"
+                                 Margin="2"
+                                 Grid.Column="2"
+                                 IsVisible="False" />
+
                             </Grid>
                             <ScrollView Orientation="Horizontal">
                                 <HorizontalStackLayout x:Name="imageStack" Spacing="10"/>
