@@ -21,8 +21,8 @@
 		<ApplicationIdGuid>e44d9f3a-6397-4876-bf13-6606255cdef8</ApplicationIdGuid>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>4.9.1</ApplicationDisplayVersion>
-		<ApplicationVersion>36</ApplicationVersion>
+		<ApplicationDisplayVersion>4.9.4</ApplicationDisplayVersion>
+		<ApplicationVersion>39</ApplicationVersion>
 		<!--<PublishTrimmed>true</PublishTrimmed>-->
 		<AndroidLinkResources>false</AndroidLinkResources>
 
@@ -162,7 +162,7 @@
 		<AndroidSigningKeyPass>benjoseph</AndroidSigningKeyPass>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android35.0|AnyCPU'">
 		<AndroidLinkTool>r8</AndroidLinkTool>
 	</PropertyGroup>
 
