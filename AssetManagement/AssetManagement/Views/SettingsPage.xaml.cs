@@ -179,4 +179,9 @@ public partial class SettingsPage : ContentPage
             //await DisplayAlert("Message", "App lock is removed", "OK");
         }
     }
+
+    private async void btnManageAssetType_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new ManageAssetTypePage());
+    }
 }
