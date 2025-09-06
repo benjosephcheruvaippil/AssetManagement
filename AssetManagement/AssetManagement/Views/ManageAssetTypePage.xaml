@@ -2,8 +2,112 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AssetManagement.Views.ManageAssetTypePage"
+             xmlns:ListView="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView"
+             xmlns:DataPager="clr-namespace:Syncfusion.Maui.DataGrid.DataPager;assembly=Syncfusion.Maui.DataGrid"
+             xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
              Title="ManageAssetTypePage">
-    <VerticalStackLayout>
 
-    </VerticalStackLayout>
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <VerticalStackLayout Grid.Row="0" Padding="10" Spacing="-10">
+            <inputLayout:SfTextInputLayout x:Name="txtPlaceNameLayout"
+                        ContainerType="Outlined"
+                        ContainerBackground="{AppThemeBinding Light=White, Dark=Black}"
+                Hint="Place Name">
+                <inputLayout:SfTextInputLayout.HintLabelStyle>
+                    <inputLayout:LabelStyle FontSize="20"/>
+                </inputLayout:SfTextInputLayout.HintLabelStyle>
+                <inputLayout:SfTextInputLayout.Content>
+                    <Entry x:Name="entryPlaceName" FontSize="20" BackgroundColor="Black"/>
+                </inputLayout:SfTextInputLayout.Content>
+            </inputLayout:SfTextInputLayout>
+
+            <inputLayout:SfTextInputLayout x:Name="txtPlaceDescriptionLayout"
+         ContainerType="Outlined"
+         ContainerBackground="{AppThemeBinding Light=White, Dark=Black}"
+         Hint="Place Description">
+                <inputLayout:SfTextInputLayout.HintLabelStyle>
+                    <inputLayout:LabelStyle FontSize="20"/>
+                </inputLayout:SfTextInputLayout.HintLabelStyle>
+                <inputLayout:SfTextInputLayout.Content>
+                    <Entry x:Name="entryPlaceDescription" FontSize="20" BackgroundColor="Black"/>
+                </inputLayout:SfTextInputLayout.Content>
+            </inputLayout:SfTextInputLayout>
+
+        </VerticalStackLayout>
+
+
+        <HorizontalStackLayout Grid.Row="1" Margin="0,0,0,10" Spacing="10" HorizontalOptions="Center">
+            <Button x:Name="btnSave" Text="Save" Clicked="btnSave_Clicked"/>
+            <Button x:Name="btnClear" Text="Clear" Clicked="btnClear_Clicked"/>
+        </HorizontalStackLayout>
+
+
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="59"/>
+            </Grid.RowDefinitions>
+
+
+            <ListView:SfListView x:Name="verticalListView" 
+                              Grid.Row="0"
+                              AutoFitMode="DynamicHeight"
+                              SelectionMode="Single"
+                              ItemTapped="verticalListView_ItemTapped">
+                <ListView:SfListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="16,12,16,12" ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <!--<ColumnDefinition Width="44"/>-->
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <!--<Border HorizontalOptions="Start" Padding="0" HeightRequest="44" WidthRequest="44" Stroke="Transparent">
+                             <Border.StrokeShape>
+                                 <RoundRectangle CornerRadius="3"/>
+                             </Border.StrokeShape>
+                             <Image Grid.Column="0" Source="{Binding Image,Converter={StaticResource imageconverter}}" Aspect="Fill" HeightRequest="44" WidthRequest="44"/>
+                         </Border>-->
+                            <Grid Grid.Column="0" VerticalOptions="Center" RowSpacing="4">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Label Grid.Row="0"
+                                    Text="{Binding Name}"
+                                    FontSize="20"
+                                    FontFamily="Roboto-Regular"
+                                    CharacterSpacing="0.25"
+                                    TextColor="{AppThemeBinding Light={StaticResource HeaderForegroundLight},Dark={StaticResource HeaderForeground}}"/>
+                                <Label Grid.Row="1" Text="{Binding Description}" FontAttributes="Bold,Italic"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextColourAlt1Light},Dark={StaticResource TextColourAlt1}}"
+                                    FontSize="18" FontFamily="Roboto-Regular" LineBreakMode="TailTruncation" CharacterSpacing="0.15"/>
+                                <Label Grid.Row="2" Text="{Binding Description}" FontAttributes="Bold,Italic"
+                                     TextColor="{AppThemeBinding Light={StaticResource TextColourAlt1Light},Dark={StaticResource TextColourAlt1}}"
+                                     FontSize="18" FontFamily="Roboto-Regular" LineBreakMode="TailTruncation" CharacterSpacing="0.15"/>
+                                <Label Grid.Row="3" Text="{Binding Description}" FontAttributes="Bold,Italic"
+  TextColor="{AppThemeBinding Light={StaticResource TextColourAlt1Light},Dark={StaticResource TextColourAlt1}}"
+  FontSize="18" FontFamily="Roboto-Regular" LineBreakMode="TailTruncation" CharacterSpacing="0.15"/>
+                            </Grid>
+                        </Grid>
+                    </DataTemplate>
+                </ListView:SfListView.ItemTemplate>
+            </ListView:SfListView>
+            <DataPager:SfDataPager x:Name="dataPager"
+                Grid.Row="1"
+                Margin="7.5,11.5,7.5,11.5"
+                HorizontalOptions="Fill"
+                VerticalOptions="Center"
+                HeightRequest="36"
+                ButtonSize="36"
+                ButtonSpacing="8"
+                ButtonFontSize="14"
+                NumericButtonCount="7"
+                PageChanged="dataPager_PageChanged">
+            </DataPager:SfDataPager>
+        </Grid>
+    </Grid>
+
 </ContentPage>
