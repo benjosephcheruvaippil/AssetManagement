@@ -98,7 +98,7 @@
             </ListView:SfListView>
             <DataPager:SfDataPager x:Name="dataPager" 
             Grid.Row="1"
-            Margin="7.5,11.5,7.5,11.5"
+            HorizontalOptions="Center"
             HeightRequest="36"
             ButtonSize="36"
             ButtonSpacing="8"
