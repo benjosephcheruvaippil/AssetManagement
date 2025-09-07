@@ -15,7 +15,7 @@
                         ContainerBackground="{AppThemeBinding Light=White, Dark=Black}"
                 Hint="Place Name">
                 <inputLayout:SfTextInputLayout.HintLabelStyle>
-                    <inputLayout:LabelStyle FontSize="20"/>
+                    <inputLayout:LabelStyle FontSize="20" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
                 </inputLayout:SfTextInputLayout.HintLabelStyle>
                 <inputLayout:SfTextInputLayout.Content>
                     <Entry x:Name="entryPlaceName" FontSize="20" BackgroundColor="Black"/>
@@ -27,7 +27,7 @@
          ContainerBackground="{AppThemeBinding Light=White, Dark=Black}"
          Hint="Place Description">
                 <inputLayout:SfTextInputLayout.HintLabelStyle>
-                    <inputLayout:LabelStyle FontSize="20"/>
+                    <inputLayout:LabelStyle FontSize="20" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
                 </inputLayout:SfTextInputLayout.HintLabelStyle>
                 <inputLayout:SfTextInputLayout.Content>
                     <Entry x:Name="entryPlaceDescription" FontSize="20" BackgroundColor="Black"/>
@@ -54,7 +54,8 @@
                               Grid.Row="0"
                               AutoFitMode="DynamicHeight"
                               SelectionMode="Single"
-                              ItemTapped="verticalListView_ItemTapped">
+                              ItemTapped="verticalListView_ItemTapped"
+                                 SelectionBackground="#333333">
                 <ListView:SfListView.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="16,12,16,12" ColumnSpacing="12">
@@ -95,17 +96,26 @@
                     </DataTemplate>
                 </ListView:SfListView.ItemTemplate>
             </ListView:SfListView>
-            <DataPager:SfDataPager x:Name="dataPager"
-                Grid.Row="1"
-                Margin="7.5,11.5,7.5,11.5"
-                HorizontalOptions="Fill"
-                VerticalOptions="Center"
-                HeightRequest="36"
-                ButtonSize="36"
-                ButtonSpacing="8"
-                ButtonFontSize="14"
-                NumericButtonCount="7"
-                PageChanged="dataPager_PageChanged">
+            <DataPager:SfDataPager x:Name="dataPager" 
+            Grid.Row="1"
+            Margin="7.5,11.5,7.5,11.5"
+            HeightRequest="36"
+            ButtonSize="36"
+            ButtonSpacing="8"
+            ButtonFontSize="14"
+            NumericButtonCount="7"     
+            PageChanged="dataPager_PageChanged">
+                <DataPager:SfDataPager.DefaultStyle>
+                    <DataPager:DataPagerStyle
+                        NumericButtonBackgroundColor="Transparent"      
+                        NumericButtonTextColor="#CCCCCC"
+                        NumericButtonSelectionBackgroundColor="Transparent"
+                        NumericButtonSelectionTextColor="White"
+                        NavigationButtonBackgroundColor="Transparent"
+                        NavigationButtonIconColor="White"
+                        NavigationButtonDisableBackgroundColor="Transparent"
+                        NavigationButtonDisableIconColor="#555555"/>
+                </DataPager:SfDataPager.DefaultStyle>
             </DataPager:SfDataPager>
         </Grid>
     </Grid>
