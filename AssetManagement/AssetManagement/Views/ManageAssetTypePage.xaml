@@ -71,39 +71,39 @@
                                  SelectionBackground="{AppThemeBinding Light=#ADD8E6, Dark=#333333}">
                 <ListView:SfListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="16,12,16,12" ColumnSpacing="12">
-                            <Grid.ColumnDefinitions>
-                                <!--<ColumnDefinition Width="44"/>-->
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <!--<Border HorizontalOptions="Start" Padding="0" HeightRequest="44" WidthRequest="44" Stroke="Transparent">
-                             <Border.StrokeShape>
-                                 <RoundRectangle CornerRadius="3"/>
-                             </Border.StrokeShape>
-                             <Image Grid.Column="0" Source="{Binding Image,Converter={StaticResource imageconverter}}" Aspect="Fill" HeightRequest="44" WidthRequest="44"/>
-                         </Border>-->
-                            <Grid Grid.Column="0" VerticalOptions="Center" RowSpacing="4">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <Label Grid.Row="0" IsVisible="False" Text="{Binding AssetTypeId}"/>
-                                <Label Grid.Row="1"
+                        <Border Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}" 
+                        StrokeThickness="1"
+                        StrokeShape="Rectangle"
+                        Margin="4"
+                        Padding="8">
+                            <Grid Margin="16,12,16,12" ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <!--<ColumnDefinition Width="44"/>-->
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="0" VerticalOptions="Center" RowSpacing="4">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Row="0" IsVisible="False" Text="{Binding AssetTypeId}"/>
+                                    <Label Grid.Row="1"
                                     Text="{Binding AssetTypeName}"
                                     FontSize="20"
                                     FontFamily="Roboto-Regular"
                                     CharacterSpacing="0.25"
                                     TextColor="{AppThemeBinding Light={StaticResource HeaderForegroundLight},Dark={StaticResource HeaderForeground}}"/>
-                                <Label Grid.Row="2" Text="{Binding Description}" FontAttributes="Bold,Italic"
+                                    <Label Grid.Row="2" Text="{Binding Description}" FontAttributes="Bold,Italic"
                                     TextColor="{AppThemeBinding Light={StaticResource TextColourAlt1Light},Dark={StaticResource TextColourAlt1}}"
                                     FontSize="18" FontFamily="Roboto-Regular" LineBreakMode="TailTruncation" CharacterSpacing="0.15"/>
-                                <Label Grid.Row="3" IsVisible="False" Text="{Binding Description}" FontAttributes="Bold,Italic"
+                                    <Label Grid.Row="3" IsVisible="False" Text="{Binding Description}" FontAttributes="Bold,Italic"
                                     TextColor="{AppThemeBinding Light={StaticResource TextColourAlt1Light},Dark={StaticResource TextColourAlt1}}"
                                     FontSize="18" FontFamily="Roboto-Regular" LineBreakMode="TailTruncation" CharacterSpacing="0.15"/>
+                                </Grid>
                             </Grid>
-                        </Grid>
+                        </Border>
                     </DataTemplate>
                 </ListView:SfListView.ItemTemplate>
             </ListView:SfListView>
