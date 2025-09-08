@@ -1,44 +1,66 @@
+using AssetManagement.Models;
+using SQLite;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace AssetManagement.Views;
 
 public partial class ManageAssetTypePage : ContentPage
 {
-    private ObservableCollection<PlaceInfoNew> places;
+    private SQLiteAsyncConnection _dbConnection;
+    private int pageSize = 3;
+    private ObservableCollection<AssetTypeModel> assetTypeList = new ObservableCollection<AssetTypeModel>();
     public ManageAssetTypePage()
     {
         InitializeComponent();
-        //contactForm.DataObject = new PlaceInfoNew();
 
-        places = new ObservableCollection<PlaceInfoNew>
+        PopulateAssetTypeList("onLoad");
+    }
+
+    private async Task SetUpDb()
+    {
+        try
         {
-            new PlaceInfoNew { Name = "Kochi",     Description = "Queen of the Arabian Sea" },
-            new PlaceInfoNew { Name = "Bangalore", Description = "Silicon Valley of India" },
-            new PlaceInfoNew { Name = "Sydney",    Description = "Harbour City" },
-            new PlaceInfoNew { Name = "Mumbai",    Description = "Financial Capital" }
-            //new PlaceInfoNew { Name = "Kolkata",   Description = "City of Joy" },
-            //new PlaceInfoNew { Name = "NEtherlands",     Description = "Capital City" },
-            //new PlaceInfoNew { Name = "New York",     Description = "Capital City" },
-            //new PlaceInfoNew { Name = "California",     Description = "Capital City" },
-            //new PlaceInfoNew { Name = "Machnuts",     Description = "Capital City" },
-            //new PlaceInfoNew { Name = "London",     Description = "Capital City" }
-        };
+            if (_dbConnection == null)
+            {
+                string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
+                _dbConnection = new SQLiteAsyncConnection(dbPath);
+                await _dbConnection.CreateTableAsync<AssetTypeModel>();
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", ex.Message, "OK");
+        }
+    }
 
-        dataPager.Source = places;
-        dataPager.PageSize = 2;
-        verticalListView.ItemsSource = places.Skip(0).Take(2).ToList();
+    public async void PopulateAssetTypeList(string operation)
+    {
+        await SetUpDb();
+        var assetTypes = await _dbConnection.Table<AssetTypeModel>().ToListAsync();
+        assetTypeList.Clear();
+        foreach (var assetType in assetTypes)
+        {
+            assetTypeList.Add(assetType);
+        }
+
+        dataPager.Source = assetTypeList;
+        if (operation == "onSave" || operation == "onDelete")
+        {
+            dataPager.MoveToFirstPage();
+        }
+        dataPager.PageSize = pageSize;
+        verticalListView.ItemsSource = assetTypeList.Skip(0).Take(pageSize).ToList();
     }
 
     private void verticalListView_ItemTapped(object sender, Syncfusion.Maui.ListView.ItemTappedEventArgs e)
     {
-        if (e.DataItem is PlaceInfoNew tappedItem)
+        if (e.DataItem is AssetTypeModel tappedItem)
         {
-            string? name = tappedItem.Name;
-            string? description = tappedItem.Description;
-
-            entryPlaceName.Text = name;
-            entryPlaceDescription.Text = description;
-            // await DisplayAlert("Row Clicked", $"Name: {name}", "OK");
+            txtAssetTypeId.Text = tappedItem.AssetTypeId.ToString();
+            entryAssetTypeName.Text = tappedItem.AssetTypeName;
+            entryAssetTypeDescription.Text = tappedItem.Description;
+            maturityDateAsOfDateRadioGroup.SelectedValue = tappedItem.EnableMaturityDate == true ? "MD" : "AOD";
         }
     }
 
@@ -51,37 +73,76 @@ public partial class ManageAssetTypePage : ContentPage
         var startIndex = newPage * pageSize;
 
         // Assuming you have your original list in a variable `items`
-        var currentPageItems = places.Skip(startIndex).Take(pageSize).ToList();
+        var currentPageItems = assetTypeList.Skip(startIndex).Take(pageSize).ToList();
 
         verticalListView.ItemsSource = currentPageItems;
     }
 
-    private void btnSave_Clicked(object sender, EventArgs e)
+    private async void btnSave_Clicked(object sender, EventArgs e)
     {
-
-        places.Add(new PlaceInfoNew
+        if(string.IsNullOrWhiteSpace(entryAssetTypeName.Text))
         {
-            Name = entryPlaceName.Text,
-            Description = entryPlaceDescription.Text
-        });
+            await DisplayAlert("Validation Error", "Asset Type Name is required.", "OK");
+            return;
+        }
 
-        dataPager.Source = places;
-        dataPager.MoveToFirstPage();
+        AssetTypeModel objAssetTypeModel = new AssetTypeModel()
+        {
+            AssetTypeId = string.IsNullOrEmpty(txtAssetTypeId.Text) ? 0 : int.Parse(txtAssetTypeId.Text),
+            AssetTypeName = entryAssetTypeName.Text.Trim(),
+            Description = entryAssetTypeDescription.Text.Trim(),
+            EnableMaturityDate = maturityDateAsOfDateRadioGroup.SelectedValue?.ToString() == "MD" ? true : false,
+            EnableAsOfDate = maturityDateAsOfDateRadioGroup.SelectedValue?.ToString() == "AOD" ? true : false
+        };
 
-        var currentPageItems = places.Skip(0).Take(2).ToList();
+        await SetUpDb();
 
-        verticalListView.ItemsSource = currentPageItems;
+        if (string.IsNullOrEmpty(txtAssetTypeId.Text))
+        {
+            int rowsAffected = await _dbConnection.InsertAsync(objAssetTypeModel);
+        }
+        else
+        {
+            await _dbConnection.UpdateAsync(objAssetTypeModel);
+        }
+
+        ClearFields();
+
+        PopulateAssetTypeList("onSave");
     }
 
     private void btnClear_Clicked(object sender, EventArgs e)
     {
-        entryPlaceName.Text = "";
-        entryPlaceDescription.Text = "";
+        ClearFields();
     }
-}
 
-public class PlaceInfoNew
-{
-    public string Name { get; set; }
-    public string Description { get; set; }
+    public void ClearFields()
+    {
+        txtAssetTypeId.Text = "";
+        entryAssetTypeName.Text = "";
+        entryAssetTypeDescription.Text = "";
+        maturityDateAsOfDateRadioGroup.SelectedValue = "MD";
+    }
+
+    private async void btnDelete_Clicked(object sender, EventArgs e)
+    {
+        AssetTypeModel objAssetTypeModel = new AssetTypeModel()
+        {
+            AssetTypeId = string.IsNullOrEmpty(txtAssetTypeId.Text) ? 0 : int.Parse(txtAssetTypeId.Text)
+        };
+
+        int result = await _dbConnection.DeleteAsync(objAssetTypeModel);
+        if (result > 0)
+        {
+            await DisplayAlert("Success", "Record deleted successfully.", "OK");
+        }
+        else
+        {
+            await DisplayAlert("Error", "Failed to delete the record.", "OK");
+        }
+
+        ClearFields();
+
+        PopulateAssetTypeList("onDelete");
+    }
 }

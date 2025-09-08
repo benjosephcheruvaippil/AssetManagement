@@ -11,6 +11,8 @@
     <Grid RowDefinitions="Auto,Auto,*">
 
         <VerticalStackLayout Grid.Row="0" Padding="10" Spacing="-10">
+            <Entry x:Name="txtAssetTypeId" IsVisible="False"/>
+            
             <inputLayout:SfTextInputLayout x:Name="txtPlaceNameLayout"
                         ContainerType="Outlined"
                         ContainerBackground="{AppThemeBinding Light=White, Dark=Black}"
@@ -19,7 +21,7 @@
                     <inputLayout:LabelStyle FontSize="20" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
                 </inputLayout:SfTextInputLayout.HintLabelStyle>
                 <inputLayout:SfTextInputLayout.Content>
-                    <Entry x:Name="entryPlaceName" FontSize="20" BackgroundColor="Black"/>
+                    <Entry x:Name="entryAssetTypeName" FontSize="20" BackgroundColor="Black"/>
                 </inputLayout:SfTextInputLayout.Content>
             </inputLayout:SfTextInputLayout>
 
@@ -31,17 +33,17 @@
                     <inputLayout:LabelStyle FontSize="20" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
                 </inputLayout:SfTextInputLayout.HintLabelStyle>
                 <inputLayout:SfTextInputLayout.Content>
-                    <Entry x:Name="entryPlaceDescription" FontSize="20" BackgroundColor="Black"/>
+                    <Entry x:Name="entryAssetTypeDescription" FontSize="20" BackgroundColor="Black"/>
                 </inputLayout:SfTextInputLayout.Content>
             </inputLayout:SfTextInputLayout>
 
-            <sfButtons:SfRadioGroup x:Name="optionsGroup"
+            <sfButtons:SfRadioGroup x:Name="maturityDateAsOfDateRadioGroup"
                                     Orientation="Horizontal"
                                     Spacing="20"
-                                 SelectedValue="A">
+                                 SelectedValue="MD">
 
-                <sfButtons:SfRadioButton Text="Option A" Value="A"/>
-                <sfButtons:SfRadioButton Text="Option B" Value="B"/>
+                <sfButtons:SfRadioButton Text="Maturity Date" Value="MD"/>
+                <sfButtons:SfRadioButton Text="As Of Date" Value="AOD"/>
 
             </sfButtons:SfRadioGroup>
         </VerticalStackLayout>
@@ -49,6 +51,7 @@
 
         <HorizontalStackLayout Grid.Row="1" Margin="0,0,0,10" Spacing="10" HorizontalOptions="Center">
             <Button x:Name="btnSave" Text="Save" Clicked="btnSave_Clicked"/>
+            <Button x:Name="btnDelete" Text="Delete" Clicked="btnDelete_Clicked"/>
             <Button x:Name="btnClear" Text="Clear" Clicked="btnClear_Clicked"/>
         </HorizontalStackLayout>
 
@@ -86,21 +89,19 @@
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
-                                <Label Grid.Row="0"
-                                    Text="{Binding Name}"
+                                <Label Grid.Row="0" IsVisible="False" Text="{Binding AssetTypeId}"/>
+                                <Label Grid.Row="1"
+                                    Text="{Binding AssetTypeName}"
                                     FontSize="20"
                                     FontFamily="Roboto-Regular"
                                     CharacterSpacing="0.25"
                                     TextColor="{AppThemeBinding Light={StaticResource HeaderForegroundLight},Dark={StaticResource HeaderForeground}}"/>
-                                <Label Grid.Row="1" Text="{Binding Description}" FontAttributes="Bold,Italic"
+                                <Label Grid.Row="2" Text="{Binding Description}" FontAttributes="Bold,Italic"
                                     TextColor="{AppThemeBinding Light={StaticResource TextColourAlt1Light},Dark={StaticResource TextColourAlt1}}"
                                     FontSize="18" FontFamily="Roboto-Regular" LineBreakMode="TailTruncation" CharacterSpacing="0.15"/>
-                                <Label Grid.Row="2" Text="{Binding Description}" FontAttributes="Bold,Italic"
-                                     TextColor="{AppThemeBinding Light={StaticResource TextColourAlt1Light},Dark={StaticResource TextColourAlt1}}"
-                                     FontSize="18" FontFamily="Roboto-Regular" LineBreakMode="TailTruncation" CharacterSpacing="0.15"/>
-                                <Label Grid.Row="3" Text="{Binding Description}" FontAttributes="Bold,Italic"
-  TextColor="{AppThemeBinding Light={StaticResource TextColourAlt1Light},Dark={StaticResource TextColourAlt1}}"
-  FontSize="18" FontFamily="Roboto-Regular" LineBreakMode="TailTruncation" CharacterSpacing="0.15"/>
+                                <Label Grid.Row="3" IsVisible="False" Text="{Binding Description}" FontAttributes="Bold,Italic"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextColourAlt1Light},Dark={StaticResource TextColourAlt1}}"
+                                    FontSize="18" FontFamily="Roboto-Regular" LineBreakMode="TailTruncation" CharacterSpacing="0.15"/>
                             </Grid>
                         </Grid>
                     </DataTemplate>
