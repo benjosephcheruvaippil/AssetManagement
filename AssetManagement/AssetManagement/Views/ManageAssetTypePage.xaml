@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="AssetManagement.Views.ManageAssetTypePage"
+             x:Class="AssetManagement.Views.ManageAssetTypePage"           
              xmlns:ListView="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView"
              xmlns:DataPager="clr-namespace:Syncfusion.Maui.DataGrid.DataPager;assembly=Syncfusion.Maui.DataGrid"
              xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
+             xmlns:sfButtons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
              Title="ManageAssetTypePage">
 
     <Grid RowDefinitions="Auto,Auto,*">
@@ -34,6 +35,15 @@
                 </inputLayout:SfTextInputLayout.Content>
             </inputLayout:SfTextInputLayout>
 
+            <sfButtons:SfRadioGroup x:Name="optionsGroup"
+                                    Orientation="Horizontal"
+                                    Spacing="20"
+                                 SelectedValue="A">
+
+                <sfButtons:SfRadioButton Text="Option A" Value="A"/>
+                <sfButtons:SfRadioButton Text="Option B" Value="B"/>
+
+            </sfButtons:SfRadioGroup>
         </VerticalStackLayout>
 
 
@@ -55,7 +65,7 @@
                               AutoFitMode="DynamicHeight"
                               SelectionMode="Single"
                               ItemTapped="verticalListView_ItemTapped"
-                                 SelectionBackground="#333333">
+                                 SelectionBackground="{AppThemeBinding Light=#ADD8E6, Dark=#333333}">
                 <ListView:SfListView.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="16,12,16,12" ColumnSpacing="12">
@@ -108,13 +118,13 @@
                 <DataPager:SfDataPager.DefaultStyle>
                     <DataPager:DataPagerStyle
                         NumericButtonBackgroundColor="Transparent"      
-                        NumericButtonTextColor="#CCCCCC"
+                        NumericButtonTextColor="{AppThemeBinding Light=#333333,Dark=#CCCCCC}"
                         NumericButtonSelectionBackgroundColor="Transparent"
-                        NumericButtonSelectionTextColor="White"
+                        NumericButtonSelectionTextColor="{AppThemeBinding Light=#0078D7,Dark=White}"
                         NavigationButtonBackgroundColor="Transparent"
-                        NavigationButtonIconColor="White"
+                        NavigationButtonIconColor="{AppThemeBinding Light=#333333,Dark=White}"
                         NavigationButtonDisableBackgroundColor="Transparent"
-                        NavigationButtonDisableIconColor="#555555"/>
+                        NavigationButtonDisableIconColor="{AppThemeBinding Light=#AAAAAA,Dark=#555555}"/>
                 </DataPager:SfDataPager.DefaultStyle>
             </DataPager:SfDataPager>
         </Grid>
