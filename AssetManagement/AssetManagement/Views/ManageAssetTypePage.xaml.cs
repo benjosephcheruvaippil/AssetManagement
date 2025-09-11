@@ -1,4 +1,5 @@
 using AssetManagement.Models;
+using AssetManagement.Models.DataTransferObject;
 using SQLite;
 using Syncfusion.Maui.Toolkit.Chips;
 using System.Collections;
@@ -11,7 +12,7 @@ public partial class ManageAssetTypePage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
     private int pageSize = 3;
-    private ObservableCollection<AssetTypeModel> assetTypeList = new ObservableCollection<AssetTypeModel>();
+    private ObservableCollection<AssetTypeDTO> assetTypeList = new ObservableCollection<AssetTypeDTO>();
     public ManageAssetTypePage()
     {
         InitializeComponent();
@@ -39,7 +40,18 @@ public partial class ManageAssetTypePage : ContentPage
     public async void PopulateAssetTypeList(string operation)
     {
         await SetUpDb();
-        var assetTypes = await _dbConnection.Table<AssetTypeModel>().ToListAsync();
+        var assetTypes = (await _dbConnection.Table<AssetTypeModel>().ToListAsync())
+            .Select(s => new AssetTypeDTO
+            {
+                AssetTypeId = s.AssetTypeId,
+                AssetTypeName = s.AssetTypeName,
+                Description = s.Description,
+                EnableAsOfDate = s.EnableAsOfDate,
+                EnableMaturityDate = s.EnableMaturityDate,
+                IncludeInNetWorth = s.IncludeInNetWorth,
+                CategoryTag = s.CategoryTag   
+            }).ToList();
+
         assetTypeList.Clear();
         foreach (var assetType in assetTypes)
         {
@@ -57,7 +69,7 @@ public partial class ManageAssetTypePage : ContentPage
 
     private void verticalListView_ItemTapped(object sender, Syncfusion.Maui.ListView.ItemTappedEventArgs e)
     {
-        if (e.DataItem is AssetTypeModel tappedItem)
+        if (e.DataItem is AssetTypeDTO tappedItem)
         {
             var chipToSelect = assetTypeTagChipGroup.Items
                                 .OfType<SfChip>()
@@ -65,7 +77,7 @@ public partial class ManageAssetTypePage : ContentPage
 
             txtAssetTypeId.Text = tappedItem.AssetTypeId.ToString();
             entryAssetTypeName.Text = tappedItem.AssetTypeName;
-            entryAssetTypeDescription.Text = tappedItem.Description;
+            //entryAssetTypeDescription.Text = tappedItem.Description;
             maturityDateAsOfDateRadioGroup.SelectedValue = tappedItem.EnableMaturityDate == true ? "MD" : "AOD";
             chkIncludeInNetworth.IsChecked = tappedItem.IncludeInNetWorth;
             assetTypeTagChipGroup.SelectedItem = chipToSelect;
@@ -104,7 +116,7 @@ public partial class ManageAssetTypePage : ContentPage
         {
             AssetTypeId = string.IsNullOrEmpty(txtAssetTypeId.Text) ? 0 : int.Parse(txtAssetTypeId.Text),
             AssetTypeName = entryAssetTypeName.Text.Trim(),
-            Description = entryAssetTypeDescription.Text.Trim(),
+            //Description = entryAssetTypeDescription.Text.Trim(),
             EnableMaturityDate = maturityDateAsOfDateRadioGroup.SelectedValue?.ToString() == "MD" ? true : false,
             EnableAsOfDate = maturityDateAsOfDateRadioGroup.SelectedValue?.ToString() == "AOD" ? true : false,
             IncludeInNetWorth = chkIncludeInNetworth.IsChecked,
@@ -136,7 +148,7 @@ public partial class ManageAssetTypePage : ContentPage
     {
         txtAssetTypeId.Text = "";
         entryAssetTypeName.Text = "";
-        entryAssetTypeDescription.Text = "";
+        //entryAssetTypeDescription.Text = "";
         maturityDateAsOfDateRadioGroup.SelectedValue = "MD";
         chkIncludeInNetworth.IsChecked = false;
         assetTypeTagChipGroup.SelectedItem = null;
