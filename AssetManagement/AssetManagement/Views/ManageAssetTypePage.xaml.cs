@@ -92,7 +92,8 @@ public partial class ManageAssetTypePage : ContentPage
             AssetTypeName = entryAssetTypeName.Text.Trim(),
             Description = entryAssetTypeDescription.Text.Trim(),
             EnableMaturityDate = maturityDateAsOfDateRadioGroup.SelectedValue?.ToString() == "MD" ? true : false,
-            EnableAsOfDate = maturityDateAsOfDateRadioGroup.SelectedValue?.ToString() == "AOD" ? true : false
+            EnableAsOfDate = maturityDateAsOfDateRadioGroup.SelectedValue?.ToString() == "AOD" ? true : false,
+            IncludeInNetWorth = chkIncludeInNetworth.IsChecked
         };
 
         await SetUpDb();

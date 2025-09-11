@@ -15,5 +15,7 @@ namespace AssetManagement.Models
         public string Description { get; set; }
         public bool? EnableAsOfDate { get; set; }
         public bool? EnableMaturityDate { get; set; }
+        public bool? IncludeInNetWorth { get; set; }
+        public string CategoryTag { get; set; }
     }
 }

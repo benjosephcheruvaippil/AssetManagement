@@ -6,6 +6,7 @@
              xmlns:DataPager="clr-namespace:Syncfusion.Maui.DataGrid.DataPager;assembly=Syncfusion.Maui.DataGrid"
              xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
              xmlns:sfButtons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+             xmlns:toolkit="http://schemas.syncfusion.com/maui/toolkit"
              Title="ManageAssetTypePage">
 
     <Grid RowDefinitions="Auto,Auto,*">
@@ -44,8 +45,40 @@
 
                 <sfButtons:SfRadioButton Text="Maturity Date" Value="MD"/>
                 <sfButtons:SfRadioButton Text="As Of Date" Value="AOD"/>
-
             </sfButtons:SfRadioGroup>
+
+            <sfButtons:SfCheckBox x:Name="chkIncludeInNetworth" 
+                             Text="Include in Networth" 
+                             HorizontalOptions="Start"
+                             IsChecked="True"/>
+            <ScrollView Orientation="Horizontal"
+            HorizontalScrollBarVisibility="Never"
+            HeightRequest="56">
+
+                <toolkit:SfChipGroup
+                    ChipType="Filter"
+                    ChipPadding="10,6"
+                    ChipCornerRadius="16"
+                    ChipBackground="LightGray"
+                    ChipTextColor="Black"
+                    SelectedChipBackground="DodgerBlue"
+                    SelectedChipTextColor="White">
+
+                    <toolkit:SfChip Text="Tag1" Background="LightGray" />
+                    <toolkit:SfChip Text="Tag2" Background="LightGray" />
+                    <toolkit:SfChip Text="Tag3" Background="LightGray" />
+                    <toolkit:SfChip Text="Tag4" Background="LightGray" />
+                    <toolkit:SfChip Text="Tag5" Background="LightGray" />
+                    <toolkit:SfChip Text="Tag6" Background="LightGray" />
+                    <toolkit:SfChip Text="Tag7" Background="LightGray" />
+                    <toolkit:SfChip Text="Tag8" Background="LightGray" />
+                    <toolkit:SfChip Text="Tag9" Background="LightGray" />
+                    <toolkit:SfChip Text="Tag10" Background="LightGray" />
+
+                </toolkit:SfChipGroup>
+            </ScrollView>
+
+
         </VerticalStackLayout>
 
 
