@@ -15,26 +15,28 @@
             <Entry x:Name="txtAssetTypeId" IsVisible="False"/>
             
             <inputLayout:SfTextInputLayout x:Name="txtPlaceNameLayout"
-                        ContainerType="Outlined"
+                        ContainerType="Outlined"  
+                                           HeightRequest="85"
                         ContainerBackground="{AppThemeBinding Light=White, Dark=Black}"
-                Hint="Place Name">
+                Hint="Asset Type Name">
                 <inputLayout:SfTextInputLayout.HintLabelStyle>
-                    <inputLayout:LabelStyle FontSize="20" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+                    <inputLayout:LabelStyle FontSize="15" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
                 </inputLayout:SfTextInputLayout.HintLabelStyle>
                 <inputLayout:SfTextInputLayout.Content>
-                    <Entry x:Name="entryAssetTypeName" FontSize="20" BackgroundColor="Black"/>
+                    <Entry x:Name="entryAssetTypeName" FontSize="15" BackgroundColor="Black"/>
                 </inputLayout:SfTextInputLayout.Content>
             </inputLayout:SfTextInputLayout>
 
             <inputLayout:SfTextInputLayout x:Name="txtPlaceDescriptionLayout"
          ContainerType="Outlined"
+                                           HeightRequest="85"
          ContainerBackground="{AppThemeBinding Light=White, Dark=Black}"
-         Hint="Place Description">
+         Hint="Description">
                 <inputLayout:SfTextInputLayout.HintLabelStyle>
-                    <inputLayout:LabelStyle FontSize="20" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+                    <inputLayout:LabelStyle FontSize="17" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
                 </inputLayout:SfTextInputLayout.HintLabelStyle>
                 <inputLayout:SfTextInputLayout.Content>
-                    <Entry x:Name="entryAssetTypeDescription" FontSize="20" BackgroundColor="Black"/>
+                    <Entry x:Name="entryAssetTypeDescription" FontSize="15" BackgroundColor="Black"/>
                 </inputLayout:SfTextInputLayout.Content>
             </inputLayout:SfTextInputLayout>
 
@@ -56,24 +58,26 @@
             HeightRequest="56">
 
                 <toolkit:SfChipGroup
-                    ChipType="Filter"
-                    ChipPadding="10,6"
+                    x:Name="assetTypeTagChipGroup"
+                    ChipType="Choice"
+                   
                     ChipCornerRadius="16"
                     ChipBackground="LightGray"
                     ChipTextColor="Black"
                     SelectedChipBackground="DodgerBlue"
                     SelectedChipTextColor="White">
 
-                    <toolkit:SfChip Text="Tag1" Background="LightGray" />
-                    <toolkit:SfChip Text="Tag2" Background="LightGray" />
-                    <toolkit:SfChip Text="Tag3" Background="LightGray" />
-                    <toolkit:SfChip Text="Tag4" Background="LightGray" />
-                    <toolkit:SfChip Text="Tag5" Background="LightGray" />
-                    <toolkit:SfChip Text="Tag6" Background="LightGray" />
-                    <toolkit:SfChip Text="Tag7" Background="LightGray" />
-                    <toolkit:SfChip Text="Tag8" Background="LightGray" />
-                    <toolkit:SfChip Text="Tag9" Background="LightGray" />
-                    <toolkit:SfChip Text="Tag10" Background="LightGray" />
+                    <toolkit:SfChip Text="#Bank" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#NCD" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#MarketLinkedDebentures" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#Insurance" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#Gold" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#Others" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#Property" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#TaxEfficient" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#DebtMutualFund" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#EquityMutualFund" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#Stock" HeightRequest="35" Background="LightGray" />
 
                 </toolkit:SfChipGroup>
             </ScrollView>

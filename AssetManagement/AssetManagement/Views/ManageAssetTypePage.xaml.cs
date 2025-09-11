@@ -1,5 +1,7 @@
 using AssetManagement.Models;
 using SQLite;
+using Syncfusion.Maui.Toolkit.Chips;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
@@ -57,10 +59,16 @@ public partial class ManageAssetTypePage : ContentPage
     {
         if (e.DataItem is AssetTypeModel tappedItem)
         {
+            var chipToSelect = assetTypeTagChipGroup.Items
+                                .OfType<SfChip>()
+                                .FirstOrDefault(c => c.Text == tappedItem.CategoryTag);
+
             txtAssetTypeId.Text = tappedItem.AssetTypeId.ToString();
             entryAssetTypeName.Text = tappedItem.AssetTypeName;
             entryAssetTypeDescription.Text = tappedItem.Description;
             maturityDateAsOfDateRadioGroup.SelectedValue = tappedItem.EnableMaturityDate == true ? "MD" : "AOD";
+            chkIncludeInNetworth.IsChecked = tappedItem.IncludeInNetWorth;
+            assetTypeTagChipGroup.SelectedItem = chipToSelect;
         }
     }
 
@@ -86,6 +94,12 @@ public partial class ManageAssetTypePage : ContentPage
             return;
         }
 
+        string CategoryTag = "";
+        if (assetTypeTagChipGroup.SelectedItem is SfChip chip)
+        {
+            CategoryTag = chip.Text;
+        }
+
         AssetTypeModel objAssetTypeModel = new AssetTypeModel()
         {
             AssetTypeId = string.IsNullOrEmpty(txtAssetTypeId.Text) ? 0 : int.Parse(txtAssetTypeId.Text),
@@ -93,7 +107,8 @@ public partial class ManageAssetTypePage : ContentPage
             Description = entryAssetTypeDescription.Text.Trim(),
             EnableMaturityDate = maturityDateAsOfDateRadioGroup.SelectedValue?.ToString() == "MD" ? true : false,
             EnableAsOfDate = maturityDateAsOfDateRadioGroup.SelectedValue?.ToString() == "AOD" ? true : false,
-            IncludeInNetWorth = chkIncludeInNetworth.IsChecked
+            IncludeInNetWorth = chkIncludeInNetworth.IsChecked,
+            CategoryTag = CategoryTag
         };
 
         await SetUpDb();
@@ -123,6 +138,8 @@ public partial class ManageAssetTypePage : ContentPage
         entryAssetTypeName.Text = "";
         entryAssetTypeDescription.Text = "";
         maturityDateAsOfDateRadioGroup.SelectedValue = "MD";
+        chkIncludeInNetworth.IsChecked = false;
+        assetTypeTagChipGroup.SelectedItem = null;
     }
 
     private async void btnDelete_Clicked(object sender, EventArgs e)
