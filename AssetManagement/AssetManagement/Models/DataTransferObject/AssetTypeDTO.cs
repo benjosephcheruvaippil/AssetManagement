@@ -15,17 +15,17 @@ namespace AssetManagement.Models.DataTransferObject
         public bool? EnableMaturityDate { get; set; }
         public bool? IncludeInNetWorth { get; set; }
         public string CategoryTag { get; set; }
-        public string DateDescription
-        {
-            get
-            {
-                if (EnableAsOfDate == true)
-                    return "* As Of Date *";
-                else if (EnableMaturityDate == true)
-                    return "* Maturity Date *";
-                else
-                    return "N/A";
-            }
-        }
+        //public string DateDescription
+        //{
+        //    get
+        //    {
+        //        if (EnableAsOfDate == true)
+        //            return "* As Of Date *";
+        //        else if (EnableMaturityDate == true)
+        //            return "* Maturity Date *";
+        //        else
+        //            return "N/A";
+        //    }
+        //}
     }
 }

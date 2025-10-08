@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="AssetManagement.Views.ManageAssetTypePage"           
-             xmlns:ListView="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView"
+             x:Class="AssetManagement.Views.ManageAssetTypePage"     
+             xmlns:vm="clr-namespace:AssetManagement.ViewModels"
              xmlns:DataPager="clr-namespace:Syncfusion.Maui.DataGrid.DataPager;assembly=Syncfusion.Maui.DataGrid"
              xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
              xmlns:sfButtons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
@@ -100,51 +100,32 @@
                 <RowDefinition Height="59"/>
             </Grid.RowDefinitions>
 
-
-            <ListView:SfListView x:Name="verticalListView" 
-                              Grid.Row="0"
-                              AutoFitMode="DynamicHeight"
-                              SelectionMode="Single"
-                              ItemTapped="verticalListView_ItemTapped"
-                                 SelectionBackground="{AppThemeBinding Light=#ADD8E6, Dark=#333333}">
-                <ListView:SfListView.ItemTemplate>
+            <CollectionView Grid.Row="0" ItemsSource="{Binding AssetTypes}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Border Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}" 
-                        StrokeThickness="1"
-                        StrokeShape="Rectangle"
-                        Margin="4"
-                        Padding="8">
-                            <Grid Margin="5,3,3,3" ColumnSpacing="12">
-                                <Grid.ColumnDefinitions>
-                                    <!--<ColumnDefinition Width="44"/>-->
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid Grid.Column="0" VerticalOptions="Center" RowSpacing="4">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
-                                    <Label Grid.Row="0" IsVisible="False" Text="{Binding AssetTypeId}"/>
-                                    <Label Grid.Row="1"
-                                    Text="{Binding AssetTypeName}"
-                                    FontSize="20"
-                                    FontFamily="Roboto-Regular"
-                                    CharacterSpacing="0.25"
-                                    TextColor="{AppThemeBinding Light={StaticResource HeaderForegroundLight},Dark={StaticResource HeaderForeground}}"/>
-                                    <Label Grid.Row="2" Text="{Binding DateDescription}" FontAttributes="Bold,Italic"
-                                    TextColor="{AppThemeBinding Light={StaticResource TextColourAlt1Light},Dark={StaticResource TextColourAlt1}}"
-                                    FontSize="18" FontFamily="Roboto-Regular" LineBreakMode="TailTruncation" CharacterSpacing="0.15"/>
-                                    <Label Grid.Row="3" Text="{Binding CategoryTag}" FontAttributes="Bold,Italic"
-                                    TextColor="{AppThemeBinding Light={StaticResource TextColourAlt1Light},Dark={StaticResource TextColourAlt1}}"
-                                    FontSize="18" FontFamily="Roboto-Regular" LineBreakMode="TailTruncation" CharacterSpacing="0.15"/>
-                                </Grid>
-                            </Grid>
-                        </Border>
+                        <Frame Margin="5"
+                       Padding="10"
+                       CornerRadius="12"
+                       HasShadow="True"
+                       BackgroundColor="White"
+                       BorderColor="LightGray">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCardTapped"/>
+                            </Frame.GestureRecognizers>
+                            <VerticalStackLayout>
+                                <Label Text="{Binding AssetTypeName}" 
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="Black"/>
+                                <Label Text="{Binding CategoryTag}" 
+                               FontSize="14"
+                               TextColor="Gray"/>
+                            </VerticalStackLayout>
+                        </Frame>
                     </DataTemplate>
-                </ListView:SfListView.ItemTemplate>
-            </ListView:SfListView>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            
             <DataPager:SfDataPager x:Name="dataPager" 
             Grid.Row="1"
             HorizontalOptions="Center"

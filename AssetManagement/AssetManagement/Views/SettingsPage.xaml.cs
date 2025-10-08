@@ -11,6 +11,7 @@ public partial class SettingsPage : ContentPage
 {
     private SQLiteAsyncConnection _dbConnection;
     private AssetListPageViewModel _viewModel;
+    private AssetTypeViewModel _assetTypeViewModel;
     private readonly IAssetService _assetService;
     private readonly IAppRestarter _appRestarter;
     public SettingsPage(AssetListPageViewModel viewModel, IAssetService assetService, IAppRestarter appRestarter)
@@ -182,6 +183,6 @@ public partial class SettingsPage : ContentPage
 
     private async void btnManageAssetType_Clicked(object sender, EventArgs e)
     {
-        await Navigation.PushAsync(new ManageAssetTypePage());
+        await Navigation.PushAsync(new ManageAssetTypePage(_assetTypeViewModel));
     }
 }
