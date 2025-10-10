@@ -128,12 +128,30 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
             FontSize="16"
             HorizontalOptions="Center" />
 
-                <Label
-            x:Name="lblNetAssetValue"
-            Text=""
-            SemanticProperties.HeadingLevel="Level1"
-            FontSize="20"
-            HorizontalOptions="Center" />
+                <Grid ColumnDefinitions="Auto,*"
+                  HorizontalOptions="Center"
+                  VerticalOptions="Center">
+
+                                <Button 
+                    Grid.Column="0"
+                    Text="ℹ️"
+                    FontSize="20"
+                    BackgroundColor="Transparent"
+                    TextColor="Blue"
+                    Padding="0"
+                    HeightRequest="24"
+                    WidthRequest="24"
+                    Clicked="NetAssetValueIButton_Clicked" />
+
+                                <Label
+                    Grid.Column="1"
+                    x:Name="lblNetAssetValue"
+                    Text=""
+                    FontSize="20"
+                    VerticalTextAlignment="Center"
+                    LineBreakMode="WordWrap" />
+                </Grid>
+
                 <Label
             x:Name="lblProjectedAssetValue"
             Text=""
@@ -253,6 +271,7 @@ HorizontalOptions="Center" WidthRequest="120" HeightRequest="35" />
                             <x:String>Debt Mutual Fund</x:String>
                             <x:String>Equity Mutual Fund</x:String>
                             <x:String>Stocks</x:String>
+                            <x:String>Property</x:String>
                             <x:String>Others</x:String>
                         </x:Array>
                     </Picker.ItemsSource>

@@ -435,7 +435,8 @@ public partial class AssetPage : TabbedPage
     {
         await SetUpDb();
         List<Assets> records = await _dbConnection.Table<Assets>().ToListAsync();
-        decimal NetAssetValue = records.Sum(s => s.Amount);
+        List<Assets> recordsExceptProperty = records.Where(a => a.Type != Constants.AssetTypeProperty).ToList();
+        decimal NetAssetValue = recordsExceptProperty.Sum(s => s.Amount);
         string result = "Net Asset Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", NetAssetValue);
         lblNetAssetValue.Text = result;
 
@@ -468,7 +469,7 @@ public partial class AssetPage : TabbedPage
         lblStocks.Text = "Stocks: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Stocks);     
 
         decimal projectedAmount = 0;
-        foreach (var item in records)
+        foreach (var item in recordsExceptProperty)
         {
             if (item.MaturityDate.ToShortDateString() != "01-01-0001") //debt instruments which have a maturity
             {
@@ -694,7 +695,7 @@ public partial class AssetPage : TabbedPage
     {
         string type = entType.SelectedItem.ToString();
 
-        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "Equity Mutual Fund" || type == "Debt Mutual Fund" || type == "Stocks" || type == "NPS" || type == "Others")
+        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "Equity Mutual Fund" || type == "Debt Mutual Fund" || type == "Stocks" || type == "NPS" || type == "Others" || type == Constants.AssetTypeProperty)
         {
             entStartDate.Date = DateTime.Now;
             entMaturityDate.Date = DateTime.Now;
@@ -1591,5 +1592,10 @@ public partial class AssetPage : TabbedPage
         {
             await DisplayAlert("Error", $"Capturing photo failed: {ex.Message}", "OK");
         }
+    }
+
+    private async void NetAssetValueIButton_Clicked(object sender, EventArgs e)
+    {
+        await DisplayAlert("Info", $"Net Asset Value does not include Property/Real Estate investments.", "OK");
     }
 }
