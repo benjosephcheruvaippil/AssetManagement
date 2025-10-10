@@ -56,7 +56,7 @@ namespace AssetManagement.ViewModels
                     }
                     else
                     {
-                        records = records.Where(a => a.InvestmentEntity.ToLower().Contains(searchText.ToLower()) || a.Holder.ToLower().Contains(searchText.ToLower())).ToList();
+                        records = records.Where(a => a.InvestmentEntity.ToLower().Contains(searchText.ToLower()) || a.Type.ToLower().Contains(searchText.ToLower()) || a.Holder.ToLower().Contains(searchText.ToLower())).ToList();
                     }
 
                     foreach (var record in records)
@@ -136,7 +136,7 @@ namespace AssetManagement.ViewModels
             decimal MaturingAssetsTotalValue = 0;
             List<Assets> records = await _assetService.GetAssetsList();
             List<MaturingAssets> assetsMaturingIn10Days = (from rec in records
-                                                           where (rec.MaturityDate < DateTime.Now.AddDays(20) || rec.MaturityDate < DateTime.Now)
+                                                           where rec.Type != Constants.AssetTypeProperty && (rec.MaturityDate < DateTime.Now.AddDays(20) || rec.MaturityDate < DateTime.Now)
                                                            select new MaturingAssets
                                                            {
                                                                AssetId = rec.AssetId,
@@ -169,7 +169,7 @@ namespace AssetManagement.ViewModels
             decimal MaturingAssetsTotalValue = 0;
             List<Assets> records = await _assetService.GetAssetsList();
             List<MaturingAssets> assetsMaturingIn10Days = (from rec in records
-                                                           where (rec.MaturityDate < DateTime.Now.AddDays(daysLeft) || rec.MaturityDate < DateTime.Now)
+                                                           where rec.Type != Constants.AssetTypeProperty && (rec.MaturityDate < DateTime.Now.AddDays(daysLeft) || rec.MaturityDate < DateTime.Now)
                                                            select new MaturingAssets
                                                            {
                                                                AssetId = rec.AssetId,
