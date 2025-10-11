@@ -23,6 +23,13 @@ public partial class ExpensePage : ContentPage
     {
         InitializeComponent();
 
+        if (currentTheme == AppTheme.Dark)
+        {
+            //set to white color
+            pickerExpenseCategory.TextColor = Color.FromArgb("#FFFFFF");
+            pickerExpenseCategory.BackgroundColor = Color.FromArgb("#000000");
+        }
+
         var labelShowRemaining = new TapGestureRecognizer();
         labelShowRemaining.Tapped += (s, e) =>
         {
@@ -152,13 +159,6 @@ public partial class ExpensePage : ContentPage
             if (expenseCategories.Count > 1)
             {
                 pickerExpenseCategory.Text = "";
-            }
-
-            if (currentTheme == AppTheme.Dark)
-            {
-                //set to white color
-                pickerExpenseCategory.TextColor = Color.FromArgb("#FFFFFF");
-                pickerExpenseCategory.BackgroundColor = Color.FromArgb("#000000");
             }
         }
         catch (Exception)

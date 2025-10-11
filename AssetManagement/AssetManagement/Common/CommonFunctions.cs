@@ -174,6 +174,11 @@ namespace AssetManagement.Common
                             // Authentication succeeded
                             return true;
                         }
+                        else if (!result.Authenticated && (result.ErrorMessage == "NoFingerprint" || string.IsNullOrEmpty(result.ErrorMessage)))             
+                        {
+                            //this means no fingerprint and face id registered. hence we can bypass app lock and open the app.
+                            return true;
+                        }
                         else
                         {
                             // Authentication failed

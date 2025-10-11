@@ -21,6 +21,8 @@ namespace AssetManagement.Models.Constants
         //Ben's Samsung: samsung-Phone-SM-S911B
         //Ben's Redmi: 
 
+        public const string AssetTypeProperty = "Property";
+
         public static string _currency = "en-IN";
         public static string GetCurrency()
         {

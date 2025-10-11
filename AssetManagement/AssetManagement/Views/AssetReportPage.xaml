@@ -27,7 +27,7 @@ FontSize="20"
 HorizontalOptions="Center" 
 HorizontalTextAlignment="Center"
 TextColor="Black"/>
-            <micro:ChartView x:Name="netWorthChangeChart" HeightRequest="800" />
+            <micro:ChartView x:Name="netWorthChangeChart" HeightRequest="600" />
             <Line X1="-2"
 Y1="0"
 X2="600"

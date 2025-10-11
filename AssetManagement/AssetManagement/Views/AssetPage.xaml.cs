@@ -435,7 +435,8 @@ public partial class AssetPage : TabbedPage
     {
         await SetUpDb();
         List<Assets> records = await _dbConnection.Table<Assets>().ToListAsync();
-        decimal NetAssetValue = records.Sum(s => s.Amount);
+        List<Assets> recordsExceptProperty = records.Where(a => a.Type != Constants.AssetTypeProperty).ToList();
+        decimal NetAssetValue = recordsExceptProperty.Sum(s => s.Amount);
         string result = "Net Asset Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", NetAssetValue);
         lblNetAssetValue.Text = result;
 
@@ -468,7 +469,7 @@ public partial class AssetPage : TabbedPage
         lblStocks.Text = "Stocks: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Stocks);     
 
         decimal projectedAmount = 0;
-        foreach (var item in records)
+        foreach (var item in recordsExceptProperty)
         {
             if (item.MaturityDate.ToShortDateString() != "01-01-0001") //debt instruments which have a maturity
             {
@@ -694,7 +695,7 @@ public partial class AssetPage : TabbedPage
     {
         string type = entType.SelectedItem.ToString();
 
-        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "Equity Mutual Fund" || type == "Debt Mutual Fund" || type == "Stocks" || type == "NPS" || type == "Others")
+        if (type == "Insurance_MF" || type == "PPF" || type == "EPF" || type == "Equity Mutual Fund" || type == "Debt Mutual Fund" || type == "Stocks" || type == "NPS" || type == "Others" || type == Constants.AssetTypeProperty)
         {
             entStartDate.Date = DateTime.Now;
             entMaturityDate.Date = DateTime.Now;
@@ -1232,6 +1233,7 @@ public partial class AssetPage : TabbedPage
         if (objAsset.AssetId != 0)
         {
             btnUploadImages.IsVisible = true;
+            btnCaptureImage.IsVisible = true;
 
             entEntityName.Text = objAsset.InvestmentEntity;
             entType.SelectedItem = objAsset.Type;
@@ -1303,6 +1305,7 @@ public partial class AssetPage : TabbedPage
             entRiskValue.Text = "";
 
             btnUploadImages.IsVisible = false;
+            btnCaptureImage.IsVisible = false;
             imageStack.Children.Clear();
         }
         catch (Exception ex)
@@ -1401,48 +1404,53 @@ public partial class AssetPage : TabbedPage
 
             if (result != null)
             {
-                string filePath = result.FullPath; // Get file path
-                var uploadToGoogleDriveResult = await UploadImageToGoogleDrive(filePath);
-
-                if ((bool)uploadToGoogleDriveResult.IsSuccess)
-                {
-                    int assetId = Convert.ToInt32(lblAssetId.Text);
-
-                    AssetDocuments docs = new AssetDocuments();
-                    docs.AssetId = assetId;
-                    docs.FileId = uploadToGoogleDriveResult.FileId;
-                    docs.FilePath = $"https://drive.google.com/uc?export=view&id={uploadToGoogleDriveResult.FileId}";
-                    await _dbConnection.InsertAsync(docs);
-
-                    var getFileList = await _dbConnection.Table<AssetDocuments>().Where(d => d.AssetId == assetId).ToListAsync();
-                    List<FileList> imageUrlList = new List<FileList>();
-                    if (getFileList.Count > 0)
-                    {
-                        foreach (var item in getFileList)
-                        {
-                            FileList imageUrls = new FileList
-                            {
-                                FileId = item.FileId,
-                                FilePath = item.FilePath
-                            };
-
-                            imageUrlList.Add(imageUrls);
-                        }
-                    }
-
-                    await LoadImages(imageUrlList);
-
-                    await DisplayAlert("Success", $"File uploaded to google drive.", "Ok");
-                }
-                else
-                {
-                    await DisplayAlert("Failed", $"File upload failed.", "Ok");
-                }
+                //string filePath = result.FullPath; // Get file path
+                await SaveImage(result.FullPath);
             }
         }
         catch (Exception ex)
         {
             await DisplayAlert("Error", $"Failed to pick image: {ex.Message}", "OK");
+        }
+    }
+
+    public async Task SaveImage(string filePath)
+    {
+        var uploadToGoogleDriveResult = await UploadImageToGoogleDrive(filePath);
+
+        if ((bool)uploadToGoogleDriveResult.IsSuccess)
+        {
+            int assetId = Convert.ToInt32(lblAssetId.Text);
+
+            AssetDocuments docs = new AssetDocuments();
+            docs.AssetId = assetId;
+            docs.FileId = uploadToGoogleDriveResult.FileId;
+            docs.FilePath = $"https://drive.google.com/uc?export=view&id={uploadToGoogleDriveResult.FileId}";
+            await _dbConnection.InsertAsync(docs);
+
+            var getFileList = await _dbConnection.Table<AssetDocuments>().Where(d => d.AssetId == assetId).ToListAsync();
+            List<FileList> imageUrlList = new List<FileList>();
+            if (getFileList.Count > 0)
+            {
+                foreach (var item in getFileList)
+                {
+                    FileList imageUrls = new FileList
+                    {
+                        FileId = item.FileId,
+                        FilePath = item.FilePath
+                    };
+
+                    imageUrlList.Add(imageUrls);
+                }
+            }
+
+            await LoadImages(imageUrlList);
+
+            await DisplayAlert("Success", $"File uploaded to google drive.", "Ok");
+        }
+        else
+        {
+            await DisplayAlert("Failed", $"File upload failed.", "Ok");
         }
     }
 
@@ -1550,5 +1558,44 @@ public partial class AssetPage : TabbedPage
     private async void OpenFullScreenImage(string imageUrl)
     {
         await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl));
+    }
+
+    private async void btnCaptureImage_Clicked(object sender, EventArgs e)
+    {
+        FileResult photo;
+        try
+        {
+            if (MediaPicker.Default.IsCaptureSupported)
+            {
+                photo = await MediaPicker.CapturePhotoAsync();
+                //await LoadPhotoAsync(photo);
+
+                if (photo == null)
+                    return;
+
+                // Save into local cache
+                var filePath = Path.Combine(FileSystem.CacheDirectory, photo.FileName);
+                using (var stream = await photo.OpenReadAsync())
+                using (var newStream = File.OpenWrite(filePath))
+                {
+                    await stream.CopyToAsync(newStream);
+                }
+
+                await SaveImage(filePath);
+            }
+            else
+            {
+                await DisplayAlert("Not Supported", "Camera capture is not supported on this device", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Capturing photo failed: {ex.Message}", "OK");
+        }
+    }
+
+    private async void NetAssetValueIButton_Clicked(object sender, EventArgs e)
+    {
+        await DisplayAlert("Info", $"Net Asset Value does not include Property/Real Estate investments.", "OK");
     }
 }

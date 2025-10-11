@@ -169,7 +169,6 @@ public partial class SettingsPage : ContentPage
         {
             lblLockText.Text = "App Lock On";
             int rowsAffected = await _dbConnection.ExecuteAsync("Update Owners set Locked=?", true);
-            
             //await DisplayAlert("Message", "App locked using pattern/fingerprint", "OK");
         }
         else
