@@ -316,7 +316,7 @@ public partial class AssetReportPage : ContentPage
 
                             DateTime fromDate = new DateTime(year, fromMonth, 1, 0, 0, 0);
                             DateTime toDate = new DateTime(year, toMonth, DateTime.DaysInMonth(year, toMonth), 23, 59, 59);
-                            var quarter_list = await _dbConnection.Table<AssetAuditLog>().Where(a => a.Type != Constants.AssetTypeProperty && a.CreatedDate >= fromDate && a.CreatedDate <= toDate).ToListAsync();
+                            var quarter_list = await _dbConnection.Table<AssetAuditLog>().Where(a => (a.Type != Constants.AssetTypeProperty || string.IsNullOrEmpty(a.Type)) && a.CreatedDate >= fromDate && a.CreatedDate <= toDate).ToListAsync();
                             //find average amount
                             double? totalNetAssetValue = 0;
                             foreach (var log in quarter_list)
