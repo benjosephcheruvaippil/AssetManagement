@@ -55,25 +55,36 @@ public partial class ManageCategoriesPage : ContentPage
             entryCategoryName.Text = entryCategoryName.Text.Trim();
             if (string.IsNullOrEmpty(txtIncomeExpenseCategoryId.Text))//insert
             {
-                //check if duplicate names exist
+                //check if duplicate names/short code exist
+                await SetUpDb();
+                var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
                 if (!string.IsNullOrEmpty(entryCategoryName.Text))
                 {
                     string inputtedCategoryNameFormatted = entryCategoryName.Text.ToLower();
 
-                    await SetUpDb();
-                    var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
                     if (categories.Where(o => o.CategoryName.ToLower() == inputtedCategoryNameFormatted).Count() > 0)
                     {
                         await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
                         return;
                     }
                 }
-                //check if duplicate names exist
+                if (!string.IsNullOrEmpty(entryShortCode.Text))
+                {
+                    string inputtedShortCodeFormatted= entryShortCode.Text.ToLower();
+
+                    if (categories.Where(o => !string.IsNullOrEmpty(o.ShortCode) && o.ShortCode.ToLower() == inputtedShortCodeFormatted).Count() > 0)
+                    {
+                        await DisplayAlert("Message", "Duplicate short code found in database. Please re-enter.", "OK");
+                        return;
+                    }
+                }
+                //check if duplicate names/short code exist
 
                 IncomeExpenseCategories objIncomeExpenseCat = new IncomeExpenseCategories
                 {
                     CategoryName = entryCategoryName.Text.Trim(),
                     CategoryType = categoryTypePicker.SelectedItem.ToString(),
+                    ShortCode = entryShortCode.Text.Trim(),
                     IsOneTimeExpense = chkIsOneTimeExpense.IsChecked,
                     IsVisible = chkIsVisible.IsChecked
                 };
@@ -93,27 +104,37 @@ public partial class ManageCategoriesPage : ContentPage
             else //update
             {
                 int incomeExpenseCategoryId = Convert.ToInt32(txtIncomeExpenseCategoryId.Text);
-                //check if duplicate names exist
+                //check if duplicate names/short code exist
+                await SetUpDb();
+                var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
                 if (!string.IsNullOrEmpty(entryCategoryName.Text))
                 {
                     string inputtedCategoryNameFormatted = entryCategoryName.Text.ToLower().Trim();
 
-                    await SetUpDb();
-                    var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
-                    
                     if (categories.Where(o => o.CategoryName.ToLower() == inputtedCategoryNameFormatted && o.IncomeExpenseCategoryId != incomeExpenseCategoryId).Count() >= 1)
                     {
                         await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
                         return;
                     }
                 }
-                //check if duplicate names exist
-                
+                if (!string.IsNullOrEmpty(entryShortCode.Text))
+                {
+                    string inputtedShortCodeFormatted = entryShortCode.Text.ToLower();
+
+                    if (categories.Where(o => !string.IsNullOrEmpty(o.ShortCode) && o.ShortCode.ToLower() == inputtedShortCodeFormatted && o.IncomeExpenseCategoryId != incomeExpenseCategoryId).Count() > 0)
+                    {
+                        await DisplayAlert("Message", "Duplicate short code found in database. Please re-enter.", "OK");
+                        return;
+                    }
+                }
+                //check if duplicate names/short code exist
+
                 IncomeExpenseCategories objIncomeExpenseCat = new IncomeExpenseCategories
                 {
                     IncomeExpenseCategoryId = incomeExpenseCategoryId,
                     CategoryName = entryCategoryName.Text.Trim(),
                     CategoryType = categoryTypePicker.SelectedItem.ToString(),
+                    ShortCode=entryShortCode.Text.Trim(),
                     IsOneTimeExpense = chkIsOneTimeExpense.IsChecked,
                     IsVisible = chkIsVisible.IsChecked
                 };
@@ -197,6 +218,7 @@ public partial class ManageCategoriesPage : ContentPage
         //}
         chkIsOneTimeExpense.IsChecked = incomeExpenseRecord.IsOneTimeExpense == null ? false : (bool)incomeExpenseRecord.IsOneTimeExpense;
         chkIsVisible.IsChecked = incomeExpenseRecord.IsVisible == null ? false : (bool)incomeExpenseRecord.IsVisible;
+        entryShortCode.Text = incomeExpenseRecord.ShortCode;
         OldCategoryName = entryCategoryName.Text;
     }
 
@@ -246,6 +268,7 @@ public partial class ManageCategoriesPage : ContentPage
         entCategorySearch.Text = "";
         txtIncomeExpenseCategoryId.Text = "";
         entryCategoryName.Text = "";
+        entryShortCode.Text = "";
         categoryTypePicker.SelectedIndex = -1;
     }
 
@@ -260,17 +283,20 @@ public partial class ManageCategoriesPage : ContentPage
                 {
                     lblOneTimeExpense.IsVisible = true;
                     chkIsOneTimeExpense.IsVisible = true;
+                    entryShortCode.IsVisible = true;
                 }
                 else
                 {
                     lblOneTimeExpense.IsVisible = false;
                     chkIsOneTimeExpense.IsVisible = false;
+                    entryShortCode.IsVisible = false;
                 }
             }
             else
             {
                 lblOneTimeExpense.IsVisible = false;
                 chkIsOneTimeExpense.IsVisible = false;
+                entryShortCode.IsVisible = false;
             }
         }
         catch (Exception ex)

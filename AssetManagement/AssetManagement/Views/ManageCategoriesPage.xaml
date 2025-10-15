@@ -16,6 +16,7 @@ Placeholder="Enter category name" />
                 </x:Array>
             </Picker.ItemsSource>
         </Picker>
+        <Entry x:Name="entryShortCode" Placeholder="short code for expense upload" IsVisible="False" />
         <StackLayout Orientation="Horizontal">
             <Label x:Name="lblOneTimeExpense" IsVisible="False" VerticalOptions="Center">One Time Expense</Label>
             <CheckBox x:Name="chkIsOneTimeExpense" IsVisible="False" IsChecked="False" />

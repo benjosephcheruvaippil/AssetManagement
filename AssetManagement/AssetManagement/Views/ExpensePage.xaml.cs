@@ -792,6 +792,10 @@ public partial class ExpensePage : ContentPage
                         description = description.Replace(" ", "");
                         description = description.Replace("\n", "");
                         description = description.ToLower();
+
+                        //Create a dictionary with short code and category name from DB as key value pair and loop through it.
+                        //if description matches then set the "category".
+
                         if (description.Contains("/au/"))
                         {
                             addExpense = true;
