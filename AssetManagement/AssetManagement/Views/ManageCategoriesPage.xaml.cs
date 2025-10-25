@@ -84,7 +84,7 @@ public partial class ManageCategoriesPage : ContentPage
                 {
                     CategoryName = entryCategoryName.Text.Trim(),
                     CategoryType = categoryTypePicker.SelectedItem.ToString(),
-                    ShortCode = entryShortCode.Text.Trim(),
+                    ShortCode = string.IsNullOrEmpty(entryShortCode.Text) ? null : entryShortCode.Text.Trim(),
                     IsOneTimeExpense = chkIsOneTimeExpense.IsChecked,
                     IsVisible = chkIsVisible.IsChecked
                 };
@@ -134,7 +134,7 @@ public partial class ManageCategoriesPage : ContentPage
                     IncomeExpenseCategoryId = incomeExpenseCategoryId,
                     CategoryName = entryCategoryName.Text.Trim(),
                     CategoryType = categoryTypePicker.SelectedItem.ToString(),
-                    ShortCode=entryShortCode.Text.Trim(),
+                    ShortCode = string.IsNullOrEmpty(entryShortCode.Text) ? null : entryShortCode.Text.Trim(),
                     IsOneTimeExpense = chkIsOneTimeExpense.IsChecked,
                     IsVisible = chkIsVisible.IsChecked
                 };
@@ -143,7 +143,11 @@ public partial class ManageCategoriesPage : ContentPage
                 if (rowsAffected > 0)
                 {
                     //update all records in IncomeExpenseModel table
-                    var recordsUpdatedIncomeExpense = await _dbConnection.ExecuteAsync($"Update IncomeExpenseModel set CategoryName='{entryCategoryName.Text.Trim()}' where CategoryName='{OldCategoryName}'");
+                    //var recordsUpdatedIncomeExpense = await _dbConnection.ExecuteAsync($"Update IncomeExpenseModel set CategoryName='{entryCategoryName.Text.Trim()}' where CategoryName='{OldCategoryName}'");
+
+                    var sql = "UPDATE IncomeExpenseModel SET CategoryName = ? WHERE CategoryName = ?";
+                    var recordsUpdatedIncomeExpense = await _dbConnection.ExecuteAsync(sql, entryCategoryName.Text.Trim(), OldCategoryName);
+
                     //update all records in Assets table
                     //var recordsUpdateAssets = await _dbConnection.ExecuteAsync($"Update Assets set Holder='{entryOwnerName.Text.Trim()}' where Holder='{OldOwnerName}'");
                     ClearCategoriesForm();

@@ -717,9 +717,15 @@ public partial class ExpensePage : ContentPage
             //get the last file_upload date
             await SetUpDb();
             List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' and Mode='file_upload' order by Date desc Limit 1");
+            var categoriesWithShortCode = await _dbConnection.Table<IncomeExpenseCategories>().Where(c => c.CategoryType == "Expense" && !string.IsNullOrEmpty(c.ShortCode) && c.IsVisible == true).ToListAsync();
             if (expenses.Count > 0)
             {
-                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n- au: Automobile,hs: Household Items,le: Leisure,eo: Eating Out,ex: Others.\n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
+                string messageText = "";
+                foreach (var code in categoriesWithShortCode)
+                {
+                    messageText= messageText + $"- {code.ShortCode}: {code.CategoryName}\n";
+                }
+                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n {messageText} \n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
                 if (!userResponse)
                 {
                     return;
@@ -793,35 +799,42 @@ public partial class ExpensePage : ContentPage
                         description = description.Replace("\n", "");
                         description = description.ToLower();
 
-                        //Create a dictionary with short code and category name from DB as key value pair and loop through it.
-                        //if description matches then set the "category".
+                        foreach(var kvp in categoriesWithShortCode)
+                        {
+                            if (description.Contains("/" + kvp.ShortCode + "/"))
+                            {
+                                addExpense = true;
+                                category = kvp.CategoryName;
+                                break;
+                            }
+                        }
 
-                        if (description.Contains("/au/"))
-                        {
-                            addExpense = true;
-                            category = "Automobile";
-                        }
-                        else if (description.Contains("/hs/"))
-                        {
-                            addExpense = true;
-                            category = "Household Items";
-                        }
-                        else if (description.Contains("/le/"))
-                        {
-                            addExpense = true;
-                            category = "Leisure";
-                        }
-                        else if (description.Contains("/eo/"))
-                        {
-                            addExpense = true;
-                            category = "Eating Out";
-                        }
-                        else if (description.Contains("/ex/"))
-                        {
-                            addExpense = true;
-                            category = "Others";
-                        }
-                        
+                        //if (description.Contains("/au/"))
+                        //{
+                        //    addExpense = true;
+                        //    category = "Automobile";
+                        //}
+                        //else if (description.Contains("/hs/"))
+                        //{
+                        //    addExpense = true;
+                        //    category = "Household Items";
+                        //}
+                        //else if (description.Contains("/le/"))
+                        //{
+                        //    addExpense = true;
+                        //    category = "Leisure";
+                        //}
+                        //else if (description.Contains("/eo/"))
+                        //{
+                        //    addExpense = true;
+                        //    category = "Eating Out";
+                        //}
+                        //else if (description.Contains("/ex/"))
+                        //{
+                        //    addExpense = true;
+                        //    category = "Others";
+                        //}
+
                         if (addExpense)
                         {
                             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
