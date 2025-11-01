@@ -7,6 +7,7 @@ using ExcelDataReader;
 using SQLite;
 using System.Data;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace AssetManagement.Views;
 
@@ -717,7 +718,7 @@ public partial class ExpensePage : ContentPage
             //get the last file_upload date
             await SetUpDb();
             List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' and Mode='file_upload' order by Date desc Limit 1");
-            var categoriesWithShortCode = await _dbConnection.Table<IncomeExpenseCategories>().Where(c => c.CategoryType == "Expense" && !string.IsNullOrEmpty(c.ShortCode) && c.IsVisible == true).ToListAsync();
+            var categoriesWithShortCode = await _dbConnection.Table<IncomeExpenseCategories>().Where(c => c.CategoryType == "Expense" && !string.IsNullOrEmpty(c.ShortCode)).ToListAsync();
             if (expenses.Count > 0)
             {
                 string messageText = "";
@@ -788,52 +789,42 @@ public partial class ExpensePage : ContentPage
                         DateTime transactionDate = new DateTime(Convert.ToInt32(dateArr[2]), Convert.ToInt32(dateArr[1]), Convert.ToInt32(dateArr[0]));
                         DateTime date = transactionDate.Date;
                         bool addExpense = false;
-                        string category = "";
+                        string category = "",remarks="";
                         double amount = 0;
                         if (!string.IsNullOrEmpty(Convert.ToString(dtStudentRecords.Rows[i][3])))
                         {
                             amount = Convert.ToDouble(dtStudentRecords.Rows[i][3]);
                         }
                         string description = Convert.ToString(dtStudentRecords.Rows[i][2]);
-                        description = description.Replace(" ", "");
-                        description = description.Replace("\n", "");
-                        description = description.ToLower();
+                        string alteredDescription = description.Replace(" ", "").Replace("\n", "").ToLower();
+                        //description = description.Replace(" ", "");
+                        //description = description.Replace("\n", "");
+                        //description = description.ToLower();
 
                         foreach(var kvp in categoriesWithShortCode)
                         {
-                            if (description.Contains("/" + kvp.ShortCode + "/"))
+                            if (alteredDescription.Contains("/" + kvp.ShortCode + "/"))
                             {
                                 addExpense = true;
                                 category = kvp.CategoryName;
                                 break;
                             }
-                        }
+                            else if(alteredDescription.Contains("/" + kvp.ShortCode + "-") || alteredDescription.Contains("/" + kvp.ShortCode + " -"))
+                            {
+                                addExpense = true;
 
-                        //if (description.Contains("/au/"))
-                        //{
-                        //    addExpense = true;
-                        //    category = "Automobile";
-                        //}
-                        //else if (description.Contains("/hs/"))
-                        //{
-                        //    addExpense = true;
-                        //    category = "Household Items";
-                        //}
-                        //else if (description.Contains("/le/"))
-                        //{
-                        //    addExpense = true;
-                        //    category = "Leisure";
-                        //}
-                        //else if (description.Contains("/eo/"))
-                        //{
-                        //    addExpense = true;
-                        //    category = "Eating Out";
-                        //}
-                        //else if (description.Contains("/ex/"))
-                        //{
-                        //    addExpense = true;
-                        //    category = "Others";
-                        //}
+                                string pattern = $@"/{kvp.ShortCode}\s*-[^/]+";
+                                var match = Regex.Match(description, pattern, RegexOptions.IgnoreCase);
+
+                                string input = match.Success ? match.Value.TrimStart('/') : string.Empty;
+                                int index = input.IndexOf('-');
+                                //category = index >= 0 ? input.Substring(0, index).Trim() : input;
+                                category = kvp.CategoryName;
+                                remarks = index >= 0 ? input.Substring(index + 1).Trim() : string.Empty;
+
+                                break;
+                            }
+                        }
 
                         if (addExpense)
                         {
@@ -843,7 +834,7 @@ public partial class ExpensePage : ContentPage
                                 TransactionType = "Expense",
                                 Date = date,
                                 CategoryName = category,
-                                Remarks = "",
+                                Remarks = remarks,
                                 Mode = "file_upload"
                             };
                             listIncomeExpenseModel.Add(objIncomeExpense);
