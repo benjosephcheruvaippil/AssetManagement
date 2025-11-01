@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AssetManagement.Views.ManageAssetTypePage"     
+             xmlns:vm="clr-namespace:AssetManagement.ViewModels"
+             xmlns:DataPager="clr-namespace:Syncfusion.Maui.DataGrid.DataPager;assembly=Syncfusion.Maui.DataGrid"
+             xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
+             xmlns:sfButtons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+             xmlns:toolkit="http://schemas.syncfusion.com/maui/toolkit"
+             Title="Asset Types">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <VerticalStackLayout Grid.Row="0" Padding="10" Spacing="-10">
+            <Entry x:Name="txtAssetTypeId" IsVisible="False"/>
+            
+            <inputLayout:SfTextInputLayout x:Name="txtAssetTypeNameLayout"
+                        ContainerType="Outlined"  
+                        HeightRequest="85"
+                        ContainerBackground="{AppThemeBinding Light=White, Dark=Black}"
+                Hint="Asset Type Name">
+                <inputLayout:SfTextInputLayout.HintLabelStyle>
+                    <inputLayout:LabelStyle FontSize="15" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+                </inputLayout:SfTextInputLayout.HintLabelStyle>
+                <inputLayout:SfTextInputLayout.Content>
+                    <Entry x:Name="entryAssetTypeName" FontSize="15" BackgroundColor="Black"/>
+                </inputLayout:SfTextInputLayout.Content>
+            </inputLayout:SfTextInputLayout>
+
+            <!--<inputLayout:SfTextInputLayout x:Name="txtDescriptionLayout"
+         ContainerType="Outlined"
+         HeightRequest="85"
+         ContainerBackground="{AppThemeBinding Light=White, Dark=Black}"
+         Hint="Description">
+                <inputLayout:SfTextInputLayout.HintLabelStyle>
+                    <inputLayout:LabelStyle FontSize="17" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+                </inputLayout:SfTextInputLayout.HintLabelStyle>
+                <inputLayout:SfTextInputLayout.Content>
+                    <Entry x:Name="entryAssetTypeDescription" FontSize="15" BackgroundColor="Black"/>
+                </inputLayout:SfTextInputLayout.Content>
+            </inputLayout:SfTextInputLayout>-->
+
+            <sfButtons:SfRadioGroup x:Name="maturityDateAsOfDateRadioGroup"
+                                    Orientation="Horizontal"
+                                    Spacing="20"
+                                 SelectedValue="MD">
+
+                <sfButtons:SfRadioButton FontSize="18" Text="Maturity Date" Value="MD"/>
+                <sfButtons:SfRadioButton FontSize="18" Text="As Of Date" Value="AOD"/>
+            </sfButtons:SfRadioGroup>
+
+            <sfButtons:SfCheckBox x:Name="chkIncludeInNetworth" 
+                             Text="Include in Networth" 
+                             HorizontalOptions="Start"
+                             FontSize="18"
+                             IsChecked="True"/>
+            <ScrollView Orientation="Horizontal"
+            HorizontalScrollBarVisibility="Never"
+            HeightRequest="56">
+
+                <toolkit:SfChipGroup
+                    x:Name="assetTypeTagChipGroup"
+                    ChipType="Choice"
+                   
+                    ChipCornerRadius="16"
+                    ChipBackground="LightGray"
+                    ChipTextColor="Black"
+                    SelectedChipBackground="DodgerBlue"
+                    SelectedChipTextColor="White">
+
+                    <toolkit:SfChip Text="#Bank" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#NCD" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#MarketLinkedDebentures" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#Insurance" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#Gold" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#Others" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#Property" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#TaxEfficient" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#DebtMutualFund" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#EquityMutualFund" HeightRequest="35" Background="LightGray" />
+                    <toolkit:SfChip Text="#Stock" HeightRequest="35" Background="LightGray" />
+
+                </toolkit:SfChipGroup>
+            </ScrollView>
+
+
+        </VerticalStackLayout>
+
+
+        <HorizontalStackLayout Grid.Row="1" Margin="0,0,0,10" Spacing="10" HorizontalOptions="Center">
+            <Button x:Name="btnSave" Text="Save" Clicked="btnSave_Clicked"/>
+            <Button x:Name="btnDelete" Text="Delete" Clicked="btnDelete_Clicked"/>
+            <Button x:Name="btnClear" Text="Clear" Clicked="btnClear_Clicked"/>
+        </HorizontalStackLayout>
+
+
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="59"/>
+            </Grid.RowDefinitions>
+
+            <CollectionView Grid.Row="0" ItemsSource="{Binding AssetTypes}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="5"
+                       Padding="10"
+                       CornerRadius="12"
+                       HasShadow="True"
+                       BackgroundColor="White"
+                       BorderColor="LightGray">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCardTapped"/>
+                            </Frame.GestureRecognizers>
+                            <VerticalStackLayout>
+                                <Label Text="{Binding AssetTypeName}" 
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="Black"/>
+                                <Label Text="{Binding CategoryTag}" 
+                               FontSize="14"
+                               TextColor="Gray"/>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            
+            <DataPager:SfDataPager x:Name="dataPager" 
+            Grid.Row="1"
+            HorizontalOptions="Center"
+            HeightRequest="36"
+            ButtonSize="36"
+            ButtonSpacing="8"
+            ButtonFontSize="14"
+            NumericButtonCount="7"     
+            PageChanged="dataPager_PageChanged">
+                <DataPager:SfDataPager.DefaultStyle>
+                    <DataPager:DataPagerStyle
+                        NumericButtonBackgroundColor="Transparent"      
+                        NumericButtonTextColor="{AppThemeBinding Light=#333333,Dark=#CCCCCC}"
+                        NumericButtonSelectionBackgroundColor="Transparent"
+                        NumericButtonSelectionTextColor="{AppThemeBinding Light=#0078D7,Dark=White}"
+                        NavigationButtonBackgroundColor="Transparent"
+                        NavigationButtonIconColor="{AppThemeBinding Light=#333333,Dark=White}"
+                        NavigationButtonDisableBackgroundColor="Transparent"
+                        NavigationButtonDisableIconColor="{AppThemeBinding Light=#AAAAAA,Dark=#555555}"/>
+                </DataPager:SfDataPager.DefaultStyle>
+            </DataPager:SfDataPager>
+        </Grid>
+    </Grid>
+
+</ContentPage>

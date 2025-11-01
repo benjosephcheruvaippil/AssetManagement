@@ -63,6 +63,7 @@ public partial class AppLaunchPage : ContentPage
                 await _dbConnection.CreateTableAsync<Owners>();
                 await _dbConnection.CreateTableAsync<UserCurrency>();
                 await _dbConnection.CreateTableAsync<Currency>();
+                await _dbConnection.CreateTableAsync<AssetTypeModel>();
             }
         }
         catch (Exception ex)
