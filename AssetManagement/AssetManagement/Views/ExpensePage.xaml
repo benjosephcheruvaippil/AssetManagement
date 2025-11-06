@@ -99,10 +99,14 @@ HighlightedTextColor="{AppThemeBinding Light={StaticResource PrimaryBackgroundLi
 
             <DatePicker x:Name="dpDateExpense"/>
 
-                <Entry x:Name="entryExpenseRemarks"
-           Placeholder="Enter remarks" />
+                <!--<Entry x:Name="entryExpenseRemarks"
+           Placeholder="Enter remarks" />-->
+            <Editor
+            x:Name="entryExpenseRemarks"
+            Placeholder="Enter remarks"
+            AutoSize="TextChanges"/>
 
-                <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+            <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
                     <Button
                 x:Name="btnSaveExpense"
                 Text="Save Expense"
@@ -140,20 +144,32 @@ HighlightedTextColor="{AppThemeBinding Light={StaticResource PrimaryBackgroundLi
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnCardTapped"/>
                             </Border.GestureRecognizers>
-                            <VerticalStackLayout>
-                                <Label Text="{Binding TransactionId}" IsVisible="False"/>
-                                <Label Text="{Binding CategoryName}"
-                           FontAttributes="Bold"
-                           TextColor="Black"/>
-                                <Label Text="{Binding Date, StringFormat='{0:dd MMM yyyy h:mm tt}'}"
-                            FontAttributes="Bold"
-                            TextColor="Black"/> 
-                                <Label Text="{Binding Amount}" 
-                           TextColor="Gray"/>
-                                <Label Text="{Binding Remarks}"
-                            FontAttributes="Bold"
-                            TextColor="Black"/>         
-                            </VerticalStackLayout>
+                            <Grid>
+                                <!-- Main content -->
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding TransactionId}" IsVisible="False"/>
+                                    <Label Text="{Binding CategoryName}"
+                               FontAttributes="Bold"
+                               TextColor="Black"/>
+                                    <Label Text="{Binding Date, StringFormat='{0:dd MMM yyyy h:mm tt}'}"
+                               FontAttributes="Bold"
+                               TextColor="Black"/>
+                                    <Label Text="{Binding Amount}" 
+                                           FontAttributes="Bold"
+                               TextColor="Black"/>
+                                    <Label Text="{Binding Remarks}"
+                               FontAttributes="Bold"
+                               TextColor="Black"/>
+                                </VerticalStackLayout>
+
+                                <!-- Color patch -->
+                                <BoxView WidthRequest="15"
+                             HeightRequest="15"
+                             CornerRadius="3"
+                             HorizontalOptions="End"
+                             VerticalOptions="Start"
+                             Color="{Binding ModeColor}"/>
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
