@@ -5,6 +5,7 @@ using AssetManagement.Models.Constants;
 using CommunityToolkit.Maui.Storage;
 using ExcelDataReader;
 using SQLite;
+using Syncfusion.Maui.Core;
 using System.Data;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -20,6 +21,7 @@ public partial class ExpensePage : ContentPage
     ///private readonly IAssetService _assetService;
     public int PageNumber = 0, PageSize = 30, TotalExpenseRecordCount = 0;
     public bool ApplyFilterClicked = false;
+    Border _selectedFrame = null;
     public ExpensePage()
     {
         InitializeComponent();
@@ -317,7 +319,7 @@ public partial class ExpensePage : ContentPage
         dpDateExpense.MaximumDate = new DateTime(2050, 12, 31);
         dpDateExpense.Date = DateTime.Now;
         dpDateExpense.Format = "dd-MM-yyyy";
-        tblscExpenses.Clear();
+        //tblscExpenses.Clear();
         await SetUpDb();
 
         List<IncomeExpenseModel> expenses = new List<IncomeExpenseModel>();
@@ -326,7 +328,7 @@ public partial class ExpensePage : ContentPage
         {
             PageNumber = 0;
             ApplyFilterClicked = false;
-            tblscExpenses.Title = "Last 5 Transactions";
+            //tblscExpenses.Title = "Last 5 Transactions";
             lblShowRemainingRecords.IsVisible = true;
             expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
         }
@@ -358,35 +360,39 @@ public partial class ExpensePage : ContentPage
                 lblShowRemainingRecords.IsVisible = false;
             }
 
-            tblscExpenses.Title = "Showing "+ showRecordCount + " of "+ TotalExpenseRecordCount + " records";
+            //tblscExpenses.Title = "Showing "+ showRecordCount + " of "+ TotalExpenseRecordCount + " records";
+            lblCardBanner.Text = "Showing " + showRecordCount + " of " + TotalExpenseRecordCount + " records";
             expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 30 Offset " + offset);
         }
 
-        foreach (var item in expenses)
-        {
-            TextCell objCell = new TextCell();
-            objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
+        //foreach (var item in expenses)
+        //{
+        //    TextCell objCell = new TextCell();
+        //    objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
 
-            if (!string.IsNullOrEmpty(item.Remarks))
-            {
-                objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
-            }
-            else
-            {
-                objCell.Detail = Convert.ToString(item.Amount);
-            }
+        //    if (!string.IsNullOrEmpty(item.Remarks))
+        //    {
+        //        objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
+        //    }
+        //    else
+        //    {
+        //        objCell.Detail = Convert.ToString(item.Amount);
+        //    }
 
-            if (currentTheme == AppTheme.Dark)
-            {
-                //set to white color
-                tblscExpenses.TextColor= Color.FromArgb("#FFFFFF");
-                objCell.TextColor = Color.FromArgb("#FFFFFF");
-            }
+        //    if (currentTheme == AppTheme.Dark)
+        //    {
+        //        //set to white color
+        //        //tblscExpenses.TextColor= Color.FromArgb("#FFFFFF");
+        //        objCell.TextColor = Color.FromArgb("#FFFFFF");
+        //    }
 
-            tblscExpenses.Add(objCell);
+        //    //tblscExpenses.Add(objCell);
 
-            objCell.Tapped += ObjCell_Tapped;
-        }
+        //    objCell.Tapped += ObjCell_Tapped;
+        //}
+
+        expenseCollectionView.ItemsSource = expenses;
+        await expenseScrollView.ScrollToAsync(0, 0, true);
     }
 
     private void btnClearExpense_Clicked(object sender, EventArgs e)
@@ -619,7 +625,7 @@ public partial class ExpensePage : ContentPage
 
     public async Task ApplyFilterPagination()
     {
-        tblscExpenses.Clear();
+        //tblscExpenses.Clear();
         PageNumber = PageNumber + 1;
         int offset = (PageNumber - 1) * PageSize;
 
@@ -681,34 +687,37 @@ public partial class ExpensePage : ContentPage
             lblShowRemainingRecords.IsVisible = false;
         }
 
-        tblscExpenses.Title = "Showing " + showRecordCount + " of " + TotalExpenseRecordCount + " records";
+        //tblscExpenses.Title = "Showing " + showRecordCount + " of " + TotalExpenseRecordCount + " records";
+        lblCardBanner.Text = "Showing " + showRecordCount + " of " + TotalExpenseRecordCount + " records";
         //pagination
 
-        foreach (var item in expenses)
-        {
-            TextCell objCell = new TextCell();
-            objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
+        //foreach (var item in expenses)
+        //{
+        //    TextCell objCell = new TextCell();
+        //    objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
 
-            if (!string.IsNullOrEmpty(item.Remarks))
-            {
-                objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
-            }
-            else
-            {
-                objCell.Detail = Convert.ToString(item.Amount);
-            }
+        //    if (!string.IsNullOrEmpty(item.Remarks))
+        //    {
+        //        objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
+        //    }
+        //    else
+        //    {
+        //        objCell.Detail = Convert.ToString(item.Amount);
+        //    }
 
-            if (currentTheme == AppTheme.Dark)
-            {
-                //set to white color
-                tblscExpenses.TextColor = Color.FromArgb("#FFFFFF");
-                objCell.TextColor = Color.FromArgb("#FFFFFF");
-            }
+        //    if (currentTheme == AppTheme.Dark)
+        //    {
+        //        //set to white color
+        //        //tblscExpenses.TextColor = Color.FromArgb("#FFFFFF");
+        //        objCell.TextColor = Color.FromArgb("#FFFFFF");
+        //    }
 
-            tblscExpenses.Add(objCell);
+        //    //tblscExpenses.Add(objCell);
 
-            objCell.Tapped += ObjCell_Tapped;
-        }
+        //    objCell.Tapped += ObjCell_Tapped;
+        //}
+
+        expenseCollectionView.ItemsSource = expenses;
     }
 
     private async void pickexpensefile_Clicked(object sender, EventArgs e)
@@ -877,6 +886,37 @@ public partial class ExpensePage : ContentPage
             {
                 Navigation.PushAsync(new ManageCategoriesPage());
             }
+        }
+    }
+
+    private async void OnCardTapped(object sender, EventArgs e)
+    {
+        if ((sender as Border)?.BindingContext is IncomeExpenseModel tappedItem)
+        {
+            // Populate your fields
+            txtTransactionId.Text = tappedItem.TransactionId.ToString();
+            entryExpenseAmount.Text = tappedItem.Amount.ToString();
+            pickerExpenseCategory.Text = tappedItem.CategoryName;
+            dpDateExpense.Date = tappedItem.Date;
+            entryExpenseRemarks.Text = string.IsNullOrEmpty(tappedItem.Remarks) ? string.Empty : tappedItem.Remarks.Trim();
+
+            // Highlight logic
+            var tappedFrame = sender as Border;
+
+            // Remove previous highlight
+            if (_selectedFrame != null && _selectedFrame != tappedFrame)
+            {
+                _selectedFrame.BackgroundColor = Colors.White;
+                //_selectedFrame.BorderColor = Colors.LightGray;
+            }
+
+            // Set new highlight
+            tappedFrame.BackgroundColor = Color.FromArgb("#5D6D7E");
+            //tappedFrame.BorderColor = Color.FromArgb("#5D6D7E");
+
+            // Keep track of currently selected frame
+            _selectedFrame = tappedFrame;
+            await expenseScrollView.ScrollToAsync(0, 0, true);
         }
     }
 }
