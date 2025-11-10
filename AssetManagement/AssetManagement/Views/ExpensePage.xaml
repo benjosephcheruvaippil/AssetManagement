@@ -2,9 +2,13 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:converters="clr-namespace:AssetManagement.Common"
              xmlns:syncfusion="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
              x:Class="AssetManagement.Views.ExpensePage"
              Title="Expense">
+    <ContentPage.Resources>
+        <converters:StringNullOrEmptyToBoolConverter x:Key="StringNullOrEmptyToBoolConverter" />
+    </ContentPage.Resources>
     <ScrollView x:Name="expenseScrollView">
         <VerticalStackLayout>
             <toolkit:Expander Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" BackgroundColor="Gray" x:Name="expanderFilterDetails"  IsExpanded="False">
@@ -159,7 +163,8 @@ HighlightedTextColor="{AppThemeBinding Light={StaticResource PrimaryBackgroundLi
                                TextColor="Black"/>
                                     <Label Text="{Binding Remarks}"
                                FontAttributes="Bold"
-                               TextColor="Black"/>
+                               TextColor="Black"
+                               IsVisible="{Binding Remarks, Converter={StaticResource StringNullOrEmptyToBoolConverter}}"/>
                                 </VerticalStackLayout>
 
                                 <!-- Color patch -->

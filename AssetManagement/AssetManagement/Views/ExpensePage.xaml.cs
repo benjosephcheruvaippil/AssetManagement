@@ -348,6 +348,7 @@ public partial class ExpensePage : ContentPage
             if (ApplyFilterClicked)
             {
                 await ApplyFilterPagination();
+                await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
                 return;
             }
             PageNumber = PageNumber + 1;
