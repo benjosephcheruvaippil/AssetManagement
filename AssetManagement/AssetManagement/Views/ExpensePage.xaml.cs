@@ -342,6 +342,7 @@ public partial class ExpensePage : ContentPage
                 Remarks = s.Remarks,
                 Mode = s.Mode
             }).ToList();
+            expenseCollectionView.ItemsSource = expensesDTO;
         }
         else if (hint == "Pagewise")
         {
@@ -384,6 +385,9 @@ public partial class ExpensePage : ContentPage
                 Remarks = s.Remarks,
                 Mode = s.Mode
             }).ToList();
+
+            expenseCollectionView.ItemsSource = expensesDTO;
+            await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
         }
 
         //foreach (var item in expenses)
@@ -412,8 +416,8 @@ public partial class ExpensePage : ContentPage
         //    objCell.Tapped += ObjCell_Tapped;
         //}
 
-        expenseCollectionView.ItemsSource = expensesDTO;
-        await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
+        //expenseCollectionView.ItemsSource = expensesDTO;
+        //await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
     }
 
     private void btnClearExpense_Clicked(object sender, EventArgs e)
@@ -428,6 +432,11 @@ public partial class ExpensePage : ContentPage
         pickerExpenseCategory.Text = "";
         entryExpenseRemarks.Text = "";
         dpDateExpense.Date = DateTime.Now;
+        if (_selectedFrame != null)
+        {
+            _selectedFrame.BackgroundColor = Colors.White;
+            _selectedFrame = null;
+        }
     }
 
     //private async void btnUploadData_Clicked(object sender, EventArgs e)
@@ -948,7 +957,29 @@ public partial class ExpensePage : ContentPage
 
             // Keep track of currently selected frame
             _selectedFrame = tappedFrame;
-            await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
+
+            var visibleRect = new Rect(
+            expenseScrollView.ScrollX,
+            expenseScrollView.ScrollY,
+            expenseScrollView.Width,
+            expenseScrollView.Height);
+
+            // Get position of target element
+            var targetRect = expanderFilterDetails.Bounds;
+
+            // Check if the target is within the visible area
+            bool isVisible =
+                targetRect.Y >= visibleRect.Y &&
+                targetRect.Y <= visibleRect.Y + visibleRect.Height;
+
+            // Scroll only if not visible
+            if (!isVisible)
+            {
+                await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
+            }
+
+
+            //await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
         }
     }
 }
