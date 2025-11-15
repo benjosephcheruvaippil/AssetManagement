@@ -660,12 +660,12 @@ public partial class ExpensePage : ContentPage
         int offset = (PageNumber - 1) * PageSize;
 
         DateTime? fromDate = dpFromDateFilter.Date;
-        DateTime? toDate = dpToDateFilter.Date;
-        if (fromDate == DateTime.Today && toDate == DateTime.Today)
-        {
-            fromDate = null;
-            toDate = null;
-        }
+        DateTime? toDate = dpToDateFilter.Date.AddDays(1);
+        //if (fromDate == DateTime.Today && toDate == DateTime.Today)
+        //{
+        //    fromDate = null;
+        //    toDate = null;
+        //}
         string category = entCategoryFilter.Text;
         string remarks = entRemarksFilter.Text;
 
