@@ -1,5 +1,6 @@
 using AssetManagement.Models;
 using AssetManagement.Models.Constants;
+using AssetManagement.Models.DataTransferObject;
 using SQLite;
 using System.Globalization;
 
@@ -11,6 +12,7 @@ public partial class IncomePage : ContentPage
     AppTheme currentTheme = Application.Current.RequestedTheme;
     public int PageNumber = 0, PageSize = 30, TotalIncomeRecordCount = 0;
     public bool ApplyFilterClicked = false;
+    Border _selectedFrame = null;
     public IncomePage()
     {
         InitializeComponent();
@@ -115,16 +117,31 @@ public partial class IncomePage : ContentPage
         dpDateIncome.Date = DateTime.Now;
         dpDateIncome.Format = "dd-MM-yyyy";
         //set date
-        tblscIncome.Clear();
+        //tblscIncome.Clear();
         await SetUpDb();
 
         List<IncomeExpenseModel> income = new List<IncomeExpenseModel>();
+        List<IncomeExpenseDTO> incomeDTO = new List<IncomeExpenseDTO>();
 
         if (hint == "Last5")
         {
             PageNumber = 0;
-            tblscIncome.Title = "Last 5 Transactions";
+            ApplyFilterClicked = false;
+            //tblscIncome.Title = "Last 5 Transactions";
+            lblCardBanner.Text = "Last 5 Transactions";
+            lblShowRemainingRecords.IsVisible = true;
             income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 5");
+            incomeDTO = income.Select(s => new IncomeExpenseDTO
+            {
+                TransactionId = s.TransactionId,
+                Amount = s.Amount,
+                CategoryName = s.CategoryName,
+                Date = s.Date,
+                OwnerName = s.OwnerName,
+                Remarks = s.Remarks,
+                Mode = s.Mode
+            }).ToList();
+            incomeCollectionView.ItemsSource = incomeDTO;
         }
         else if(hint == "Pagewise")
         {
@@ -154,7 +171,7 @@ public partial class IncomePage : ContentPage
                 lblShowRemainingRecords.IsVisible = false;
             }
 
-            tblscIncome.Title = "Showing " + showRecordCount + " of " + TotalIncomeRecordCount + " records";
+            //tblscIncome.Title = "Showing " + showRecordCount + " of " + TotalIncomeRecordCount + " records";
 
             income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 30 Offset " + offset);
         }
@@ -177,11 +194,11 @@ public partial class IncomePage : ContentPage
             if (currentTheme == AppTheme.Dark)
             {
                 //set to white color
-                tblscIncome.TextColor = Color.FromArgb("#FFFFFF");
+                //tblscIncome.TextColor = Color.FromArgb("#FFFFFF");
                 objCell.TextColor = Color.FromArgb("#FFFFFF");
             }
 
-            tblscIncome.Add(objCell);
+            //tblscIncome.Add(objCell);
 
             objCell.Tapped += ObjCell_IncomeTapped; ;
         }
@@ -398,7 +415,7 @@ public partial class IncomePage : ContentPage
 
     public async Task ApplyFilterPagination()
     {
-        tblscIncome.Clear();
+        //tblscIncome.Clear();
         PageNumber = PageNumber + 1;
         int offset = (PageNumber - 1) * PageSize;
 
@@ -412,7 +429,8 @@ public partial class IncomePage : ContentPage
         string category = entCategoryFilter.Text;
         string remarks = entRemarksFilter.Text;
 
-        List<IncomeExpenseModel> expenses = new List<IncomeExpenseModel>();
+        List<IncomeExpenseModel> income = new List<IncomeExpenseModel>();
+        List<IncomeExpenseDTO> incomeDTO = new List<IncomeExpenseDTO>();
 
         var query = @"select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income'";
 
@@ -437,12 +455,22 @@ public partial class IncomePage : ContentPage
         string pageCountQuery = query;
         query += "ORDER BY Date DESC LIMIT 30 Offset " + offset;
 
-        expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>(query, parameters.ToArray());
+        income = await _dbConnection.QueryAsync<IncomeExpenseModel>(query, parameters.ToArray());
+        incomeDTO = income.Select(s => new IncomeExpenseDTO
+        {
+            TransactionId = s.TransactionId,
+            Amount = s.Amount,
+            CategoryName = s.CategoryName,
+            Date = s.Date,
+            Remarks = s.Remarks,
+            Mode = s.Mode
+        }).ToList();
 
         //pagination
         if (TotalIncomeRecordCount == 0)
         {
             var totalRecords = await _dbConnection.QueryAsync<IncomeExpenseModel>(pageCountQuery, parameters.ToArray());
+            lblCurrentMonthIncome.Text = "Total: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalRecords.Sum(s => s.Amount));
             TotalIncomeRecordCount = totalRecords.Count();
         }
         int showRecordCount = 0;
@@ -460,34 +488,37 @@ public partial class IncomePage : ContentPage
             lblShowRemainingRecords.IsVisible = false;
         }
 
-        tblscIncome.Title = "Showing " + showRecordCount + " of " + TotalIncomeRecordCount + " records";
+        //tblscIncome.Title = "Showing " + showRecordCount + " of " + TotalIncomeRecordCount + " records";
+        lblCardBanner.Text = "Showing " + showRecordCount + " of " + TotalIncomeRecordCount + " records";
         //pagination
 
-        foreach (var item in expenses)
-        {
-            TextCell objCell = new TextCell();
-            objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
+        //foreach (var item in expenses)
+        //{
+        //    TextCell objCell = new TextCell();
+        //    objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
 
-            if (!string.IsNullOrEmpty(item.Remarks))
-            {
-                objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
-            }
-            else
-            {
-                objCell.Detail = Convert.ToString(item.Amount);
-            }
+        //    if (!string.IsNullOrEmpty(item.Remarks))
+        //    {
+        //        objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
+        //    }
+        //    else
+        //    {
+        //        objCell.Detail = Convert.ToString(item.Amount);
+        //    }
 
-            if (currentTheme == AppTheme.Dark)
-            {
-                //set to white color
-                tblscIncome.TextColor = Color.FromArgb("#FFFFFF");
-                objCell.TextColor = Color.FromArgb("#FFFFFF");
-            }
+        //    if (currentTheme == AppTheme.Dark)
+        //    {
+        //        //set to white color
+        //        //tblscIncome.TextColor = Color.FromArgb("#FFFFFF");
+        //        objCell.TextColor = Color.FromArgb("#FFFFFF");
+        //    }
 
-            tblscIncome.Add(objCell);
+        //    //tblscIncome.Add(objCell);
 
-            objCell.Tapped += ObjCell_IncomeTapped;
-        }
+        //    objCell.Tapped += ObjCell_IncomeTapped;
+        //}
+
+        incomeCollectionView.ItemsSource = incomeDTO;
     }
 
     private void pickerIncomeCategory_SelectedIndexChanged(object sender, Syncfusion.Maui.Inputs.SelectionChangedEventArgs e)
@@ -510,6 +541,59 @@ public partial class IncomePage : ContentPage
 
                 Navigation.PushAsync(new ManageUsersPage());
             }
+        }
+    }
+
+    private async void OnCardTapped(object sender, EventArgs e)
+    {
+        if ((sender as Border)?.BindingContext is IncomeExpenseDTO tappedItem)
+        {
+            // Populate your fields
+            txtIncomeTransactionId.Text = tappedItem.TransactionId.ToString();
+            entryIncomeAmount.Text = tappedItem.Amount.ToString();
+            pickerIncomeCategory.Text = tappedItem.CategoryName;
+            dpDateIncome.Date = tappedItem.Date;
+            entryIncomeRemarks.Text = string.IsNullOrEmpty(tappedItem.Remarks) ? string.Empty : tappedItem.Remarks.Trim();
+
+            // Highlight logic
+            var tappedFrame = sender as Border;
+
+            // Remove previous highlight
+            if (_selectedFrame != null && _selectedFrame != tappedFrame)
+            {
+                _selectedFrame.BackgroundColor = Colors.White;
+                //_selectedFrame.BorderColor = Colors.LightGray;
+            }
+
+            // Set new highlight
+            tappedFrame.BackgroundColor = Color.FromArgb("#5D6D7E");
+            //tappedFrame.BorderColor = Color.FromArgb("#5D6D7E");
+
+            // Keep track of currently selected frame
+            _selectedFrame = tappedFrame;
+
+            var visibleRect = new Rect(
+            incomeScrollView.ScrollX,
+            incomeScrollView.ScrollY,
+            incomeScrollView.Width,
+            incomeScrollView.Height);
+
+            // Get position of target element
+            var targetRect = expanderFilterDetails.Bounds;
+
+            // Check if the target is within the visible area
+            bool isVisible =
+                targetRect.Y >= visibleRect.Y &&
+                targetRect.Y <= visibleRect.Y + visibleRect.Height;
+
+            // Scroll only if not visible
+            if (!isVisible)
+            {
+                await incomeScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
+            }
+
+
+            //await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
         }
     }
 
