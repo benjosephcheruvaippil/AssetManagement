@@ -148,6 +148,7 @@ public partial class IncomePage : ContentPage
             if (ApplyFilterClicked)
             {
                 await ApplyFilterPagination();
+                await incomeScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
                 return;
             }
             PageNumber = PageNumber + 1;
@@ -172,36 +173,49 @@ public partial class IncomePage : ContentPage
             }
 
             //tblscIncome.Title = "Showing " + showRecordCount + " of " + TotalIncomeRecordCount + " records";
-
+            lblCardBanner.Text = "Showing " + showRecordCount + " of " + TotalIncomeRecordCount + " records";
             income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 30 Offset " + offset);
+            incomeDTO = income.Select(s => new IncomeExpenseDTO
+            {
+                TransactionId = s.TransactionId,
+                Amount = s.Amount,
+                CategoryName = s.CategoryName,
+                Date = s.Date,
+                OwnerName = s.OwnerName,
+                Remarks = s.Remarks,
+                Mode = s.Mode
+            }).ToList();
+
+            incomeCollectionView.ItemsSource = incomeDTO;
+            await incomeScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
         }
         
 
-        foreach (var item in income)
-        {
-            TextCell objCell = new TextCell();
-            objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
+        //foreach (var item in income)
+        //{
+        //    TextCell objCell = new TextCell();
+        //    objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
 
-            if (!string.IsNullOrEmpty(item.Remarks))
-            {
-                objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
-            }
-            else
-            {
-                objCell.Detail = Convert.ToString(item.Amount);
-            }
+        //    if (!string.IsNullOrEmpty(item.Remarks))
+        //    {
+        //        objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
+        //    }
+        //    else
+        //    {
+        //        objCell.Detail = Convert.ToString(item.Amount);
+        //    }
 
-            if (currentTheme == AppTheme.Dark)
-            {
-                //set to white color
-                //tblscIncome.TextColor = Color.FromArgb("#FFFFFF");
-                objCell.TextColor = Color.FromArgb("#FFFFFF");
-            }
+        //    if (currentTheme == AppTheme.Dark)
+        //    {
+        //        //set to white color
+        //        //tblscIncome.TextColor = Color.FromArgb("#FFFFFF");
+        //        objCell.TextColor = Color.FromArgb("#FFFFFF");
+        //    }
 
-            //tblscIncome.Add(objCell);
+        //    //tblscIncome.Add(objCell);
 
-            objCell.Tapped += ObjCell_IncomeTapped; ;
-        }
+        //    objCell.Tapped += ObjCell_IncomeTapped; ;
+        //}
     }
 
     private void ObjCell_IncomeTapped(object sender, EventArgs e)
