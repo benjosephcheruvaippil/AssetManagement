@@ -381,6 +381,11 @@ public partial class IncomePage : ContentPage
         pickerIncomeCategory.Text = "";
         entryIncomeRemarks.Text = "";
         dpDateIncome.Date = DateTime.Now;
+        if (_selectedFrame != null)
+        {
+            _selectedFrame.BackgroundColor = Colors.White;
+            _selectedFrame = null;
+        }
     }
 
     private async void btnDeleteIncome_Clicked(object sender, EventArgs e)
