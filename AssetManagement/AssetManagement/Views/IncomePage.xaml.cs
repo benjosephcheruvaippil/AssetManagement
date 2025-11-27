@@ -130,11 +130,12 @@ public partial class IncomePage : ContentPage
             //tblscIncome.Title = "Last 5 Transactions";
             lblCardBanner.Text = "Last 5 Transactions";
             lblShowRemainingRecords.IsVisible = true;
-            income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 5");
+            income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,TaxAmountCut,CategoryName,OwnerName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 5");
             incomeDTO = income.Select(s => new IncomeExpenseDTO
             {
                 TransactionId = s.TransactionId,
                 Amount = s.Amount,
+                TaxAmountCut = s.TaxAmountCut,
                 CategoryName = s.CategoryName,
                 Date = s.Date,
                 OwnerName = s.OwnerName,
@@ -174,11 +175,12 @@ public partial class IncomePage : ContentPage
 
             //tblscIncome.Title = "Showing " + showRecordCount + " of " + TotalIncomeRecordCount + " records";
             lblCardBanner.Text = "Showing " + showRecordCount + " of " + TotalIncomeRecordCount + " records";
-            income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 30 Offset " + offset);
+            income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,TaxAmountCut,CategoryName,OwnerName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 30 Offset " + offset);
             incomeDTO = income.Select(s => new IncomeExpenseDTO
             {
                 TransactionId = s.TransactionId,
                 Amount = s.Amount,
+                TaxAmountCut = s.TaxAmountCut,
                 CategoryName = s.CategoryName,
                 Date = s.Date,
                 OwnerName = s.OwnerName,
@@ -451,7 +453,7 @@ public partial class IncomePage : ContentPage
         List<IncomeExpenseModel> income = new List<IncomeExpenseModel>();
         List<IncomeExpenseDTO> incomeDTO = new List<IncomeExpenseDTO>();
 
-        var query = @"select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income'";
+        var query = @"select TransactionId,Amount,TaxAmountCut,CategoryName,OwnerName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income'";
 
         var parameters = new List<object>();
         if (fromDate != null && toDate != null)
@@ -479,8 +481,10 @@ public partial class IncomePage : ContentPage
         {
             TransactionId = s.TransactionId,
             Amount = s.Amount,
+            TaxAmountCut = s.TaxAmountCut,
             CategoryName = s.CategoryName,
             Date = s.Date,
+            OwnerName = s.OwnerName,
             Remarks = s.Remarks,
             Mode = s.Mode
         }).ToList();
@@ -570,7 +574,9 @@ public partial class IncomePage : ContentPage
             // Populate your fields
             txtIncomeTransactionId.Text = tappedItem.TransactionId.ToString();
             entryIncomeAmount.Text = tappedItem.Amount.ToString();
+            entryTaxAmount.Text = tappedItem.TaxAmountCut.ToString();
             pickerIncomeCategory.Text = tappedItem.CategoryName;
+            pickerOwnerName.SelectedItem = tappedItem.OwnerName;
             dpDateIncome.Date = tappedItem.Date;
             entryIncomeRemarks.Text = string.IsNullOrEmpty(tappedItem.Remarks) ? string.Empty : tappedItem.Remarks.Trim();
 
