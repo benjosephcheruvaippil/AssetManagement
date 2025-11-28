@@ -2,10 +2,14 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:converters="clr-namespace:AssetManagement.Common"
              xmlns:syncfusion="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
              x:Class="AssetManagement.Views.IncomePage"
              Title="Income">
-    <ScrollView>
+    <ContentPage.Resources>
+        <converters:StringNullOrEmptyToBoolConverter x:Key="StringNullOrEmptyToBoolConverter" />
+    </ContentPage.Resources>
+    <ScrollView x:Name="incomeScrollView">
             <VerticalStackLayout>
 
             <toolkit:Expander Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" BackgroundColor="Gray" x:Name="expanderFilterDetails"  IsExpanded="False">
@@ -125,12 +129,57 @@
                 Margin="7,0,0,0"
                 Clicked="btnClearIncome_Clicked"/>
                 </StackLayout>
-                <TableView x:Name="tblviewIncome" Intent="Menu">
+                <!--<TableView x:Name="tblviewIncome" Intent="Menu">
                     <TableRoot>
                         <TableSection x:Name="tblscIncome" Title="Last 5 Transactions">
                         </TableSection>
                     </TableRoot>
-                </TableView>
+                </TableView>-->
+
+            <Label x:Name="lblCardBanner" Text="Last 5 Transactions" Margin="10,5,0,5"></Label>
+            <CollectionView x:Name="incomeCollectionView" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="5"
+        Padding="10"
+        Stroke="LightGray"
+        StrokeShape="RoundRectangle 12"
+        BackgroundColor="White">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCardTapped"/>
+                            </Border.GestureRecognizers>
+                            <Grid>
+                                <!-- Main content -->
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding TransactionId}" IsVisible="False"/>
+                                    <Label Text="{Binding CategoryName}"
+                   FontAttributes="Bold"
+                   TextColor="Black"/>
+                                    <Label Text="{Binding Date, StringFormat='{0:dd MMM yyyy h:mm tt}'}"
+                   FontAttributes="Bold"
+                   TextColor="Black"/>
+                                    <Label Text="{Binding Amount}" 
+                               FontAttributes="Bold"
+                   TextColor="Black"/>
+                                    <Label Text="{Binding Remarks}"
+                   FontAttributes="Bold"
+                   TextColor="Black"
+                   IsVisible="{Binding Remarks, Converter={StaticResource StringNullOrEmptyToBoolConverter}}"/>
+                                </VerticalStackLayout>
+
+                                <!-- Color patch -->
+                                <BoxView WidthRequest="15"
+                 HeightRequest="15"
+                 CornerRadius="3"
+                 HorizontalOptions="End"
+                 VerticalOptions="Start"
+                 Color="{Binding ModeColor}"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
             <Label x:Name="lblShowRemainingRecords" Text="Show Next 30 Records" FontAttributes="Bold" HorizontalOptions="Center" />
             <BoxView HeightRequest="50" Color="Transparent"/>
                 <Label x:Name="lblCurrentMonthIncome" FontSize="Large" Text="" HorizontalOptions="CenterAndExpand"></Label>
