@@ -135,6 +135,7 @@ public partial class IncomePage : ContentPage
             {
                 TransactionId = s.TransactionId,
                 Amount = s.Amount,
+                CurrencySymbol = Constants.GetCurrency(),
                 TaxAmountCut = s.TaxAmountCut,
                 CategoryName = s.CategoryName,
                 Date = s.Date,
@@ -180,6 +181,7 @@ public partial class IncomePage : ContentPage
             {
                 TransactionId = s.TransactionId,
                 Amount = s.Amount,
+                CurrencySymbol = Constants.GetCurrency(),
                 TaxAmountCut = s.TaxAmountCut,
                 CategoryName = s.CategoryName,
                 Date = s.Date,
@@ -481,6 +483,7 @@ public partial class IncomePage : ContentPage
         {
             TransactionId = s.TransactionId,
             Amount = s.Amount,
+            CurrencySymbol = Constants.GetCurrency(),
             TaxAmountCut = s.TaxAmountCut,
             CategoryName = s.CategoryName,
             Date = s.Date,

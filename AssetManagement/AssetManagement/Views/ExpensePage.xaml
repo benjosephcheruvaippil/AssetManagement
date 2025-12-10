@@ -158,7 +158,7 @@ HighlightedTextColor="{AppThemeBinding Light={StaticResource PrimaryBackgroundLi
                                     <Label Text="{Binding Date, StringFormat='{0:dd MMM yyyy h:mm tt}'}"
                                FontAttributes="Bold"
                                TextColor="Black"/>
-                                    <Label Text="{Binding Amount}" 
+                                    <Label Text="{Binding AmountText}" 
                                            FontAttributes="Bold"
                                TextColor="Black"/>
                                     <Label Text="{Binding Remarks}"

@@ -337,6 +337,7 @@ public partial class ExpensePage : ContentPage
             {
                 TransactionId = s.TransactionId,
                 Amount = s.Amount,
+                CurrencySymbol = Constants.GetCurrency(),
                 CategoryName = s.CategoryName,
                 Date = s.Date,
                 Remarks = s.Remarks,
@@ -380,6 +381,7 @@ public partial class ExpensePage : ContentPage
             {
                 TransactionId = s.TransactionId,
                 Amount = s.Amount,
+                CurrencySymbol = Constants.GetCurrency(),
                 CategoryName = s.CategoryName,
                 Date = s.Date,
                 Remarks = s.Remarks,
@@ -700,6 +702,7 @@ public partial class ExpensePage : ContentPage
         {
             TransactionId = s.TransactionId,
             Amount = s.Amount,
+            CurrencySymbol = Constants.GetCurrency(),
             CategoryName = s.CategoryName,
             Date = s.Date,
             Remarks = s.Remarks,
