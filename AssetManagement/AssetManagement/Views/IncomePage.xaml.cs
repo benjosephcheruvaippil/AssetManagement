@@ -12,7 +12,7 @@ public partial class IncomePage : ContentPage
     AppTheme currentTheme = Application.Current.RequestedTheme;
     public int PageNumber = 0, PageSize = 30, TotalIncomeRecordCount = 0;
     public bool ApplyFilterClicked = false;
-    Border _selectedFrame = null;
+    //Border _selectedFrame = null;
     public IncomePage()
     {
         InitializeComponent();
@@ -23,6 +23,9 @@ public partial class IncomePage : ContentPage
             LoadIncomeInPage("Pagewise");
         };
         lblShowRemainingRecords.GestureRecognizers.Add(labelShowRemaining);
+
+        double screenHeight = DeviceDisplay.MainDisplayInfo.Height / DeviceDisplay.MainDisplayInfo.Density;
+        incomeCollectionView.HeightRequest = screenHeight * 0.5;
     }
 
     protected async override void OnAppearing()
@@ -399,10 +402,15 @@ public partial class IncomePage : ContentPage
         pickerIncomeCategory.Text = "";
         entryIncomeRemarks.Text = "";
         dpDateIncome.Date = DateTime.Now;
-        if (_selectedFrame != null)
+        //if (_selectedFrame != null)
+        //{
+        //    _selectedFrame.BackgroundColor = Colors.White;
+        //    _selectedFrame = null;
+        //}
+        if (incomeCollectionView.ItemsSource is IEnumerable<IncomeExpenseDTO> items)
         {
-            _selectedFrame.BackgroundColor = Colors.White;
-            _selectedFrame = null;
+            foreach (var item in items)
+                item.IsSelected = false; // reset all
         }
     }
 
@@ -442,7 +450,7 @@ public partial class IncomePage : ContentPage
         PageNumber = PageNumber + 1;
         int offset = (PageNumber - 1) * PageSize;
 
-        DateTime? fromDate = dpFromDateFilter.Date, toDate = dpToDateFilter.Date;
+        DateTime? fromDate = dpFromDateFilter.Date, toDate = dpToDateFilter.Date.AddDays(1).AddSeconds(-1);
         if (dpFromDateFilter.Date == dpToDateFilter.Date)
         {
             fromDate = dpFromDateFilter.Date;
@@ -583,23 +591,16 @@ public partial class IncomePage : ContentPage
             dpDateIncome.Date = tappedItem.Date;
             entryIncomeRemarks.Text = string.IsNullOrEmpty(tappedItem.Remarks) ? string.Empty : tappedItem.Remarks.Trim();
 
-            // Highlight logic
-            var tappedFrame = sender as Border;
-
-            // Remove previous highlight
-            if (_selectedFrame != null && _selectedFrame != tappedFrame)
+            // Highlight logic using DTO property
+            if (incomeCollectionView.ItemsSource is IEnumerable<IncomeExpenseDTO> items)
             {
-                _selectedFrame.BackgroundColor = Colors.White;
-                //_selectedFrame.BorderColor = Colors.LightGray;
+                foreach (var item in items)
+                    item.IsSelected = false; // reset all
             }
 
-            // Set new highlight
-            tappedFrame.BackgroundColor = Color.FromArgb("#5D6D7E");
-            //tappedFrame.BorderColor = Color.FromArgb("#5D6D7E");
+            tappedItem.IsSelected = true; // select tapped item
 
-            // Keep track of currently selected frame
-            _selectedFrame = tappedFrame;
-
+            // Scroll logic stays the same
             var visibleRect = new Rect(
             incomeScrollView.ScrollX,
             incomeScrollView.ScrollY,

@@ -8,6 +8,7 @@
              Title="Income">
     <ContentPage.Resources>
         <converters:StringNullOrEmptyToBoolConverter x:Key="StringNullOrEmptyToBoolConverter" />
+        <converters:BoolToSelectionColorConverter x:Key="BoolToSelectionColorConverter" />
     </ContentPage.Resources>
     <ScrollView x:Name="incomeScrollView">
             <VerticalStackLayout>
@@ -144,7 +145,7 @@
         Padding="10"
         Stroke="LightGray"
         StrokeShape="RoundRectangle 12"
-        BackgroundColor="White">
+        BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolToSelectionColorConverter}}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnCardTapped"/>
                             </Border.GestureRecognizers>

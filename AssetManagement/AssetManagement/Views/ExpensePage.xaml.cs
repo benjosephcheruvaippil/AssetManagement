@@ -21,7 +21,7 @@ public partial class ExpensePage : ContentPage
     ///private readonly IAssetService _assetService;
     public int PageNumber = 0, PageSize = 30, TotalExpenseRecordCount = 0;
     public bool ApplyFilterClicked = false;
-    Border _selectedFrame = null;
+    //Border _selectedFrame = null;
     public ExpensePage()
     {
         InitializeComponent();
@@ -39,7 +39,10 @@ public partial class ExpensePage : ContentPage
             LoadExpensesInPage("Pagewise");
         };
         lblShowRemainingRecords.GestureRecognizers.Add(labelShowRemaining);
-        }
+
+        double screenHeight = DeviceDisplay.MainDisplayInfo.Height / DeviceDisplay.MainDisplayInfo.Density;
+        expenseCollectionView.HeightRequest= screenHeight * 0.5;
+    }
 
     protected async override void OnAppearing()
     {
@@ -434,10 +437,15 @@ public partial class ExpensePage : ContentPage
         pickerExpenseCategory.Text = "";
         entryExpenseRemarks.Text = "";
         dpDateExpense.Date = DateTime.Now;
-        if (_selectedFrame != null)
+        //if (_selectedFrame != null)
+        //{
+        //    _selectedFrame.BackgroundColor = Colors.White;
+        //    _selectedFrame = null;
+        //}
+        if (expenseCollectionView.ItemsSource is IEnumerable<IncomeExpenseDTO> items)
         {
-            _selectedFrame.BackgroundColor = Colors.White;
-            _selectedFrame = null;
+            foreach (var item in items)
+                item.IsSelected = false; // reset all
         }
     }
 
@@ -661,7 +669,7 @@ public partial class ExpensePage : ContentPage
         PageNumber = PageNumber + 1;
         int offset = (PageNumber - 1) * PageSize;
 
-        DateTime? fromDate = dpFromDateFilter.Date, toDate = dpToDateFilter.Date;
+        DateTime? fromDate = dpFromDateFilter.Date, toDate = dpToDateFilter.Date.AddDays(1).AddSeconds(-1);
         if (dpFromDateFilter.Date == dpToDateFilter.Date)
         {
             fromDate = dpFromDateFilter.Date;
@@ -944,28 +952,21 @@ public partial class ExpensePage : ContentPage
             dpDateExpense.Date = tappedItem.Date;
             entryExpenseRemarks.Text = string.IsNullOrEmpty(tappedItem.Remarks) ? string.Empty : tappedItem.Remarks.Trim();
 
-            // Highlight logic
-            var tappedFrame = sender as Border;
-
-            // Remove previous highlight
-            if (_selectedFrame != null && _selectedFrame != tappedFrame)
+            // Highlight logic using DTO property
+            if (expenseCollectionView.ItemsSource is IEnumerable<IncomeExpenseDTO> items)
             {
-                _selectedFrame.BackgroundColor = Colors.White;
-                //_selectedFrame.BorderColor = Colors.LightGray;
+                foreach (var item in items)
+                    item.IsSelected = false; // reset all
             }
 
-            // Set new highlight
-            tappedFrame.BackgroundColor = Color.FromArgb("#5D6D7E");
-            //tappedFrame.BorderColor = Color.FromArgb("#5D6D7E");
+            tappedItem.IsSelected = true; // select tapped item
 
-            // Keep track of currently selected frame
-            _selectedFrame = tappedFrame;
-
+            // Scroll logic stays the same
             var visibleRect = new Rect(
-            expenseScrollView.ScrollX,
-            expenseScrollView.ScrollY,
-            expenseScrollView.Width,
-            expenseScrollView.Height);
+                expenseScrollView.ScrollX,
+                expenseScrollView.ScrollY,
+                expenseScrollView.Width,
+                expenseScrollView.Height);
 
             // Get position of target element
             var targetRect = expanderFilterDetails.Bounds;
