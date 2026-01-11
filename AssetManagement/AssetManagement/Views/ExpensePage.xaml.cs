@@ -333,9 +333,23 @@ public partial class ExpensePage : ContentPage
             PageNumber = 0;
             ApplyFilterClicked = false;
             //tblscExpenses.Title = "Last 5 Transactions";
-            lblCardBanner.Text= "Last 5 Transactions";
-            lblShowRemainingRecords.IsVisible = true;
+            //lblCardBanner.Text= "Last 5 Transactions";
+            //lblShowRemainingRecords.IsVisible = true;
             expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
+
+            if(expenses.Count == 0)
+            {
+                expenseCollectionView.IsVisible = false;
+                lblCardBanner.Text = "";
+                lblShowRemainingRecords.IsVisible = false;
+            }
+            else
+            {
+                expenseCollectionView.IsVisible = true;
+                lblCardBanner.Text = "Last 5 Transactions";
+                lblShowRemainingRecords.IsVisible = true;
+            }
+
             expensesDTO = expenses.Select(s => new IncomeExpenseDTO
             {
                 TransactionId = s.TransactionId,

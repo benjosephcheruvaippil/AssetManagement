@@ -134,6 +134,20 @@ public partial class IncomePage : ContentPage
             lblCardBanner.Text = "Last 5 Transactions";
             lblShowRemainingRecords.IsVisible = true;
             income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,TaxAmountCut,CategoryName,OwnerName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 5");
+
+            if (income.Count == 0)
+            {
+                incomeCollectionView.IsVisible = false;
+                lblCardBanner.Text = "";
+                lblShowRemainingRecords.IsVisible = false;
+            }
+            else
+            {
+                incomeCollectionView.IsVisible = true;
+                lblCardBanner.Text = "Last 5 Transactions";
+                lblShowRemainingRecords.IsVisible = true;
+            }
+
             incomeDTO = income.Select(s => new IncomeExpenseDTO
             {
                 TransactionId = s.TransactionId,
