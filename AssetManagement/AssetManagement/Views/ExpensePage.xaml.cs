@@ -780,14 +780,22 @@ public partial class ExpensePage : ContentPage
             await SetUpDb();
             List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' and Mode='file_upload' order by Date desc Limit 1");
             var categoriesWithShortCode = await _dbConnection.Table<IncomeExpenseCategories>().Where(c => c.CategoryType == "Expense" && !string.IsNullOrEmpty(c.ShortCode)).ToListAsync();
+            string messageText = "";
+            foreach (var code in categoriesWithShortCode)
+            {
+                messageText = messageText + $"- {code.ShortCode}: {code.CategoryName}\n";
+            }
             if (expenses.Count > 0)
             {
-                string messageText = "";
-                foreach (var code in categoriesWithShortCode)
-                {
-                    messageText= messageText + $"- {code.ShortCode}: {code.CategoryName}\n";
-                }
                 bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n {messageText} \n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
+                if (!userResponse)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                bool userResponse = await DisplayAlert("Message", $"Instructions\n {messageText} \n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
                 if (!userResponse)
                 {
                     return;
@@ -831,9 +839,12 @@ public partial class ExpensePage : ContentPage
                         DateTime transactionDate = new DateTime(Convert.ToInt32(dateArr[2]), Convert.ToInt32(dateArr[1]), Convert.ToInt32(dateArr[0]));
                         DateTime date = transactionDate.Date;
                         var recordsToBeDeleted = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.Mode == "file_upload" && i.TransactionType == "Expense" && i.Date >= date).ToListAsync();
-                        foreach(var record in recordsToBeDeleted)
+                        if (recordsToBeDeleted.Count > 0)
                         {
-                            await _dbConnection.DeleteAsync(record);
+                            foreach (var record in recordsToBeDeleted)
+                            {
+                                await _dbConnection.DeleteAsync(record);
+                            }
                         }
                         //Delete if exists mode=file_upload on the specified date
                         break;
@@ -862,6 +873,12 @@ public partial class ExpensePage : ContentPage
                         //description = description.Replace("\n", "");
                         //description = description.ToLower();
 
+                        if (categoriesWithShortCode.Count == 0)
+                        {
+                            //no categories with shortcode found, so cannot proceed
+                            await DisplayAlert("Error", $"There are no categories with short code. Hence cannot add any records.", "OK");
+                            break;
+                        }
                         foreach(var kvp in categoriesWithShortCode)
                         {
                             if (alteredDescription.Contains("/" + kvp.ShortCode + "/"))
