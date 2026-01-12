@@ -540,7 +540,7 @@ public partial class AssetPage : TabbedPage
 
             if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "Equity Mutual Fund" || objAsset.Type == "Debt Mutual Fund" || objAsset.Type == "Stocks" || objAsset.Type == "NPS" || objAsset.Type == "Others")
             {
-                objAsset.AsOfDate = entAsOfDate.Date;
+                objAsset.AsOfDate = (DateTime)entAsOfDate.Date;
                 objAsset.StartDate = Convert.ToDateTime("01-01-0001");
                 objAsset.MaturityDate = Convert.ToDateTime("01-01-0001");
 
@@ -550,8 +550,8 @@ public partial class AssetPage : TabbedPage
             else
             {
                 objAsset.AsOfDate = Convert.ToDateTime("01-01-0001");
-                objAsset.StartDate = entStartDate.Date;
-                objAsset.MaturityDate = entMaturityDate.Date;
+                objAsset.StartDate = (DateTime)entStartDate.Date;
+                objAsset.MaturityDate = (DateTime)entMaturityDate.Date;
 
                 entAsOfDate.IsEnabled = false;
             }

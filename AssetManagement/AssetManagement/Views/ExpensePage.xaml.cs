@@ -208,7 +208,7 @@ public partial class ExpensePage : ContentPage
             {
                 Amount = Convert.ToDouble(entryExpenseAmount.Text),
                 TransactionType = "Expense",
-                Date = dpDateExpense.Date != DateTime.Now.Date ? dpDateExpense.Date : DateTime.Now,
+                Date = (DateTime)dpDateExpense.Date != DateTime.Now.Date ? (DateTime)dpDateExpense.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerExpenseCategory.Text.Trim()),
                 Remarks = entryExpenseRemarks.Text,
                 Mode = "manual"
@@ -237,7 +237,7 @@ public partial class ExpensePage : ContentPage
                 TransactionId = transId,
                 Amount = Convert.ToDouble(entryExpenseAmount.Text),
                 TransactionType = "Expense",
-                Date = dpDateExpense.Date != DateTime.Now.Date ? dpDateExpense.Date : DateTime.Now,
+                Date = (DateTime)dpDateExpense.Date != DateTime.Now.Date ? (DateTime)dpDateExpense.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerExpenseCategory.Text.Trim()),
                 Mode = incExpResult.Mode,
                 Remarks = entryExpenseRemarks.Text
@@ -683,11 +683,11 @@ public partial class ExpensePage : ContentPage
         PageNumber = PageNumber + 1;
         int offset = (PageNumber - 1) * PageSize;
 
-        DateTime? fromDate = dpFromDateFilter.Date, toDate = dpToDateFilter.Date.AddDays(1).AddSeconds(-1);
+        DateTime? fromDate = dpFromDateFilter.Date, toDate = dpToDateFilter.Date.Value.AddDays(1).AddSeconds(-1);
         if (dpFromDateFilter.Date == dpToDateFilter.Date)
         {
             fromDate = dpFromDateFilter.Date;
-            toDate = dpToDateFilter.Date.AddDays(1);
+            toDate = dpToDateFilter.Date.Value.AddDays(1);
         }
        
         string category = entCategoryFilter.Text;

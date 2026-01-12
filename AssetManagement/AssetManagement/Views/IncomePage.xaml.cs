@@ -349,7 +349,7 @@ public partial class IncomePage : ContentPage
                 Amount = Convert.ToDouble(entryIncomeAmount.Text),
                 TaxAmountCut=Convert.ToDouble(entryTaxAmount.Text),
                 TransactionType = "Income",
-                Date = dpDateIncome.Date != DateTime.Now.Date ? dpDateIncome.Date : DateTime.Now,
+                Date = (DateTime)dpDateIncome.Date != DateTime.Now.Date ? (DateTime)dpDateIncome.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerIncomeCategory.Text.Trim()),
                 OwnerName=Convert.ToString(pickerOwnerName.SelectedItem),
                 Remarks = entryIncomeRemarks.Text
@@ -378,7 +378,7 @@ public partial class IncomePage : ContentPage
                 Amount = Convert.ToDouble(entryIncomeAmount.Text),
                 TaxAmountCut = Convert.ToDouble(entryTaxAmount.Text),
                 TransactionType = "Income",
-                Date = dpDateIncome.Date != DateTime.Now.Date ? dpDateIncome.Date : DateTime.Now,
+                Date = (DateTime)dpDateIncome.Date != DateTime.Now.Date ? (DateTime)dpDateIncome.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerIncomeCategory.Text.Trim()),
                 OwnerName = Convert.ToString(pickerOwnerName.SelectedItem),
                 Remarks = entryIncomeRemarks.Text
@@ -464,11 +464,11 @@ public partial class IncomePage : ContentPage
         PageNumber = PageNumber + 1;
         int offset = (PageNumber - 1) * PageSize;
 
-        DateTime? fromDate = dpFromDateFilter.Date, toDate = dpToDateFilter.Date.AddDays(1).AddSeconds(-1);
+        DateTime? fromDate = dpFromDateFilter.Date, toDate = dpToDateFilter.Date.Value.AddDays(1).AddSeconds(-1);
         if (dpFromDateFilter.Date == dpToDateFilter.Date)
         {
             fromDate = dpFromDateFilter.Date;
-            toDate = dpToDateFilter.Date.AddDays(1);
+            toDate = dpToDateFilter.Date.Value.AddDays(1);
         }
 
         string category = entCategoryFilter.Text;

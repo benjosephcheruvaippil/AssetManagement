@@ -401,8 +401,8 @@ public partial class IncomeExpenseReportsPage : ContentPage
                 return;
             }
             activityIndicator.IsRunning = true;
-            DateTime fromDateIncomeReport = dpFromDateIncomeReport.Date;
-            DateTime toDateIncomeReport = dpTODateIncomeReport.Date;
+            DateTime fromDateIncomeReport = (DateTime)dpFromDateIncomeReport.Date;
+            DateTime toDateIncomeReport = (DateTime)dpTODateIncomeReport.Date;
             DateTime fromDate = new DateTime(fromDateIncomeReport.Year, fromDateIncomeReport.Month, fromDateIncomeReport.Day, 0, 0, 0);
             DateTime toDate = new DateTime(toDateIncomeReport.Year, toDateIncomeReport.Month, toDateIncomeReport.Day, 23, 59, 59);
             List<IncomeExpenseModel> inexpList = new List<IncomeExpenseModel>();
