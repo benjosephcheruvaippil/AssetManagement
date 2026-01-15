@@ -257,7 +257,7 @@ public partial class IncomePage : ContentPage
 
         if (string.IsNullOrEmpty(pickerIncomeCategory.Text))
         {
-            DisplayAlert("Info", textCell[0].Trim() + " - Please make this category visible from Manage Category page in order to edit.", "OK");
+            DisplayAlertAsync("Info", textCell[0].Trim() + " - Please make this category visible from Manage Category page in order to edit.", "OK");
         }
 
         pickerOwnerName.SelectedItem = incomeDetail.Result.OwnerName;
@@ -304,27 +304,27 @@ public partial class IncomePage : ContentPage
     {
         if (((pickerIncomeCategory.ItemsSource as IEnumerable<object>)?.Cast<object>().Count() ?? 0) == 0)
         {
-            await DisplayAlert("Message", "Please create income categories under Settings -> Manage Categories before adding expenses", "OK");
+            await DisplayAlertAsync("Message", "Please create income categories under Settings -> Manage Categories before adding expenses", "OK");
             return;
         }
         else if (string.IsNullOrEmpty(entryIncomeAmount.Text))
         {
-            await DisplayAlert("Message", "Please input required values", "OK");
+            await DisplayAlertAsync("Message", "Please input required values", "OK");
             return;
         }
         else if (string.IsNullOrEmpty(pickerIncomeCategory.Text))
         {
-            await DisplayAlert("Message", "Please select a category", "OK");
+            await DisplayAlertAsync("Message", "Please select a category", "OK");
             return;
         }
         else if (pickerOwnerName.Items.Count == 0)
         {
-            await DisplayAlert("Message", "Please create owner/users under Settings -> Manage Owners/Users before adding income", "OK");
+            await DisplayAlertAsync("Message", "Please create owner/users under Settings -> Manage Owners/Users before adding income", "OK");
             return;
         }
         else if (pickerOwnerName.SelectedIndex == -1)
         {
-            await DisplayAlert("Message", "Please select an owner", "OK");
+            await DisplayAlertAsync("Message", "Please select an owner", "OK");
             return;
         }
 
@@ -337,7 +337,7 @@ public partial class IncomePage : ContentPage
         var incomeCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Income").ToListAsync();
         if (!incomeCategories.Any(c => c.CategoryName == pickerIncomeCategory.Text.Trim()))
         {
-            await DisplayAlert("Message", "Please create this category under Settings -> Manage Categories before adding income", "OK");
+            await DisplayAlertAsync("Message", "Please create this category under Settings -> Manage Categories before adding income", "OK");
             return;
         }
         //check if category present in master table
@@ -367,7 +367,7 @@ public partial class IncomePage : ContentPage
             }
             else
             {
-                await DisplayAlert("Error", "Something went wrong", "OK");
+                await DisplayAlertAsync("Error", "Something went wrong", "OK");
             }
         }
         else //update
@@ -398,7 +398,7 @@ public partial class IncomePage : ContentPage
             }
             else
             {
-                await DisplayAlert("Error", "Something went wrong", "OK");
+                await DisplayAlertAsync("Error", "Something went wrong", "OK");
             }
         }
     }
@@ -432,7 +432,7 @@ public partial class IncomePage : ContentPage
     {
         if (!string.IsNullOrEmpty(txtIncomeTransactionId.Text))
         {
-            bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
+            bool userResponse = await DisplayAlertAsync("Warning", "Are you sure to delete?", "Yes", "No");
             if (userResponse)
             {
                 IncomeExpenseModel objIncome = new IncomeExpenseModel()

@@ -43,7 +43,7 @@ public partial class ManageUsersPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            await DisplayAlertAsync("Error", ex.Message, "OK");
         }
     }
 
@@ -51,7 +51,7 @@ public partial class ManageUsersPage : ContentPage
     {
         if (string.IsNullOrEmpty(entryOwnerName.Text))
         {
-            await DisplayAlert("Message", "Please input name", "OK");
+            await DisplayAlertAsync("Message", "Please input name", "OK");
             return;
         }
         entryOwnerName.Text = entryOwnerName.Text.Trim();
@@ -72,7 +72,7 @@ public partial class ManageUsersPage : ContentPage
                 //}
                 if (owners.Where(o => o.OwnerName.ToLower() == inputtedOwnerNameFormatted).Count() > 0)
                 {
-                    await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
+                    await DisplayAlertAsync("Message", "Duplicate name found in database. Please re-enter.", "OK");
                     return;
                 }
             }
@@ -92,7 +92,7 @@ public partial class ManageUsersPage : ContentPage
             }
             else
             {
-                await DisplayAlert("Error", "Something went wrong", "OK");
+                await DisplayAlertAsync("Error", "Something went wrong", "OK");
             }
         }
         else //update
@@ -112,7 +112,7 @@ public partial class ManageUsersPage : ContentPage
                 //}
                 if (owners.Where(o => o.OwnerName.ToLower() == inputtedOwnerNameFormatted && o.OwnerId != ownerId).Count() >= 1)
                 {
-                    await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
+                    await DisplayAlertAsync("Message", "Duplicate name found in database. Please re-enter.", "OK");
                     return;
                 }
             }
@@ -138,7 +138,7 @@ public partial class ManageUsersPage : ContentPage
             }
             else
             {
-                await DisplayAlert("Error", "Something went wrong", "OK");
+                await DisplayAlertAsync("Error", "Something went wrong", "OK");
             }
         }
     }
@@ -191,26 +191,26 @@ public partial class ManageUsersPage : ContentPage
             if (!string.IsNullOrEmpty(txtOwnerId.Text))
             {
                 entryOwnerName.Text = entryOwnerName.Text.Trim();
-                bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
+                bool userResponse = await DisplayAlertAsync("Warning", "Are you sure to delete?", "Yes", "No");
                 if (userResponse)
                 {
                     //check if there is any transaction in IncomeExpenseModel and Assets table before deleting the owner
                     var incomeExpenseRecord = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.OwnerName == entryOwnerName.Text).ToListAsync();
                     if (incomeExpenseRecord.Count > 0)
                     {
-                        await DisplayAlert("Info", "Cannot delete owner since there are records with this owner.", "Ok");
+                        await DisplayAlertAsync("Info", "Cannot delete owner since there are records with this owner.", "Ok");
                         return;
                     }
                     var assetsRecord = await _dbConnection.Table<Assets>().Where(a => a.Holder == entryOwnerName.Text).ToListAsync();
                     if (assetsRecord.Count > 0)
                     {
-                        await DisplayAlert("Info", "Cannot delete owner since there are records with this owner.", "Ok");
+                        await DisplayAlertAsync("Info", "Cannot delete owner since there are records with this owner.", "Ok");
                         return;
                     }
                     var assetsNomineeRecord = await _dbConnection.Table<Assets>().Where(a => a.Nominee == entryOwnerName.Text).ToListAsync();
                     if (assetsNomineeRecord.Count > 0)
                     {
-                        await DisplayAlert("Info", "Cannot delete owner since there are records with this owner.", "Ok");
+                        await DisplayAlertAsync("Info", "Cannot delete owner since there are records with this owner.", "Ok");
                         return;
                     }
                     //check if there is any transaction in IncomeExpenseModel and Assets table before deleting the owner
@@ -227,12 +227,12 @@ public partial class ManageUsersPage : ContentPage
             }
             else
             {
-                await DisplayAlert("Info", "Please select an owner to delete", "Ok");
+                await DisplayAlertAsync("Info", "Please select an owner to delete", "Ok");
             }
         }
         catch(Exception ex)
         {
-            await DisplayAlert("Error", "Something went wrong: " + ex.Message.ToString(), "Ok");
+            await DisplayAlertAsync("Error", "Something went wrong: " + ex.Message.ToString(), "Ok");
         }
     }
 

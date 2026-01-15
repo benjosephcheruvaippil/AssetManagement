@@ -61,7 +61,7 @@ public partial class ExpensePage : ContentPage
         }
         catch(Exception)
         {
-            //await DisplayAlert("Error", ex.Message, "OK");
+            //await DisplayAlertAsync("Error", ex.Message, "OK");
             return;
         }
     }
@@ -87,7 +87,7 @@ public partial class ExpensePage : ContentPage
         }
         catch(Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            await DisplayAlertAsync("Error", ex.Message, "OK");
         }
     }
 
@@ -98,7 +98,7 @@ public partial class ExpensePage : ContentPage
             CommonFunctions objCommon = new CommonFunctions();
             if (await objCommon.IsAppUpdateAvailable())
             {
-                bool update = await DisplayAlert("Update Available","A new version of the app is available. Please update. We recommend you take a backup before updation.", "Update", "Later");
+                bool update = await DisplayAlertAsync("Update Available","A new version of the app is available. Please update. We recommend you take a backup before updation.", "Update", "Later");
 
                 await _dbConnection.ExecuteAsync("UPDATE Owners SET UpdateAvailableLastChecked = ?", DateTime.Today);
 
@@ -178,17 +178,17 @@ public partial class ExpensePage : ContentPage
     {
         if (((pickerExpenseCategory.ItemsSource as IEnumerable<object>)?.Cast<object>().Count() ?? 0) == 0)
         {
-            await DisplayAlert("Message", "Please create categories under Settings -> Manage Categories before adding expenses", "OK");
+            await DisplayAlertAsync("Message", "Please create categories under Settings -> Manage Categories before adding expenses", "OK");
             return;
         }
         else if (string.IsNullOrEmpty(entryExpenseAmount.Text))
         {
-            await DisplayAlert("Message", "Please input required values", "OK");
+            await DisplayAlertAsync("Message", "Please input required values", "OK");
             return;
         }
         else if (string.IsNullOrEmpty(pickerExpenseCategory.Text))
         {
-            await DisplayAlert("Message", "Please select a category", "OK");
+            await DisplayAlertAsync("Message", "Please select a category", "OK");
             return;
         }
 
@@ -196,7 +196,7 @@ public partial class ExpensePage : ContentPage
         var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
         if (!expenseCategories.Any(c => c.CategoryName == pickerExpenseCategory.Text.Trim()))
         {
-            await DisplayAlert("Message", "Please create this category under Settings -> Manage Categories before adding expenses", "OK");
+            await DisplayAlertAsync("Message", "Please create this category under Settings -> Manage Categories before adding expenses", "OK");
             return;
         }
         //check if category present in master table
@@ -225,7 +225,7 @@ public partial class ExpensePage : ContentPage
             }
             else
             {
-                await DisplayAlert("Error", "Something went wrong", "OK");
+                await DisplayAlertAsync("Error", "Something went wrong", "OK");
             }
         }
         else //update
@@ -256,7 +256,7 @@ public partial class ExpensePage : ContentPage
             }
             else
             {
-                await DisplayAlert("Error", "Something went wrong", "OK");
+                await DisplayAlertAsync("Error", "Something went wrong", "OK");
             }
         }
     }
@@ -275,7 +275,7 @@ public partial class ExpensePage : ContentPage
 
         if (string.IsNullOrEmpty(pickerExpenseCategory.Text))
         {
-            DisplayAlert("Info", textCell[0].Trim()+" - Please make this category visible from Manage Category page in order to edit.", "OK");
+            DisplayAlertAsync("Info", textCell[0].Trim()+" - Please make this category visible from Manage Category page in order to edit.", "OK");
         }
 
         if (tappedViewCell.Detail.Contains("-"))
@@ -465,7 +465,7 @@ public partial class ExpensePage : ContentPage
 
     //private async void btnUploadData_Clicked(object sender, EventArgs e)
     //{
-    //    bool userResponse = await DisplayAlert("Message", "Are you sure to upload data to firestore DB?", "Yes", "No");
+    //    bool userResponse = await DisplayAlertAsync("Message", "Are you sure to upload data to firestore DB?", "Yes", "No");
     //    if (!userResponse)
     //    {
     //        return;
@@ -522,13 +522,13 @@ public partial class ExpensePage : ContentPage
     //        await _dbConnection.InsertAsync(objSync);
     //        lblLastUploaded.Text = "Last Uploaded: " + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt");
     //        activityIndicator.IsRunning = false;
-    //        await DisplayAlert("Message", "Data Upload Successful", "OK");
+    //        await DisplayAlertAsync("Message", "Data Upload Successful", "OK");
 
     //    }
     //    else
     //    {
     //        activityIndicator.IsRunning = false;
-    //        await DisplayAlert("Error", "Something went wrong", "OK");
+    //        await DisplayAlertAsync("Error", "Something went wrong", "OK");
     //    }
     //}
 
@@ -539,7 +539,7 @@ public partial class ExpensePage : ContentPage
     //    var existingRecords = await _dbConnection.Table<IncomeExpenseModel>().Take(1).ToListAsync();
     //    if (existingRecords.Count > 0)
     //    {
-    //        bool userResponse = await DisplayAlert("Message", "There are existing records in the local database.Do you want to overwrite them?", "Yes", "No");
+    //        bool userResponse = await DisplayAlertAsync("Message", "There are existing records in the local database.Do you want to overwrite them?", "Yes", "No");
     //        if (userResponse)
     //        {
     //            int recordsDeleted = await _dbConnection.ExecuteAsync("Delete from IncomeExpenseModel"); //delete all present records in sqlite db
@@ -636,12 +636,12 @@ public partial class ExpensePage : ContentPage
     //        if (rowsAffected == incomeExpObj.Count)
     //        {
     //            activityIndicator.IsRunning = false;
-    //            await DisplayAlert("Message", "Success", "OK");
+    //            await DisplayAlertAsync("Message", "Success", "OK");
     //        }
     //        else
     //        {
     //            activityIndicator.IsRunning = false;
-    //            await DisplayAlert("Error", "Something went wrong", "OK");
+    //            await DisplayAlertAsync("Error", "Something went wrong", "OK");
     //        }
     //    }
     //    catch (Exception) { throw; }
@@ -651,7 +651,7 @@ public partial class ExpensePage : ContentPage
     {
         if (!string.IsNullOrEmpty(txtTransactionId.Text))
         {
-            bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
+            bool userResponse = await DisplayAlertAsync("Warning", "Are you sure to delete?", "Yes", "No");
             if (userResponse)
             {
                 IncomeExpenseModel objExpense = new IncomeExpenseModel()
@@ -801,7 +801,7 @@ public partial class ExpensePage : ContentPage
             }
             if (expenses.Count > 0)
             {
-                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n {messageText} \n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
+                bool userResponse = await DisplayAlertAsync("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n {messageText} \n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
                 if (!userResponse)
                 {
                     return;
@@ -809,7 +809,7 @@ public partial class ExpensePage : ContentPage
             }
             else
             {
-                bool userResponse = await DisplayAlert("Message", $"Instructions\n {messageText} \n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
+                bool userResponse = await DisplayAlertAsync("Message", $"Instructions\n {messageText} \n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
                 if (!userResponse)
                 {
                     return;
@@ -890,7 +890,7 @@ public partial class ExpensePage : ContentPage
                         if (categoriesWithShortCode.Count == 0)
                         {
                             //no categories with shortcode found, so cannot proceed
-                            await DisplayAlert("Error", $"There are no categories with short code. Hence cannot add any records.", "OK");
+                            await DisplayAlertAsync("Error", $"There are no categories with short code. Hence cannot add any records.", "OK");
                             break;
                         }
                         foreach(var kvp in categoriesWithShortCode)
@@ -943,20 +943,20 @@ public partial class ExpensePage : ContentPage
             //add expense into database
             if (rowsAdded > 0)
             {
-                await DisplayAlert("Info", $"File Processed Successfully\n\n{rowsAdded.ToString()} records added.", "OK");
+                await DisplayAlertAsync("Info", $"File Processed Successfully\n\n{rowsAdded.ToString()} records added.", "OK");
                 activityIndicator.IsRunning = false;
                 await ShowCurrentMonthExpenses();
                 LoadExpensesInPage("Last5");
             }
             else
             {
-                await DisplayAlert("Info", "No records were added.", "OK");
+                await DisplayAlertAsync("Info", "No records were added.", "OK");
             }
             activityIndicator.IsRunning = false;
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Alert - StackTrace", $"{ex.Message.ToString()}\n\nNo records added.", "OK");
+            await DisplayAlertAsync("Alert - StackTrace", $"{ex.Message.ToString()}\n\nNo records added.", "OK");
         }
 
     }
