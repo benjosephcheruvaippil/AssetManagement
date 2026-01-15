@@ -22,6 +22,7 @@ namespace AssetManagement.Models.Constants
         //Ben's Redmi: 
 
         public const string AssetTypeProperty = "Property";
+        public const string SyncfusionLicenseKey = "Ngo9BigBOggjHTQxAR8/V1JGaF5cX2FCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdlWX5fdXVXR2FeVExzWkZWYEs=";
 
         public static string _currency = "en-IN";
         public static string GetCurrency()

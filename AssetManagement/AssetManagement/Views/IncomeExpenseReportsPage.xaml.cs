@@ -454,7 +454,8 @@ public partial class IncomeExpenseReportsPage : ContentPage
 
             // Creating an instance
             // of ExcelPackage
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            //ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage.License.SetNonCommercialPersonal("Ben Joseph");
             ExcelPackage excel = new ExcelPackage();
 
             // name of the sheet
