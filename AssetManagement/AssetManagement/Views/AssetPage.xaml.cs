@@ -229,7 +229,7 @@ public partial class AssetPage : TabbedPage
             displayText = displayText + item.InvestmentEntity + ": " + item.TotalAmount + "\n";
         }
 
-        await DisplayAlert("Asset Info", displayText, "Ok");
+        await DisplayAlertAsync("Asset Info", displayText, "Ok");
     }
 
     protected async override void OnNavigatedTo(NavigatedToEventArgs args)
@@ -250,7 +250,7 @@ public partial class AssetPage : TabbedPage
         }
         catch
         {
-            await DisplayAlert("Info", "Welcome to asset management!", "OK");
+            await DisplayAlertAsync("Info", "Welcome to asset management!", "OK");
         }
     }
 
@@ -293,7 +293,7 @@ public partial class AssetPage : TabbedPage
     //    }
     //    else
     //    {
-    //        await DisplayAlert("Message", "Please select an asset", "OK");
+    //        await DisplayAlertAsync("Message", "Please select an asset", "OK");
     //    }
     //    //btnSave.IsVisible = true;
     //    //btnDelete.IsVisible = true;
@@ -420,14 +420,14 @@ public partial class AssetPage : TabbedPage
                     int rowsAffected = await _dbConnection.InsertAsync(assets);
                 }
             }
-            await DisplayAlert("Info", "File Processed Successfully", "OK");
+            await DisplayAlertAsync("Info", "File Processed Successfully", "OK");
             _viewModel.GetAssetsList();
             await ShowPrimaryAssetDetails();
             //throw new NotImplementedException();
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Alert - StackTrace", ex.StackTrace.ToString(), "OK");
+            await DisplayAlertAsync("Alert - StackTrace", ex.StackTrace.ToString(), "OK");
         }
     }
 
@@ -455,7 +455,14 @@ public partial class AssetPage : TabbedPage
         decimal TaxEfficient = records.Where(b => b.Type == "PPF" || b.Type == "EPF" || b.Type == "NPS").Sum(s => s.Amount);
 
         lblBank.Text = "Bank Assets Value: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", BankAssets);
-        lblNCD.Text = "Non Convertible Debentures: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", NCDAssets);
+        if (NCDAssets == 0)
+        {
+            lblNCD.IsVisible = false;
+        }
+        else
+        {
+            lblNCD.Text = "Non Convertible Debentures: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", NCDAssets);
+        }
         lblMLD.Text = "Market Linked Debentures: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", MLDAssets);
 
         lblInsuranceMF.Text = "Insurance/MF: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", Insurance_MF);
@@ -505,7 +512,7 @@ public partial class AssetPage : TabbedPage
             string holder = entHolder.SelectedItem == null ? "" : entHolder.SelectedItem.ToString();
             if (string.IsNullOrEmpty(entEntityName.Text) || entType.SelectedItem == null || string.IsNullOrEmpty(entAmount.Text) || string.IsNullOrEmpty(holder))
             {
-                await DisplayAlert("Message", "Please input all required fields", "OK");
+                await DisplayAlertAsync("Message", "Please input all required fields", "OK");
                 return;
             }
 
@@ -533,7 +540,7 @@ public partial class AssetPage : TabbedPage
 
             if (objAsset.Type == "Insurance_MF" || objAsset.Type == "PPF" || objAsset.Type == "EPF" || objAsset.Type == "Equity Mutual Fund" || objAsset.Type == "Debt Mutual Fund" || objAsset.Type == "Stocks" || objAsset.Type == "NPS" || objAsset.Type == "Others")
             {
-                objAsset.AsOfDate = entAsOfDate.Date;
+                objAsset.AsOfDate = (DateTime)entAsOfDate.Date;
                 objAsset.StartDate = Convert.ToDateTime("01-01-0001");
                 objAsset.MaturityDate = Convert.ToDateTime("01-01-0001");
 
@@ -543,8 +550,8 @@ public partial class AssetPage : TabbedPage
             else
             {
                 objAsset.AsOfDate = Convert.ToDateTime("01-01-0001");
-                objAsset.StartDate = entStartDate.Date;
-                objAsset.MaturityDate = entMaturityDate.Date;
+                objAsset.StartDate = (DateTime)entStartDate.Date;
+                objAsset.MaturityDate = (DateTime)entMaturityDate.Date;
 
                 entAsOfDate.IsEnabled = false;
             }
@@ -563,7 +570,9 @@ public partial class AssetPage : TabbedPage
             if (rowsAffected > 0)
             {
                 //add asset audit log
-                double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>("select SUM(Amount) from Assets");
+                //double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>("select SUM(Amount) from Assets");
+                double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>($"select SUM(Amount) from Assets where Type<>'{Constants.AssetTypeProperty}'");
+                
 
                 AssetAuditLog objAssetAuditLog = new AssetAuditLog
                 {
@@ -587,7 +596,7 @@ public partial class AssetPage : TabbedPage
                 };
                 SaveAssetAuditLog(objAssetAuditLog);
                 //add asset audit log
-                await DisplayAlert("Message", "Asset Saved", "OK");
+                await DisplayAlertAsync("Message", "Asset Saved", "OK");
                 if (!string.IsNullOrEmpty(entAssetSearch.Text))
                 {
                     await LoadAssets(entAssetSearch.Text.Trim());
@@ -600,7 +609,7 @@ public partial class AssetPage : TabbedPage
         }
         catch(Exception)
         {
-            await DisplayAlert("Error", "Something went wrong. Please try again.", "Got It");
+            await DisplayAlertAsync("Error", "Something went wrong. Please try again.", "Got It");
         }
     }
 
@@ -610,7 +619,7 @@ public partial class AssetPage : TabbedPage
         {
             if (!string.IsNullOrEmpty(lblAssetId.Text))
             {
-                bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
+                bool userResponse = await DisplayAlertAsync("Warning", "Are you sure to delete?", "Yes", "No");
                 if (userResponse)
                 {
                     int assetId = Convert.ToInt32(lblAssetId.Text);
@@ -625,7 +634,7 @@ public partial class AssetPage : TabbedPage
                     if (rowsAffected > 0)
                     {
                         //add asset audit log  
-                        double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>("select SUM(Amount) from Assets");
+                        double netAssetValue = await _dbConnection.ExecuteScalarAsync<double>($"select SUM(Amount) from Assets where Type<>'{Constants.AssetTypeProperty}'");
 
                         AssetAuditLog objAssetAuditLog = new AssetAuditLog
                         {
@@ -649,7 +658,7 @@ public partial class AssetPage : TabbedPage
                         };
                         SaveAssetAuditLog(objAssetAuditLog);
                         //add asset audit log
-                        await DisplayAlert("Message", "Asset Deleted", "OK");
+                        await DisplayAlertAsync("Message", "Asset Deleted", "OK");
                         ClearManageAssetForm();
                         await LoadAssets(string.IsNullOrEmpty(entAssetSearch.Text) ? "" : entAssetSearch.Text.Trim());
                     }
@@ -657,7 +666,7 @@ public partial class AssetPage : TabbedPage
             }
             else
             {
-                await DisplayAlert("Message", "Please select an asset", "OK");
+                await DisplayAlertAsync("Message", "Please select an asset", "OK");
             }
         }
         catch(Exception ex)
@@ -720,12 +729,12 @@ public partial class AssetPage : TabbedPage
         await _viewModel.LoadAssets(searchText);
         //List<Assets> objAssets = await _assetService.GetAssetsList();
         //objAssets = objAssets.Where(a => searchText.Contains(a.InvestmentEntity)).ToList();
-        //await DisplayAlert("Message", entAssetSearch.Text, "OK");
+        //await DisplayAlertAsync("Message", entAssetSearch.Text, "OK");
     }
 
     //private async void btnUploadAssets_Clicked(object sender, EventArgs e)
     //{
-    //    bool userResponse = await DisplayAlert("Message", "Are you sure to upload data to firestore DB?", "Yes", "No");
+    //    bool userResponse = await DisplayAlertAsync("Message", "Are you sure to upload data to firestore DB?", "Yes", "No");
     //    if (!userResponse)
     //    {
     //        return;
@@ -785,14 +794,14 @@ public partial class AssetPage : TabbedPage
     //        //lblLastUploaded.Text = "Last Uploaded: " + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt");
     //        activityIndicator.IsVisible = false;
     //        activityIndicator.IsRunning = false;
-    //        await DisplayAlert("Message", "Data Upload Successful", "OK");
+    //        await DisplayAlertAsync("Message", "Data Upload Successful", "OK");
 
     //    }
     //    else
     //    {
     //        activityIndicator.IsVisible = false;
     //        activityIndicator.IsRunning = false;
-    //        await DisplayAlert("Error", "Something went wrong", "OK");
+    //        await DisplayAlertAsync("Error", "Something went wrong", "OK");
     //    }
     //}
 
@@ -802,7 +811,7 @@ public partial class AssetPage : TabbedPage
     //    var existingRecords = await _dbConnection.Table<Assets>().Take(1).ToListAsync();
     //    if (existingRecords.Count > 0)
     //    {
-    //        bool userResponse = await DisplayAlert("Message", "There are existing records in the local database.Do you want to overwrite them?", "Yes", "No");
+    //        bool userResponse = await DisplayAlertAsync("Message", "There are existing records in the local database.Do you want to overwrite them?", "Yes", "No");
     //        if (userResponse)
     //        {
     //            int recordsDeleted = await _dbConnection.ExecuteAsync("Delete from Assets"); //delete all present records in sqlite db
@@ -922,13 +931,13 @@ public partial class AssetPage : TabbedPage
     //        {
     //            activityIndicator.IsVisible = false;
     //            activityIndicator.IsRunning = false;
-    //            await DisplayAlert("Message", "Success", "OK");
+    //            await DisplayAlertAsync("Message", "Success", "OK");
     //        }
     //        else
     //        {
     //            activityIndicator.IsVisible = false;
     //            activityIndicator.IsRunning = false;
-    //            await DisplayAlert("Error", "Something went wrong", "OK");
+    //            await DisplayAlertAsync("Error", "Something went wrong", "OK");
     //        }
     //    }
     //    catch (Exception) { throw; }
@@ -1058,7 +1067,7 @@ public partial class AssetPage : TabbedPage
                 var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
                 if (fileSaverResult.IsSuccessful)
                 {
-                    await DisplayAlert("Message", "Excel saved in " + fileSaverResult.FilePath, "Ok");
+                    await DisplayAlertAsync("Message", "Excel saved in " + fileSaverResult.FilePath, "Ok");
                 }
             }
             excel.Dispose();
@@ -1068,8 +1077,8 @@ public partial class AssetPage : TabbedPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "Ok");
-            await DisplayAlert("Error", ex.InnerException.ToString(), "Ok");
+            await DisplayAlertAsync("Error", ex.Message, "Ok");
+            await DisplayAlertAsync("Error", ex.InnerException.ToString(), "Ok");
         }
         return objResponse;
     }
@@ -1223,7 +1232,7 @@ public partial class AssetPage : TabbedPage
             //}
             //else
             //{
-            //    await DisplayAlert("Message", "Please select an asset", "OK");
+            //    await DisplayAlertAsync("Message", "Please select an asset", "OK");
             //}
         }
     }
@@ -1272,7 +1281,7 @@ public partial class AssetPage : TabbedPage
         }
         else
         {
-            await DisplayAlert("Message", "Please select an asset", "OK");
+            await DisplayAlertAsync("Message", "Please select an asset", "OK");
         }
     }
 
@@ -1337,7 +1346,7 @@ public partial class AssetPage : TabbedPage
     {
         if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
         {
-            await DisplayAlert("Message", "Please connect to internet for file upload.", "Ok");
+            await DisplayAlertAsync("Message", "Please connect to internet for file upload.", "Ok");
             return;
         }
 
@@ -1348,13 +1357,13 @@ public partial class AssetPage : TabbedPage
         {
             activityIndicator.IsVisible = false;
             activityIndicator.IsRunning = false;
-            await DisplayAlert("Info", "File uploaded to Google Drive.", "Ok");
+            await DisplayAlertAsync("Info", "File uploaded to Google Drive.", "Ok");
         }
         else
         {
             activityIndicator.IsVisible = false;
             activityIndicator.IsRunning = false;
-            await DisplayAlert("Error", "Failed to upload to Google Drive.", "Ok");
+            await DisplayAlertAsync("Error", "Failed to upload to Google Drive.", "Ok");
         }
     }
 
@@ -1376,7 +1385,7 @@ public partial class AssetPage : TabbedPage
             }
             else
             {
-                await DisplayAlert("Error", "Image source not recognized.", "OK");
+                await DisplayAlertAsync("Error", "Image source not recognized.", "OK");
             }
         }
     }
@@ -1387,13 +1396,13 @@ public partial class AssetPage : TabbedPage
         {
             if (string.IsNullOrEmpty(lblAssetId.Text))
             {
-                await DisplayAlert("Message", "Please select an asset to add images.", "Ok");
+                await DisplayAlertAsync("Message", "Please select an asset to add images.", "Ok");
                 return;
             }
 
             if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
             {
-                await DisplayAlert("Message", "Please connect to internet for file upload.", "Ok");
+                await DisplayAlertAsync("Message", "Please connect to internet for file upload.", "Ok");
                 return;
             }
 
@@ -1410,7 +1419,7 @@ public partial class AssetPage : TabbedPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", $"Failed to pick image: {ex.Message}", "OK");
+            await DisplayAlertAsync("Error", $"Failed to pick image: {ex.Message}", "OK");
         }
     }
 
@@ -1446,11 +1455,11 @@ public partial class AssetPage : TabbedPage
 
             await LoadImages(imageUrlList);
 
-            await DisplayAlert("Success", $"File uploaded to google drive.", "Ok");
+            await DisplayAlertAsync("Success", $"File uploaded to google drive.", "Ok");
         }
         else
         {
-            await DisplayAlert("Failed", $"File upload failed.", "Ok");
+            await DisplayAlertAsync("Failed", $"File upload failed.", "Ok");
         }
     }
 
@@ -1518,7 +1527,7 @@ public partial class AssetPage : TabbedPage
 
     private async Task RemoveImage(string fileId, List<FileList> imageUrls)
     {
-        bool isConfirmed = await DisplayAlert(
+        bool isConfirmed = await DisplayAlertAsync(
        "Confirm Delete",
        "Are you sure you want to delete this image?",
        "Yes",
@@ -1585,17 +1594,17 @@ public partial class AssetPage : TabbedPage
             }
             else
             {
-                await DisplayAlert("Not Supported", "Camera capture is not supported on this device", "OK");
+                await DisplayAlertAsync("Not Supported", "Camera capture is not supported on this device", "OK");
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", $"Capturing photo failed: {ex.Message}", "OK");
+            await DisplayAlertAsync("Error", $"Capturing photo failed: {ex.Message}", "OK");
         }
     }
 
     private async void NetAssetValueIButton_Clicked(object sender, EventArgs e)
     {
-        await DisplayAlert("Info", $"Net Asset Value does not include Property/Real Estate investments.", "OK");
+        await DisplayAlertAsync("Info", $"Net Asset Value does not include Property/Real Estate investments.", "OK");
     }
 }

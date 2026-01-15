@@ -2,11 +2,13 @@
 using AssetManagement.Common;
 using AssetManagement.Models;
 using AssetManagement.Models.Constants;
+using AssetManagement.Models.DataTransferObject;
 using CommunityToolkit.Maui.Storage;
 using ExcelDataReader;
 using SQLite;
 using System.Data;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace AssetManagement.Views;
 
@@ -19,6 +21,7 @@ public partial class ExpensePage : ContentPage
     ///private readonly IAssetService _assetService;
     public int PageNumber = 0, PageSize = 30, TotalExpenseRecordCount = 0;
     public bool ApplyFilterClicked = false;
+    //Border _selectedFrame = null;
     public ExpensePage()
     {
         InitializeComponent();
@@ -36,7 +39,10 @@ public partial class ExpensePage : ContentPage
             LoadExpensesInPage("Pagewise");
         };
         lblShowRemainingRecords.GestureRecognizers.Add(labelShowRemaining);
-        }
+
+        double screenHeight = DeviceDisplay.MainDisplayInfo.Height / DeviceDisplay.MainDisplayInfo.Density;
+        expenseCollectionView.HeightRequest= screenHeight * 0.5;
+    }
 
     protected async override void OnAppearing()
     {
@@ -55,7 +61,7 @@ public partial class ExpensePage : ContentPage
         }
         catch(Exception)
         {
-            //await DisplayAlert("Error", ex.Message, "OK");
+            //await DisplayAlertAsync("Error", ex.Message, "OK");
             return;
         }
     }
@@ -81,7 +87,7 @@ public partial class ExpensePage : ContentPage
         }
         catch(Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            await DisplayAlertAsync("Error", ex.Message, "OK");
         }
     }
 
@@ -92,7 +98,7 @@ public partial class ExpensePage : ContentPage
             CommonFunctions objCommon = new CommonFunctions();
             if (await objCommon.IsAppUpdateAvailable())
             {
-                bool update = await DisplayAlert("Update Available","A new version of the app is available. Please update. We recommend you take a backup before updation.", "Update", "Later");
+                bool update = await DisplayAlertAsync("Update Available","A new version of the app is available. Please update. We recommend you take a backup before updation.", "Update", "Later");
 
                 await _dbConnection.ExecuteAsync("UPDATE Owners SET UpdateAvailableLastChecked = ?", DateTime.Today);
 
@@ -172,17 +178,17 @@ public partial class ExpensePage : ContentPage
     {
         if (((pickerExpenseCategory.ItemsSource as IEnumerable<object>)?.Cast<object>().Count() ?? 0) == 0)
         {
-            await DisplayAlert("Message", "Please create categories under Settings -> Manage Categories before adding expenses", "OK");
+            await DisplayAlertAsync("Message", "Please create categories under Settings -> Manage Categories before adding expenses", "OK");
             return;
         }
         else if (string.IsNullOrEmpty(entryExpenseAmount.Text))
         {
-            await DisplayAlert("Message", "Please input required values", "OK");
+            await DisplayAlertAsync("Message", "Please input required values", "OK");
             return;
         }
         else if (string.IsNullOrEmpty(pickerExpenseCategory.Text))
         {
-            await DisplayAlert("Message", "Please select a category", "OK");
+            await DisplayAlertAsync("Message", "Please select a category", "OK");
             return;
         }
 
@@ -190,7 +196,7 @@ public partial class ExpensePage : ContentPage
         var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
         if (!expenseCategories.Any(c => c.CategoryName == pickerExpenseCategory.Text.Trim()))
         {
-            await DisplayAlert("Message", "Please create this category under Settings -> Manage Categories before adding expenses", "OK");
+            await DisplayAlertAsync("Message", "Please create this category under Settings -> Manage Categories before adding expenses", "OK");
             return;
         }
         //check if category present in master table
@@ -202,7 +208,7 @@ public partial class ExpensePage : ContentPage
             {
                 Amount = Convert.ToDouble(entryExpenseAmount.Text),
                 TransactionType = "Expense",
-                Date = dpDateExpense.Date != DateTime.Now.Date ? dpDateExpense.Date : DateTime.Now,
+                Date = (DateTime)dpDateExpense.Date != DateTime.Now.Date ? (DateTime)dpDateExpense.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerExpenseCategory.Text.Trim()),
                 Remarks = entryExpenseRemarks.Text,
                 Mode = "manual"
@@ -219,7 +225,7 @@ public partial class ExpensePage : ContentPage
             }
             else
             {
-                await DisplayAlert("Error", "Something went wrong", "OK");
+                await DisplayAlertAsync("Error", "Something went wrong", "OK");
             }
         }
         else //update
@@ -231,7 +237,7 @@ public partial class ExpensePage : ContentPage
                 TransactionId = transId,
                 Amount = Convert.ToDouble(entryExpenseAmount.Text),
                 TransactionType = "Expense",
-                Date = dpDateExpense.Date != DateTime.Now.Date ? dpDateExpense.Date : DateTime.Now,
+                Date = (DateTime)dpDateExpense.Date != DateTime.Now.Date ? (DateTime)dpDateExpense.Date : DateTime.Now,
                 CategoryName = Convert.ToString(pickerExpenseCategory.Text.Trim()),
                 Mode = incExpResult.Mode,
                 Remarks = entryExpenseRemarks.Text
@@ -250,7 +256,7 @@ public partial class ExpensePage : ContentPage
             }
             else
             {
-                await DisplayAlert("Error", "Something went wrong", "OK");
+                await DisplayAlertAsync("Error", "Something went wrong", "OK");
             }
         }
     }
@@ -269,7 +275,7 @@ public partial class ExpensePage : ContentPage
 
         if (string.IsNullOrEmpty(pickerExpenseCategory.Text))
         {
-            DisplayAlert("Info", textCell[0].Trim()+" - Please make this category visible from Manage Category page in order to edit.", "OK");
+            DisplayAlertAsync("Info", textCell[0].Trim()+" - Please make this category visible from Manage Category page in order to edit.", "OK");
         }
 
         if (tappedViewCell.Detail.Contains("-"))
@@ -316,24 +322,52 @@ public partial class ExpensePage : ContentPage
         dpDateExpense.MaximumDate = new DateTime(2050, 12, 31);
         dpDateExpense.Date = DateTime.Now;
         dpDateExpense.Format = "dd-MM-yyyy";
-        tblscExpenses.Clear();
+        //tblscExpenses.Clear();
         await SetUpDb();
 
         List<IncomeExpenseModel> expenses = new List<IncomeExpenseModel>();
+        List<IncomeExpenseDTO> expensesDTO = new List<IncomeExpenseDTO>();
 
         if (hint == "Last5")
         {
             PageNumber = 0;
             ApplyFilterClicked = false;
-            tblscExpenses.Title = "Last 5 Transactions";
-            lblShowRemainingRecords.IsVisible = true;
-            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
+            //tblscExpenses.Title = "Last 5 Transactions";
+            //lblCardBanner.Text= "Last 5 Transactions";
+            //lblShowRemainingRecords.IsVisible = true;
+            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
+
+            if(expenses.Count == 0)
+            {
+                expenseCollectionView.IsVisible = false;
+                lblCardBanner.Text = "";
+                lblShowRemainingRecords.IsVisible = false;
+            }
+            else
+            {
+                expenseCollectionView.IsVisible = true;
+                lblCardBanner.Text = "Last 5 Transactions";
+                lblShowRemainingRecords.IsVisible = true;
+            }
+
+            expensesDTO = expenses.Select(s => new IncomeExpenseDTO
+            {
+                TransactionId = s.TransactionId,
+                Amount = s.Amount,
+                CurrencySymbol = Constants.GetCurrency(),
+                CategoryName = s.CategoryName,
+                Date = s.Date,
+                Remarks = s.Remarks,
+                Mode = s.Mode
+            }).ToList();
+            expenseCollectionView.ItemsSource = expensesDTO;
         }
         else if (hint == "Pagewise")
         {
             if (ApplyFilterClicked)
             {
                 await ApplyFilterPagination();
+                await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
                 return;
             }
             PageNumber = PageNumber + 1;
@@ -357,35 +391,52 @@ public partial class ExpensePage : ContentPage
                 lblShowRemainingRecords.IsVisible = false;
             }
 
-            tblscExpenses.Title = "Showing "+ showRecordCount + " of "+ TotalExpenseRecordCount + " records";
-            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 30 Offset " + offset);
+            //tblscExpenses.Title = "Showing "+ showRecordCount + " of "+ TotalExpenseRecordCount + " records";
+            lblCardBanner.Text = "Showing " + showRecordCount + " of " + TotalExpenseRecordCount + " records";
+            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 30 Offset " + offset);
+            expensesDTO = expenses.Select(s => new IncomeExpenseDTO
+            {
+                TransactionId = s.TransactionId,
+                Amount = s.Amount,
+                CurrencySymbol = Constants.GetCurrency(),
+                CategoryName = s.CategoryName,
+                Date = s.Date,
+                Remarks = s.Remarks,
+                Mode = s.Mode
+            }).ToList();
+
+            expenseCollectionView.ItemsSource = expensesDTO;
+            await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
         }
 
-        foreach (var item in expenses)
-        {
-            TextCell objCell = new TextCell();
-            objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
+        //foreach (var item in expenses)
+        //{
+        //    TextCell objCell = new TextCell();
+        //    objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
 
-            if (!string.IsNullOrEmpty(item.Remarks))
-            {
-                objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
-            }
-            else
-            {
-                objCell.Detail = Convert.ToString(item.Amount);
-            }
+        //    if (!string.IsNullOrEmpty(item.Remarks))
+        //    {
+        //        objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
+        //    }
+        //    else
+        //    {
+        //        objCell.Detail = Convert.ToString(item.Amount);
+        //    }
 
-            if (currentTheme == AppTheme.Dark)
-            {
-                //set to white color
-                tblscExpenses.TextColor= Color.FromArgb("#FFFFFF");
-                objCell.TextColor = Color.FromArgb("#FFFFFF");
-            }
+        //    if (currentTheme == AppTheme.Dark)
+        //    {
+        //        //set to white color
+        //        //tblscExpenses.TextColor= Color.FromArgb("#FFFFFF");
+        //        objCell.TextColor = Color.FromArgb("#FFFFFF");
+        //    }
 
-            tblscExpenses.Add(objCell);
+        //    //tblscExpenses.Add(objCell);
 
-            objCell.Tapped += ObjCell_Tapped;
-        }
+        //    objCell.Tapped += ObjCell_Tapped;
+        //}
+
+        //expenseCollectionView.ItemsSource = expensesDTO;
+        //await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
     }
 
     private void btnClearExpense_Clicked(object sender, EventArgs e)
@@ -400,11 +451,21 @@ public partial class ExpensePage : ContentPage
         pickerExpenseCategory.Text = "";
         entryExpenseRemarks.Text = "";
         dpDateExpense.Date = DateTime.Now;
+        //if (_selectedFrame != null)
+        //{
+        //    _selectedFrame.BackgroundColor = Colors.White;
+        //    _selectedFrame = null;
+        //}
+        if (expenseCollectionView.ItemsSource is IEnumerable<IncomeExpenseDTO> items)
+        {
+            foreach (var item in items)
+                item.IsSelected = false; // reset all
+        }
     }
 
     //private async void btnUploadData_Clicked(object sender, EventArgs e)
     //{
-    //    bool userResponse = await DisplayAlert("Message", "Are you sure to upload data to firestore DB?", "Yes", "No");
+    //    bool userResponse = await DisplayAlertAsync("Message", "Are you sure to upload data to firestore DB?", "Yes", "No");
     //    if (!userResponse)
     //    {
     //        return;
@@ -461,13 +522,13 @@ public partial class ExpensePage : ContentPage
     //        await _dbConnection.InsertAsync(objSync);
     //        lblLastUploaded.Text = "Last Uploaded: " + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt");
     //        activityIndicator.IsRunning = false;
-    //        await DisplayAlert("Message", "Data Upload Successful", "OK");
+    //        await DisplayAlertAsync("Message", "Data Upload Successful", "OK");
 
     //    }
     //    else
     //    {
     //        activityIndicator.IsRunning = false;
-    //        await DisplayAlert("Error", "Something went wrong", "OK");
+    //        await DisplayAlertAsync("Error", "Something went wrong", "OK");
     //    }
     //}
 
@@ -478,7 +539,7 @@ public partial class ExpensePage : ContentPage
     //    var existingRecords = await _dbConnection.Table<IncomeExpenseModel>().Take(1).ToListAsync();
     //    if (existingRecords.Count > 0)
     //    {
-    //        bool userResponse = await DisplayAlert("Message", "There are existing records in the local database.Do you want to overwrite them?", "Yes", "No");
+    //        bool userResponse = await DisplayAlertAsync("Message", "There are existing records in the local database.Do you want to overwrite them?", "Yes", "No");
     //        if (userResponse)
     //        {
     //            int recordsDeleted = await _dbConnection.ExecuteAsync("Delete from IncomeExpenseModel"); //delete all present records in sqlite db
@@ -575,12 +636,12 @@ public partial class ExpensePage : ContentPage
     //        if (rowsAffected == incomeExpObj.Count)
     //        {
     //            activityIndicator.IsRunning = false;
-    //            await DisplayAlert("Message", "Success", "OK");
+    //            await DisplayAlertAsync("Message", "Success", "OK");
     //        }
     //        else
     //        {
     //            activityIndicator.IsRunning = false;
-    //            await DisplayAlert("Error", "Something went wrong", "OK");
+    //            await DisplayAlertAsync("Error", "Something went wrong", "OK");
     //        }
     //    }
     //    catch (Exception) { throw; }
@@ -590,7 +651,7 @@ public partial class ExpensePage : ContentPage
     {
         if (!string.IsNullOrEmpty(txtTransactionId.Text))
         {
-            bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
+            bool userResponse = await DisplayAlertAsync("Warning", "Are you sure to delete?", "Yes", "No");
             if (userResponse)
             {
                 IncomeExpenseModel objExpense = new IncomeExpenseModel()
@@ -618,23 +679,24 @@ public partial class ExpensePage : ContentPage
 
     public async Task ApplyFilterPagination()
     {
-        tblscExpenses.Clear();
+        //tblscExpenses.Clear();
         PageNumber = PageNumber + 1;
         int offset = (PageNumber - 1) * PageSize;
 
-        DateTime? fromDate = dpFromDateFilter.Date;
-        DateTime? toDate = dpToDateFilter.Date;
-        if (fromDate == DateTime.Today && toDate == DateTime.Today)
+        DateTime? fromDate = dpFromDateFilter.Date, toDate = dpToDateFilter.Date.Value.AddDays(1).AddSeconds(-1);
+        if (dpFromDateFilter.Date == dpToDateFilter.Date)
         {
-            fromDate = null;
-            toDate = null;
+            fromDate = dpFromDateFilter.Date;
+            toDate = dpToDateFilter.Date.Value.AddDays(1);
         }
+       
         string category = entCategoryFilter.Text;
         string remarks = entRemarksFilter.Text;
 
         List<IncomeExpenseModel> expenses = new List<IncomeExpenseModel>();
+        List<IncomeExpenseDTO> expensesDTO = new List<IncomeExpenseDTO>();
 
-        var query = @"select TransactionId,Amount,CategoryName,Date,Remarks from IncomeExpenseModel where TransactionType=='Expense'";
+        var query = @"select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense'";
 
         var parameters = new List<object>();
         if (fromDate != null && toDate != null)
@@ -658,11 +720,22 @@ public partial class ExpensePage : ContentPage
         query += "ORDER BY Date DESC LIMIT 30 Offset " + offset;
 
         expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>(query, parameters.ToArray());
+        expensesDTO = expenses.Select(s => new IncomeExpenseDTO
+        {
+            TransactionId = s.TransactionId,
+            Amount = s.Amount,
+            CurrencySymbol = Constants.GetCurrency(),
+            CategoryName = s.CategoryName,
+            Date = s.Date,
+            Remarks = s.Remarks,
+            Mode = s.Mode
+        }).ToList();
 
         //pagination
         if (TotalExpenseRecordCount == 0)
         {
             var totalRecords = await _dbConnection.QueryAsync<IncomeExpenseModel>(pageCountQuery, parameters.ToArray());
+            lblCurrentMonthExpenses.Text = "Total: " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalRecords.Sum(s => s.Amount));
             TotalExpenseRecordCount = totalRecords.Count();
         }
         int showRecordCount = 0;
@@ -680,34 +753,37 @@ public partial class ExpensePage : ContentPage
             lblShowRemainingRecords.IsVisible = false;
         }
 
-        tblscExpenses.Title = "Showing " + showRecordCount + " of " + TotalExpenseRecordCount + " records";
+        //tblscExpenses.Title = "Showing " + showRecordCount + " of " + TotalExpenseRecordCount + " records";
+        lblCardBanner.Text = "Showing " + showRecordCount + " of " + TotalExpenseRecordCount + " records";
         //pagination
 
-        foreach (var item in expenses)
-        {
-            TextCell objCell = new TextCell();
-            objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
+        //foreach (var item in expenses)
+        //{
+        //    TextCell objCell = new TextCell();
+        //    objCell.Text = item.CategoryName + " | " + item.Date.ToString("dd-MM-yyyy hh:mm tt") + " | " + item.TransactionId;
 
-            if (!string.IsNullOrEmpty(item.Remarks))
-            {
-                objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
-            }
-            else
-            {
-                objCell.Detail = Convert.ToString(item.Amount);
-            }
+        //    if (!string.IsNullOrEmpty(item.Remarks))
+        //    {
+        //        objCell.Detail = Convert.ToString(item.Amount) + "- " + item.Remarks;
+        //    }
+        //    else
+        //    {
+        //        objCell.Detail = Convert.ToString(item.Amount);
+        //    }
 
-            if (currentTheme == AppTheme.Dark)
-            {
-                //set to white color
-                tblscExpenses.TextColor = Color.FromArgb("#FFFFFF");
-                objCell.TextColor = Color.FromArgb("#FFFFFF");
-            }
+        //    if (currentTheme == AppTheme.Dark)
+        //    {
+        //        //set to white color
+        //        //tblscExpenses.TextColor = Color.FromArgb("#FFFFFF");
+        //        objCell.TextColor = Color.FromArgb("#FFFFFF");
+        //    }
 
-            tblscExpenses.Add(objCell);
+        //    //tblscExpenses.Add(objCell);
 
-            objCell.Tapped += ObjCell_Tapped;
-        }
+        //    objCell.Tapped += ObjCell_Tapped;
+        //}
+
+        expenseCollectionView.ItemsSource = expensesDTO;
     }
 
     private async void pickexpensefile_Clicked(object sender, EventArgs e)
@@ -717,9 +793,23 @@ public partial class ExpensePage : ContentPage
             //get the last file_upload date
             await SetUpDb();
             List<IncomeExpenseModel> expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' and Mode='file_upload' order by Date desc Limit 1");
+            var categoriesWithShortCode = await _dbConnection.Table<IncomeExpenseCategories>().Where(c => c.CategoryType == "Expense" && !string.IsNullOrEmpty(c.ShortCode)).ToListAsync();
+            string messageText = "";
+            foreach (var code in categoriesWithShortCode)
+            {
+                messageText = messageText + $"- {code.ShortCode}: {code.CategoryName}\n";
+            }
             if (expenses.Count > 0)
             {
-                bool userResponse = await DisplayAlert("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n- au: Automobile,hs: Household Items,le: Leisure,eo: Eating Out,ex: Others.\n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
+                bool userResponse = await DisplayAlertAsync("Message", $"The last upload happened at {expenses[0].Date.ToString("dd-MM-yyyy")}.\n\nInstructions\n\n {messageText} \n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
+                if (!userResponse)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                bool userResponse = await DisplayAlertAsync("Message", $"Instructions\n {messageText} \n- Upload only excel file with only a single sheet.\n- First column is date in dd-mm-yyyy format(text field).\n- Third column is description.\n- Fourth column is amount.\n\nDo you wish to continue uploading the file?", "Yes", "No");
                 if (!userResponse)
                 {
                     return;
@@ -763,9 +853,12 @@ public partial class ExpensePage : ContentPage
                         DateTime transactionDate = new DateTime(Convert.ToInt32(dateArr[2]), Convert.ToInt32(dateArr[1]), Convert.ToInt32(dateArr[0]));
                         DateTime date = transactionDate.Date;
                         var recordsToBeDeleted = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.Mode == "file_upload" && i.TransactionType == "Expense" && i.Date >= date).ToListAsync();
-                        foreach(var record in recordsToBeDeleted)
+                        if (recordsToBeDeleted.Count > 0)
                         {
-                            await _dbConnection.DeleteAsync(record);
+                            foreach (var record in recordsToBeDeleted)
+                            {
+                                await _dbConnection.DeleteAsync(record);
+                            }
                         }
                         //Delete if exists mode=file_upload on the specified date
                         break;
@@ -782,42 +875,49 @@ public partial class ExpensePage : ContentPage
                         DateTime transactionDate = new DateTime(Convert.ToInt32(dateArr[2]), Convert.ToInt32(dateArr[1]), Convert.ToInt32(dateArr[0]));
                         DateTime date = transactionDate.Date;
                         bool addExpense = false;
-                        string category = "";
+                        string category = "",remarks="";
                         double amount = 0;
                         if (!string.IsNullOrEmpty(Convert.ToString(dtStudentRecords.Rows[i][3])))
                         {
                             amount = Convert.ToDouble(dtStudentRecords.Rows[i][3]);
                         }
                         string description = Convert.ToString(dtStudentRecords.Rows[i][2]);
-                        description = description.Replace(" ", "");
-                        description = description.Replace("\n", "");
-                        description = description.ToLower();
-                        if (description.Contains("/au/"))
+                        string alteredDescription = description.Replace(" ", "").Replace("\n", "").ToLower();
+                        //description = description.Replace(" ", "");
+                        //description = description.Replace("\n", "");
+                        //description = description.ToLower();
+
+                        if (categoriesWithShortCode.Count == 0)
                         {
-                            addExpense = true;
-                            category = "Automobile";
+                            //no categories with shortcode found, so cannot proceed
+                            await DisplayAlertAsync("Error", $"There are no categories with short code. Hence cannot add any records.", "OK");
+                            break;
                         }
-                        else if (description.Contains("/hs/"))
+                        foreach(var kvp in categoriesWithShortCode)
                         {
-                            addExpense = true;
-                            category = "Household Items";
+                            if (alteredDescription.Contains("/" + kvp.ShortCode + "/"))
+                            {
+                                addExpense = true;
+                                category = kvp.CategoryName;
+                                break;
+                            }
+                            else if(alteredDescription.Contains("/" + kvp.ShortCode + "-") || alteredDescription.Contains("/" + kvp.ShortCode + " -"))
+                            {
+                                addExpense = true;
+
+                                string pattern = $@"/{kvp.ShortCode}\s*-[^/]+";
+                                var match = Regex.Match(description, pattern, RegexOptions.IgnoreCase);
+
+                                string input = match.Success ? match.Value.TrimStart('/') : string.Empty;
+                                int index = input.IndexOf('-');
+                                //category = index >= 0 ? input.Substring(0, index).Trim() : input;
+                                category = kvp.CategoryName;
+                                remarks = index >= 0 ? input.Substring(index + 1).Trim() : string.Empty;
+
+                                break;
+                            }
                         }
-                        else if (description.Contains("/le/"))
-                        {
-                            addExpense = true;
-                            category = "Leisure";
-                        }
-                        else if (description.Contains("/eo/"))
-                        {
-                            addExpense = true;
-                            category = "Eating Out";
-                        }
-                        else if (description.Contains("/ex/"))
-                        {
-                            addExpense = true;
-                            category = "Others";
-                        }
-                        
+
                         if (addExpense)
                         {
                             IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
@@ -826,7 +926,7 @@ public partial class ExpensePage : ContentPage
                                 TransactionType = "Expense",
                                 Date = date,
                                 CategoryName = category,
-                                Remarks = "",
+                                Remarks = remarks,
                                 Mode = "file_upload"
                             };
                             listIncomeExpenseModel.Add(objIncomeExpense);
@@ -843,20 +943,20 @@ public partial class ExpensePage : ContentPage
             //add expense into database
             if (rowsAdded > 0)
             {
-                await DisplayAlert("Info", $"File Processed Successfully\n\n{rowsAdded.ToString()} records added.", "OK");
+                await DisplayAlertAsync("Info", $"File Processed Successfully\n\n{rowsAdded.ToString()} records added.", "OK");
                 activityIndicator.IsRunning = false;
                 await ShowCurrentMonthExpenses();
                 LoadExpensesInPage("Last5");
             }
             else
             {
-                await DisplayAlert("Info", "No records were added.", "OK");
+                await DisplayAlertAsync("Info", "No records were added.", "OK");
             }
             activityIndicator.IsRunning = false;
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Alert - StackTrace", $"{ex.Message.ToString()}\n\nNo records added.", "OK");
+            await DisplayAlertAsync("Alert - StackTrace", $"{ex.Message.ToString()}\n\nNo records added.", "OK");
         }
 
     }
@@ -869,6 +969,52 @@ public partial class ExpensePage : ContentPage
             {
                 Navigation.PushAsync(new ManageCategoriesPage());
             }
+        }
+    }
+
+    private async void OnCardTapped(object sender, EventArgs e)
+    {
+        if ((sender as Border)?.BindingContext is IncomeExpenseDTO tappedItem)
+        {
+            // Populate your fields
+            txtTransactionId.Text = tappedItem.TransactionId.ToString();
+            entryExpenseAmount.Text = tappedItem.Amount.ToString();
+            pickerExpenseCategory.Text = tappedItem.CategoryName;
+            dpDateExpense.Date = tappedItem.Date;
+            entryExpenseRemarks.Text = string.IsNullOrEmpty(tappedItem.Remarks) ? string.Empty : tappedItem.Remarks.Trim();
+
+            // Highlight logic using DTO property
+            if (expenseCollectionView.ItemsSource is IEnumerable<IncomeExpenseDTO> items)
+            {
+                foreach (var item in items)
+                    item.IsSelected = false; // reset all
+            }
+
+            tappedItem.IsSelected = true; // select tapped item
+
+            // Scroll logic stays the same
+            var visibleRect = new Rect(
+                expenseScrollView.ScrollX,
+                expenseScrollView.ScrollY,
+                expenseScrollView.Width,
+                expenseScrollView.Height);
+
+            // Get position of target element
+            var targetRect = expanderFilterDetails.Bounds;
+
+            // Check if the target is within the visible area
+            bool isVisible =
+                targetRect.Y >= visibleRect.Y &&
+                targetRect.Y <= visibleRect.Y + visibleRect.Height;
+
+            // Scroll only if not visible
+            if (!isVisible)
+            {
+                await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
+            }
+
+
+            //await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
         }
     }
 }

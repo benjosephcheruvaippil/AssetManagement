@@ -61,7 +61,7 @@ public partial class SettingsPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            await DisplayAlertAsync("Error", ex.Message, "OK");
         }
     }
 
@@ -72,7 +72,7 @@ public partial class SettingsPage : ContentPage
             string sourceDatabasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
             if (!File.Exists(sourceDatabasePath))
             {
-                await DisplayAlert("Info", "File not found", "OK");
+                await DisplayAlertAsync("Info", "File not found", "OK");
                 return;
             }
             //string destinationBackupPath = Path.Combine(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath, "Assets.db3");
@@ -91,15 +91,15 @@ public partial class SettingsPage : ContentPage
             var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
             if (fileSaverResult.IsSuccessful)
             {
-                await DisplayAlert("Message", "Backup file saved in " + fileSaverResult.FilePath, "Ok");
+                await DisplayAlertAsync("Message", "Backup file saved in " + fileSaverResult.FilePath, "Ok");
             }
             //trying new way of achieving it
 
-            //await DisplayAlert("Info", "Backup Successful", "OK");
+            //await DisplayAlertAsync("Info", "Backup Successful", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            await DisplayAlertAsync("Error", ex.Message, "OK");
         }
     }
 
@@ -136,14 +136,14 @@ public partial class SettingsPage : ContentPage
             //await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
             //await _dbConnection.CreateTableAsync<DataSyncAudit>();
 
-            await DisplayAlert("Info", "Database restored successfully. App will get restarted to load the database.", "OK");
+            await DisplayAlertAsync("Info", "Database restored successfully. App will get restarted to load the database.", "OK");
             //this code is android specific for restarting the app programmatically
             _appRestarter.RestartApp();
             //this code is android specific for restarting the app programmatically
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            await DisplayAlertAsync("Error", ex.Message, "OK");
         }
     }
 
@@ -169,14 +169,14 @@ public partial class SettingsPage : ContentPage
         {
             lblLockText.Text = "App Lock On";
             int rowsAffected = await _dbConnection.ExecuteAsync("Update Owners set Locked=?", true);
-            //await DisplayAlert("Message", "App locked using pattern/fingerprint", "OK");
+            //await DisplayAlertAsync("Message", "App locked using pattern/fingerprint", "OK");
         }
         else
         {
             lblLockText.Text = "App Lock Off";
             int rowsAffected = await _dbConnection.ExecuteAsync("Update Owners set Locked=?", false);
 
-            //await DisplayAlert("Message", "App lock is removed", "OK");
+            //await DisplayAlertAsync("Message", "App lock is removed", "OK");
         }
     }
 }

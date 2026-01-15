@@ -20,7 +20,7 @@ public partial class FullScreenImagePage : ContentPage
         }
         else
         {
-            DisplayAlert("Error", "Image URL is empty!", "OK");
+            DisplayAlertAsync("Error", "Image URL is empty!", "OK");
         }
     }
 

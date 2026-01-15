@@ -39,7 +39,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
         }
         catch (Exception ex)
         {
-            DisplayAlert("Something went wrong: ", ex.Message, "Ok");
+            DisplayAlertAsync("Something went wrong: ", ex.Message, "Ok");
         }
     }
 
@@ -91,7 +91,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Something went wrong: ", ex.Message, "Ok");
+            await DisplayAlertAsync("Something went wrong: ", ex.Message, "Ok");
         }
     }
 
@@ -180,7 +180,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Something went wrong: ", ex.Message, "Ok");
+            await DisplayAlertAsync("Something went wrong: ", ex.Message, "Ok");
         }
     }
 
@@ -239,7 +239,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             displayText = $"Total Expense: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", yearlyExpense)}" +
           $"\nTotal Income: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", yearlyIncome)}" +
           $"\nTotal Balance: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", yearlyBalance)}";
-            await DisplayAlert(month, displayText, "Ok");
+            await DisplayAlertAsync(month, displayText, "Ok");
             return;
         }
 
@@ -291,7 +291,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
            $"\nTotal Expense: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalManualAddedExpenses + totalFileUploadExpenses)}" +
            $"\nTotal Income: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalMonthlyIncome)}" +
            $"\nTotal Balance: {string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", totalMonthlySavings)}";
-        await DisplayAlert(month, displayText, "Ok");
+        await DisplayAlertAsync(month, displayText, "Ok");
     }
 
     private async void yearPicker_SelectedIndexChanged(object sender, EventArgs e)
@@ -397,12 +397,12 @@ public partial class IncomeExpenseReportsPage : ContentPage
         {
             if (typePicker.SelectedIndex == -1)
             {
-                await DisplayAlert("Message", "Please select report type.", "Ok");
+                await DisplayAlertAsync("Message", "Please select report type.", "Ok");
                 return;
             }
             activityIndicator.IsRunning = true;
-            DateTime fromDateIncomeReport = dpFromDateIncomeReport.Date;
-            DateTime toDateIncomeReport = dpTODateIncomeReport.Date;
+            DateTime fromDateIncomeReport = (DateTime)dpFromDateIncomeReport.Date;
+            DateTime toDateIncomeReport = (DateTime)dpTODateIncomeReport.Date;
             DateTime fromDate = new DateTime(fromDateIncomeReport.Year, fromDateIncomeReport.Month, fromDateIncomeReport.Day, 0, 0, 0);
             DateTime toDate = new DateTime(toDateIncomeReport.Year, toDateIncomeReport.Month, toDateIncomeReport.Day, 23, 59, 59);
             List<IncomeExpenseModel> inexpList = new List<IncomeExpenseModel>();
@@ -550,7 +550,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
             var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
             if (fileSaverResult.IsSuccessful)
             {
-                await DisplayAlert("Message", "Excel saved in " + fileSaverResult.FilePath, "Ok");
+                await DisplayAlertAsync("Message", "Excel saved in " + fileSaverResult.FilePath, "Ok");
             }
 
             excel.Dispose();
@@ -558,8 +558,8 @@ public partial class IncomeExpenseReportsPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "Ok");
-            await DisplayAlert("Error", ex.InnerException.ToString(), "Ok");
+            await DisplayAlertAsync("Error", ex.Message, "Ok");
+            await DisplayAlertAsync("Error", ex.InnerException.ToString(), "Ok");
         }
     }
 

@@ -49,7 +49,7 @@ public partial class AssetReportPage : ContentPage
 
         //Device.BeginInvokeOnMainThread(async () =>
         //{
-        //    await DisplayAlert("Welcome", "The secondary page has opened!", "OK");
+        //    await DisplayAlertAsync("Welcome", "The secondary page has opened!", "OK");
         //});
         Task.Run(async () => { await CheckIfAssetsPresent(); });
 
@@ -124,7 +124,7 @@ public partial class AssetReportPage : ContentPage
             }
             else
             {
-                await DisplayAlert("Info", "Add assets to see reports here!", "Ok");
+                await DisplayAlertAsync("Info", "Add assets to see reports here!", "Ok");
                 if (Application.Current.MainPage is FlyoutPage flyoutPage)
                 {
                     flyoutPage.Detail = new NavigationPage(new AssetPage(_viewModel, _assetService));
@@ -133,7 +133,7 @@ public partial class AssetReportPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Info", ex.Message, "Ok");
+            await DisplayAlertAsync("Info", ex.Message, "Ok");
         }
         return dataExists;
     }
@@ -151,7 +151,7 @@ public partial class AssetReportPage : ContentPage
             displayText = displayText + item.InvestmentEntity + ": " + string.Format(new CultureInfo(Constants.GetCurrency()), "{0:C0}", item.Amount) + "\n";
         }
 
-        await DisplayAlert("Asset Info", displayText, "Ok");
+        await DisplayAlertAsync("Asset Info", displayText, "Ok");
     }
 
     private async void LoadPieChartData()
@@ -265,7 +265,7 @@ public partial class AssetReportPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Info", ex.Message, "Ok");
+            await DisplayAlertAsync("Info", ex.Message, "Ok");
         }
     }
 
@@ -361,7 +361,7 @@ public partial class AssetReportPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Info", ex.Message, "Ok");
+            await DisplayAlertAsync("Info", ex.Message, "Ok");
         }
     }
 
@@ -413,7 +413,7 @@ public partial class AssetReportPage : ContentPage
         }
         catch (Exception ex)
         {
-            DisplayAlert("Info", ex.Message, "Ok");
+            DisplayAlertAsync("Info", ex.Message, "Ok");
         }
     }
 }

@@ -42,7 +42,7 @@ public partial class AppLaunchPage : ContentPage
         }
         catch (Exception)
         {
-            //await DisplayAlert("Error", ex.Message, "OK");
+            //await DisplayAlertAsync("Error", ex.Message, "OK");
             return;
         }
     }
@@ -67,7 +67,7 @@ public partial class AppLaunchPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            await DisplayAlertAsync("Error", ex.Message, "OK");
         }
     }
 
@@ -107,7 +107,7 @@ public partial class AppLaunchPage : ContentPage
     {
         if (pickerCurrencyList.SelectedIndex == -1)
         {
-            await DisplayAlert("Message", "Please select a currency to continue", "Ok");
+            await DisplayAlertAsync("Message", "Please select a currency to continue", "Ok");
             return;
         }
         await SetUpDb();
@@ -146,7 +146,7 @@ public partial class AppLaunchPage : ContentPage
         }
         else if (_from == Constants.FromSettingsPage)
         {
-            await DisplayAlert("Message", "Saved", "Ok");
+            await DisplayAlertAsync("Message", "Saved", "Ok");
         }
     }
 

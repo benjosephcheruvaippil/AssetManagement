@@ -39,7 +39,7 @@ public partial class ManageCategoriesPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            await DisplayAlertAsync("Error", ex.Message, "OK");
         }
     }
 
@@ -49,31 +49,42 @@ public partial class ManageCategoriesPage : ContentPage
         {
             if (string.IsNullOrEmpty(entryCategoryName.Text) || categoryTypePicker.SelectedIndex == -1)
             {
-                await DisplayAlert("Message", "Please input category name and select category type", "OK");
+                await DisplayAlertAsync("Message", "Please input category name and select category type", "OK");
                 return;
             }
             entryCategoryName.Text = entryCategoryName.Text.Trim();
             if (string.IsNullOrEmpty(txtIncomeExpenseCategoryId.Text))//insert
             {
-                //check if duplicate names exist
+                //check if duplicate names/short code exist
+                await SetUpDb();
+                var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
                 if (!string.IsNullOrEmpty(entryCategoryName.Text))
                 {
                     string inputtedCategoryNameFormatted = entryCategoryName.Text.ToLower();
 
-                    await SetUpDb();
-                    var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
                     if (categories.Where(o => o.CategoryName.ToLower() == inputtedCategoryNameFormatted).Count() > 0)
                     {
-                        await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
+                        await DisplayAlertAsync("Message", "Duplicate name found in database. Please re-enter.", "OK");
                         return;
                     }
                 }
-                //check if duplicate names exist
+                if (!string.IsNullOrEmpty(entryShortCode.Text))
+                {
+                    string inputtedShortCodeFormatted= entryShortCode.Text.ToLower();
+
+                    if (categories.Where(o => !string.IsNullOrEmpty(o.ShortCode) && o.ShortCode.ToLower() == inputtedShortCodeFormatted).Count() > 0)
+                    {
+                        await DisplayAlertAsync("Message", "Duplicate short code found in database. Please re-enter.", "OK");
+                        return;
+                    }
+                }
+                //check if duplicate names/short code exist
 
                 IncomeExpenseCategories objIncomeExpenseCat = new IncomeExpenseCategories
                 {
                     CategoryName = entryCategoryName.Text.Trim(),
                     CategoryType = categoryTypePicker.SelectedItem.ToString(),
+                    ShortCode = string.IsNullOrEmpty(entryShortCode.Text) ? null : entryShortCode.Text.Trim(),
                     IsOneTimeExpense = chkIsOneTimeExpense.IsChecked,
                     IsVisible = chkIsVisible.IsChecked
                 };
@@ -87,33 +98,43 @@ public partial class ManageCategoriesPage : ContentPage
                 }
                 else
                 {
-                    await DisplayAlert("Error", "Something went wrong", "OK");
+                    await DisplayAlertAsync("Error", "Something went wrong", "OK");
                 }
             }
             else //update
             {
                 int incomeExpenseCategoryId = Convert.ToInt32(txtIncomeExpenseCategoryId.Text);
-                //check if duplicate names exist
+                //check if duplicate names/short code exist
+                await SetUpDb();
+                var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
                 if (!string.IsNullOrEmpty(entryCategoryName.Text))
                 {
                     string inputtedCategoryNameFormatted = entryCategoryName.Text.ToLower().Trim();
 
-                    await SetUpDb();
-                    var categories = await _dbConnection.Table<IncomeExpenseCategories>().ToListAsync();
-                    
                     if (categories.Where(o => o.CategoryName.ToLower() == inputtedCategoryNameFormatted && o.IncomeExpenseCategoryId != incomeExpenseCategoryId).Count() >= 1)
                     {
-                        await DisplayAlert("Message", "Duplicate name found in database. Please re-enter.", "OK");
+                        await DisplayAlertAsync("Message", "Duplicate name found in database. Please re-enter.", "OK");
                         return;
                     }
                 }
-                //check if duplicate names exist
-                
+                if (!string.IsNullOrEmpty(entryShortCode.Text))
+                {
+                    string inputtedShortCodeFormatted = entryShortCode.Text.ToLower();
+
+                    if (categories.Where(o => !string.IsNullOrEmpty(o.ShortCode) && o.ShortCode.ToLower() == inputtedShortCodeFormatted && o.IncomeExpenseCategoryId != incomeExpenseCategoryId).Count() > 0)
+                    {
+                        await DisplayAlertAsync("Message", "Duplicate short code found in database. Please re-enter.", "OK");
+                        return;
+                    }
+                }
+                //check if duplicate names/short code exist
+
                 IncomeExpenseCategories objIncomeExpenseCat = new IncomeExpenseCategories
                 {
                     IncomeExpenseCategoryId = incomeExpenseCategoryId,
                     CategoryName = entryCategoryName.Text.Trim(),
                     CategoryType = categoryTypePicker.SelectedItem.ToString(),
+                    ShortCode = string.IsNullOrEmpty(entryShortCode.Text) ? null : entryShortCode.Text.Trim(),
                     IsOneTimeExpense = chkIsOneTimeExpense.IsChecked,
                     IsVisible = chkIsVisible.IsChecked
                 };
@@ -122,7 +143,11 @@ public partial class ManageCategoriesPage : ContentPage
                 if (rowsAffected > 0)
                 {
                     //update all records in IncomeExpenseModel table
-                    var recordsUpdatedIncomeExpense = await _dbConnection.ExecuteAsync($"Update IncomeExpenseModel set CategoryName='{entryCategoryName.Text.Trim()}' where CategoryName='{OldCategoryName}'");
+                    //var recordsUpdatedIncomeExpense = await _dbConnection.ExecuteAsync($"Update IncomeExpenseModel set CategoryName='{entryCategoryName.Text.Trim()}' where CategoryName='{OldCategoryName}'");
+
+                    var sql = "UPDATE IncomeExpenseModel SET CategoryName = ? WHERE CategoryName = ?";
+                    var recordsUpdatedIncomeExpense = await _dbConnection.ExecuteAsync(sql, entryCategoryName.Text.Trim(), OldCategoryName);
+
                     //update all records in Assets table
                     //var recordsUpdateAssets = await _dbConnection.ExecuteAsync($"Update Assets set Holder='{entryOwnerName.Text.Trim()}' where Holder='{OldOwnerName}'");
                     ClearCategoriesForm();
@@ -130,13 +155,13 @@ public partial class ManageCategoriesPage : ContentPage
                 }
                 else
                 {
-                    await DisplayAlert("Error", "Something went wrong", "OK");
+                    await DisplayAlertAsync("Error", "Something went wrong", "OK");
                 }
             }
         }
         catch(Exception ex)
         {
-            await DisplayAlert("Error", "Something went wrong", "OK");
+            await DisplayAlertAsync("Error", "Something went wrong", "OK");
         }
     }
 
@@ -197,6 +222,7 @@ public partial class ManageCategoriesPage : ContentPage
         //}
         chkIsOneTimeExpense.IsChecked = incomeExpenseRecord.IsOneTimeExpense == null ? false : (bool)incomeExpenseRecord.IsOneTimeExpense;
         chkIsVisible.IsChecked = incomeExpenseRecord.IsVisible == null ? false : (bool)incomeExpenseRecord.IsVisible;
+        entryShortCode.Text = incomeExpenseRecord.ShortCode;
         OldCategoryName = entryCategoryName.Text;
     }
 
@@ -207,14 +233,14 @@ public partial class ManageCategoriesPage : ContentPage
             if (!string.IsNullOrEmpty(txtIncomeExpenseCategoryId.Text))
             {
                 entryCategoryName.Text = entryCategoryName.Text.Trim();
-                bool userResponse = await DisplayAlert("Warning", "Are you sure to delete?", "Yes", "No");
+                bool userResponse = await DisplayAlertAsync("Warning", "Are you sure to delete?", "Yes", "No");
                 if (userResponse)
                 {
                     //check if there is any transaction in IncomeExpenseModel and Assets table before deleting the owner
                     var incomeExpenseRecord = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.CategoryName == entryCategoryName.Text).ToListAsync();
                     if (incomeExpenseRecord.Count > 0)
                     {
-                        await DisplayAlert("Info", "Cannot delete category since there are records with this category.", "Ok");
+                        await DisplayAlertAsync("Info", "Cannot delete category since there are records with this category.", "Ok");
                         return;
                     }
                     //check if there is any transaction in IncomeExpenseModel and Assets table before deleting the owner
@@ -231,12 +257,12 @@ public partial class ManageCategoriesPage : ContentPage
             }
             else
             {
-                await DisplayAlert("Info", "Please select a category to delete", "Ok");
+                await DisplayAlertAsync("Info", "Please select a category to delete", "Ok");
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", "Something went wrong: " + ex.Message.ToString(), "Ok");
+            await DisplayAlertAsync("Error", "Something went wrong: " + ex.Message.ToString(), "Ok");
         }
     }
 
@@ -246,6 +272,7 @@ public partial class ManageCategoriesPage : ContentPage
         entCategorySearch.Text = "";
         txtIncomeExpenseCategoryId.Text = "";
         entryCategoryName.Text = "";
+        entryShortCode.Text = "";
         categoryTypePicker.SelectedIndex = -1;
     }
 
@@ -260,22 +287,25 @@ public partial class ManageCategoriesPage : ContentPage
                 {
                     lblOneTimeExpense.IsVisible = true;
                     chkIsOneTimeExpense.IsVisible = true;
+                    entryShortCode.IsVisible = true;
                 }
                 else
                 {
                     lblOneTimeExpense.IsVisible = false;
                     chkIsOneTimeExpense.IsVisible = false;
+                    entryShortCode.IsVisible = false;
                 }
             }
             else
             {
                 lblOneTimeExpense.IsVisible = false;
                 chkIsOneTimeExpense.IsVisible = false;
+                entryShortCode.IsVisible = false;
             }
         }
         catch (Exception ex)
         {
-            DisplayAlert("Error", "Something went wrong: " + ex.Message.ToString(), "Ok");
+            DisplayAlertAsync("Error", "Something went wrong: " + ex.Message.ToString(), "Ok");
         }
     }
 
