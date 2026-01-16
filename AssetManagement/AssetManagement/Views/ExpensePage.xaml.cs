@@ -337,10 +337,18 @@ public partial class ExpensePage : ContentPage
             //lblShowRemainingRecords.IsVisible = true;
             expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
 
-            if(expenses.Count == 0)
+            int totalExpensesCount = await _dbConnection.ExecuteScalarAsync<int>("select count(*) from IncomeExpenseModel where TransactionType=='Expense'");
+
+            if (totalExpensesCount == 0)
             {
                 expenseCollectionView.IsVisible = false;
                 lblCardBanner.Text = "";
+                lblShowRemainingRecords.IsVisible = false;
+            }
+            else if (totalExpensesCount <= 5)
+            {
+                expenseCollectionView.IsVisible = true;
+                lblCardBanner.Text = "Last 5 Transactions";
                 lblShowRemainingRecords.IsVisible = false;
             }
             else
@@ -372,10 +380,11 @@ public partial class ExpensePage : ContentPage
             }
             PageNumber = PageNumber + 1;
             int offset = (PageNumber - 1) * PageSize;
-            if (TotalExpenseRecordCount == 0)
-            {
-                TotalExpenseRecordCount = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense").CountAsync();
-            }
+            //if (TotalExpenseRecordCount == 0)
+            //{
+            //    TotalExpenseRecordCount = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense").CountAsync();
+            //}
+            TotalExpenseRecordCount = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Expense").CountAsync();
             int showRecordCount = 0;
             if (offset == 0)
             {
