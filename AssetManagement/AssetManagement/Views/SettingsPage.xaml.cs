@@ -95,7 +95,7 @@ public partial class SettingsPage : ContentPage
             }
             //trying new way of achieving it
 
-            //await DisplayAlertAsync("Info", "Backup Successful", "OK");
+            await DisplayAlertAsync("Info", "Backup Successful", "OK");
         }
         catch (Exception ex)
         {

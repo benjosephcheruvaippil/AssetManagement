@@ -56,7 +56,7 @@ public partial class ExpensePage : ContentPage
             LoadExpensesInPage("Last5");// show expenses in the expense tab          
             await ShowCurrentMonthExpenses();
             LoadExpenseCategoriesInDropdown();
-            await CheckForAppUpdate();
+            //await CheckForAppUpdate();
             //SetLastUploadedDate();
         }
         catch(Exception)
@@ -91,6 +91,9 @@ public partial class ExpensePage : ContentPage
         }
     }
 
+    /// <summary>
+    /// This function checks for app update availability.
+    /// </summary>
     public async Task CheckForAppUpdate()
     {
         try
@@ -162,10 +165,10 @@ public partial class ExpensePage : ContentPage
             };
             expenseCategories.Add(objCategories);
             pickerExpenseCategory.ItemsSource = expenseCategories.Select(i => i.CategoryName).ToList();
-            if (expenseCategories.Count > 1)
-            {
-                pickerExpenseCategory.Text = "";
-            }
+            //if (expenseCategories.Count > 1)
+            //{
+            //    pickerExpenseCategory.Text = "";
+            //}
         }
         catch (Exception)
         {
@@ -317,7 +320,7 @@ public partial class ExpensePage : ContentPage
 
     private async void LoadExpensesInPage(string hint)
     {  
-        pickerExpenseCategory.Text = "Household Items"; //set this value by default
+        //pickerExpenseCategory.Text = "Household Items"; //set this value by default
         dpDateExpense.MinimumDate = new DateTime(2020, 1, 1);
         dpDateExpense.MaximumDate = new DateTime(2050, 12, 31);
         dpDateExpense.Date = DateTime.Now;
