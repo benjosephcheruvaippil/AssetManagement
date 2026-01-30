@@ -155,6 +155,7 @@
 
 	<ItemGroup>
 		<Folder Include="Models\Api\Request\" />
+		<Folder Include="Resources\Splash\" />
 	</ItemGroup>
 	
 	<ItemGroup>
