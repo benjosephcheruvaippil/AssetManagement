@@ -1,4 +1,5 @@
-//using AndroidX.Lifecycle;
+﻿//using AndroidX.Lifecycle;
+using Android.AdServices.AppSetIds;
 using AssetManagement.Common;
 using AssetManagement.Models;
 using AssetManagement.Models.Constants;
@@ -21,7 +22,9 @@ public partial class ExpensePage : ContentPage
     ///private readonly IAssetService _assetService;
     public int PageNumber = 0, PageSize = 30, TotalExpenseRecordCount = 0;
     public bool ApplyFilterClicked = false;
+    private List<FileResult> _pendingFiles = new();
     //Border _selectedFrame = null;
+
     public ExpensePage()
     {
         InitializeComponent();
@@ -179,88 +182,110 @@ public partial class ExpensePage : ContentPage
 
     private async void btnSaveExpense_Clicked(object sender, EventArgs e)
     {
-        if (((pickerExpenseCategory.ItemsSource as IEnumerable<object>)?.Cast<object>().Count() ?? 0) == 0)
+        try
         {
-            await DisplayAlertAsync("Message", "Please create categories under Settings -> Manage Categories before adding expenses", "OK");
-            return;
-        }
-        else if (string.IsNullOrEmpty(entryExpenseAmount.Text))
-        {
-            await DisplayAlertAsync("Message", "Please input required values", "OK");
-            return;
-        }
-        else if (string.IsNullOrEmpty(pickerExpenseCategory.Text))
-        {
-            await DisplayAlertAsync("Message", "Please select a category", "OK");
-            return;
-        }
-
-        //check if category present in master table
-        var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
-        if (!expenseCategories.Any(c => c.CategoryName == pickerExpenseCategory.Text.Trim()))
-        {
-            await DisplayAlertAsync("Message", "Please create this category under Settings -> Manage Categories before adding expenses", "OK");
-            return;
-        }
-        //check if category present in master table
-
-        if (string.IsNullOrEmpty(txtTransactionId.Text))//insert
-        {
-
-            IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
+            if (((pickerExpenseCategory.ItemsSource as IEnumerable<object>)?.Cast<object>().Count() ?? 0) == 0)
             {
-                Amount = Convert.ToDouble(entryExpenseAmount.Text),
-                TransactionType = "Expense",
-                Date = (DateTime)dpDateExpense.Date != DateTime.Now.Date ? (DateTime)dpDateExpense.Date : DateTime.Now,
-                CategoryName = Convert.ToString(pickerExpenseCategory.Text.Trim()),
-                Remarks = entryExpenseRemarks.Text,
-                Mode = "manual"
-            };
-            await SetUpDb();
-            int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpense);
-            entryExpenseAmount.Text = "";
-            entryExpenseRemarks.Text = "";
-            if (rowsAffected > 0)
-            {
-
-                LoadExpensesInPage("Last5");
-                await ShowCurrentMonthExpenses();
+                await DisplayAlertAsync("Message", "Please create categories under Settings -> Manage Categories before adding expenses", "OK");
+                return;
             }
-            else
+            else if (string.IsNullOrEmpty(entryExpenseAmount.Text))
             {
-                await DisplayAlertAsync("Error", "Something went wrong", "OK");
+                await DisplayAlertAsync("Message", "Please input required values", "OK");
+                return;
+            }
+            else if (string.IsNullOrEmpty(pickerExpenseCategory.Text))
+            {
+                await DisplayAlertAsync("Message", "Please select a category", "OK");
+                return;
+            }
+
+            //check if category present in master table
+            var expenseCategories = await _dbConnection.Table<IncomeExpenseCategories>().Where(i => i.CategoryType == "Expense").ToListAsync();
+            if (!expenseCategories.Any(c => c.CategoryName == pickerExpenseCategory.Text.Trim()))
+            {
+                await DisplayAlertAsync("Message", "Please create this category under Settings -> Manage Categories before adding expenses", "OK");
+                return;
+            }
+            //check if category present in master table
+
+            if (string.IsNullOrEmpty(txtTransactionId.Text))//insert
+            {
+                string fileName = "";
+                foreach (var file in _pendingFiles)
+                {
+                    fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                    string destPath = Path.Combine(FileSystem.AppDataDirectory, fileName);
+
+                    using var sourceStream = await file.OpenReadAsync();
+                    using var destStream = File.Create(destPath);
+                    await sourceStream.CopyToAsync(destStream);
+                }
+
+                IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
+                {
+                    Amount = Convert.ToDouble(entryExpenseAmount.Text),
+                    TransactionType = "Expense",
+                    Date = (DateTime)dpDateExpense.Date != DateTime.Now.Date ? (DateTime)dpDateExpense.Date : DateTime.Now,
+                    CategoryName = Convert.ToString(pickerExpenseCategory.Text.Trim()),
+                    Remarks = entryExpenseRemarks.Text,
+                    Mode = "manual",
+                    FileName = fileName
+                };
+                await SetUpDb();
+                int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpense);
+                _pendingFiles = null;
+                entryExpenseAmount.Text = "";
+                entryExpenseRemarks.Text = "";
+                imageStack.Children.Clear();
+
+                if (rowsAffected > 0)
+                {
+
+                    LoadExpensesInPage("Last5");
+                    await ShowCurrentMonthExpenses();
+                }
+                else
+                {
+                    await DisplayAlertAsync("Error", "Something went wrong", "OK");
+                }
+            }
+            else //update
+            {
+                int transId = Convert.ToInt32(txtTransactionId.Text);
+                var incExpResult = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionId == transId).FirstOrDefaultAsync();
+                IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
+                {
+                    TransactionId = transId,
+                    Amount = Convert.ToDouble(entryExpenseAmount.Text),
+                    TransactionType = "Expense",
+                    Date = (DateTime)dpDateExpense.Date != DateTime.Now.Date ? (DateTime)dpDateExpense.Date : DateTime.Now,
+                    CategoryName = Convert.ToString(pickerExpenseCategory.Text.Trim()),
+                    Mode = incExpResult.Mode,
+                    Remarks = entryExpenseRemarks.Text
+                };
+                await SetUpDb();
+                int rowsAffected = await _dbConnection.UpdateAsync(objIncomeExpense);
+                entryExpenseAmount.Text = "";
+                entryExpenseRemarks.Text = "";
+                txtTransactionId.Text = "";
+
+                if (rowsAffected > 0)
+                {
+
+                    LoadExpensesInPage("Last5");
+                    await ShowCurrentMonthExpenses();
+                }
+                else
+                {
+                    await DisplayAlertAsync("Error", "Something went wrong", "OK");
+                }
             }
         }
-        else //update
+        catch(Exception ex)
         {
-            int transId = Convert.ToInt32(txtTransactionId.Text);
-            var incExpResult = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionId == transId).FirstOrDefaultAsync();
-            IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
-            {
-                TransactionId = transId,
-                Amount = Convert.ToDouble(entryExpenseAmount.Text),
-                TransactionType = "Expense",
-                Date = (DateTime)dpDateExpense.Date != DateTime.Now.Date ? (DateTime)dpDateExpense.Date : DateTime.Now,
-                CategoryName = Convert.ToString(pickerExpenseCategory.Text.Trim()),
-                Mode = incExpResult.Mode,
-                Remarks = entryExpenseRemarks.Text
-            };
-            await SetUpDb();
-            int rowsAffected = await _dbConnection.UpdateAsync(objIncomeExpense);
-            entryExpenseAmount.Text = "";
-            entryExpenseRemarks.Text = "";
-            txtTransactionId.Text = "";
-
-            if (rowsAffected > 0)
-            {
-
-                LoadExpensesInPage("Last5");
-                await ShowCurrentMonthExpenses();
-            }
-            else
-            {
-                await DisplayAlertAsync("Error", "Something went wrong", "OK");
-            }
+            await DisplayAlertAsync("Error", ex.ToString(), "OK");
+            return;
         }
     }
 
@@ -338,7 +363,7 @@ public partial class ExpensePage : ContentPage
             //tblscExpenses.Title = "Last 5 Transactions";
             //lblCardBanner.Text= "Last 5 Transactions";
             //lblShowRemainingRecords.IsVisible = true;
-            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
+            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode,FileName from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
 
             int totalExpensesCount = await _dbConnection.ExecuteScalarAsync<int>("select count(*) from IncomeExpenseModel where TransactionType=='Expense'");
 
@@ -369,7 +394,8 @@ public partial class ExpensePage : ContentPage
                 CategoryName = s.CategoryName,
                 Date = s.Date,
                 Remarks = s.Remarks,
-                Mode = s.Mode
+                Mode = s.Mode,
+                FileName = s.FileName
             }).ToList();
             expenseCollectionView.ItemsSource = expensesDTO;
         }
@@ -405,7 +431,7 @@ public partial class ExpensePage : ContentPage
 
             //tblscExpenses.Title = "Showing "+ showRecordCount + " of "+ TotalExpenseRecordCount + " records";
             lblCardBanner.Text = "Showing " + showRecordCount + " of " + TotalExpenseRecordCount + " records";
-            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 30 Offset " + offset);
+            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode,FileName from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 30 Offset " + offset);
             expensesDTO = expenses.Select(s => new IncomeExpenseDTO
             {
                 TransactionId = s.TransactionId,
@@ -414,7 +440,8 @@ public partial class ExpensePage : ContentPage
                 CategoryName = s.CategoryName,
                 Date = s.Date,
                 Remarks = s.Remarks,
-                Mode = s.Mode
+                Mode = s.Mode,
+                FileName = s.FileName
             }).ToList();
 
             expenseCollectionView.ItemsSource = expensesDTO;
@@ -463,6 +490,7 @@ public partial class ExpensePage : ContentPage
         pickerExpenseCategory.Text = "";
         entryExpenseRemarks.Text = "";
         dpDateExpense.Date = DateTime.Now;
+        imageStack.Children.Clear();
         //if (_selectedFrame != null)
         //{
         //    _selectedFrame.BackgroundColor = Colors.White;
@@ -708,7 +736,7 @@ public partial class ExpensePage : ContentPage
         List<IncomeExpenseModel> expenses = new List<IncomeExpenseModel>();
         List<IncomeExpenseDTO> expensesDTO = new List<IncomeExpenseDTO>();
 
-        var query = @"select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense'";
+        var query = @"select TransactionId,Amount,CategoryName,Date,Remarks,Mode,FileName from IncomeExpenseModel where TransactionType=='Expense'";
 
         var parameters = new List<object>();
         if (fromDate != null && toDate != null)
@@ -740,7 +768,8 @@ public partial class ExpensePage : ContentPage
             CategoryName = s.CategoryName,
             Date = s.Date,
             Remarks = s.Remarks,
-            Mode = s.Mode
+            Mode = s.Mode,
+            FileName = s.FileName
         }).ToList();
 
         //pagination
@@ -973,6 +1002,165 @@ public partial class ExpensePage : ContentPage
 
     }
 
+    private async void btnUplodFile_Clicked(object sender, EventArgs e)
+    {
+        try
+        {
+            var customFileType = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+        {
+            { DevicePlatform.Android, new[] { "application/pdf", "image/*" } },
+            { DevicePlatform.iOS, new[] { "public.image", "com.adobe.pdf" } },
+            { DevicePlatform.WinUI, new[] { ".pdf", ".jpg", ".jpeg", ".png" } }
+        });
+
+            var result = await FilePicker.Default.PickAsync(new PickOptions
+            {
+                PickerTitle = "Select Image or PDF",
+                FileTypes = customFileType
+            });
+
+            if (result != null)
+            {
+                _pendingFiles.Add(result);   // 👈 store temporarily
+                AddPreviewToStack(result);
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error", ex.Message, "OK");
+        }
+    }
+
+    private void AddPreviewToStack(FileResult file)
+    {
+        var grid = new Grid
+        {
+            WidthRequest = 100,
+            HeightRequest = 100
+        };
+
+        string extension = Path.GetExtension(file.FileName).ToLower();
+
+        View preview;
+
+        if (extension == ".jpg" || extension == ".jpeg" || extension == ".png")
+        {
+            preview = new Image
+            {
+                Source = ImageSource.FromFile(file.FullPath),
+                Aspect = Aspect.AspectFill
+            };
+        }
+        else
+        {
+            preview = new Image
+            {
+                Source = "pdf_icon.png",
+                Aspect = Aspect.AspectFit,
+                BackgroundColor = Colors.LightGray
+            };
+        }
+
+        grid.Children.Add(preview);
+        imageStack.Children.Add(grid);
+    }
+
+    public async Task LoadImages(List<FileList> imageUrls)
+    {
+        imageStack.Children.Clear();
+
+        foreach (var imageUrl in imageUrls)
+        {
+            var grid = new Grid
+            {
+                BindingContext = imageUrl.FileId
+            };
+
+            // Image
+            //var image = new Image
+            //{
+            //    Source = ImageSource.FromFile(imageUrl), // Load from file path
+            //    HeightRequest = 100,
+            //    WidthRequest = 100,
+            //    Aspect = Aspect.AspectFill
+            //};
+
+            string filePath = Path.Combine(FileSystem.AppDataDirectory, imageUrl.FilePath);
+
+            var image = new Image
+            {
+                Source = ImageSource.FromFile(filePath), // Load from file path
+                HeightRequest = 100,
+                WidthRequest = 100,
+                Aspect = Aspect.AspectFill
+            };
+
+            var tapGesture = new TapGestureRecognizer();
+            tapGesture.Tapped += (s, e) => OpenFullScreenImage(filePath);
+            image.GestureRecognizers.Add(tapGesture);
+
+            // "X" Button (Label)
+            var deleteLabel = new Label
+            {
+                Text = "X",
+                TextColor = Colors.Red,
+                FontSize = 20,
+                FontAttributes = FontAttributes.Bold,
+                BackgroundColor = Colors.Transparent,
+                Padding = new Thickness(5),
+                HorizontalTextAlignment = TextAlignment.Center,
+                VerticalTextAlignment = TextAlignment.Center
+            };
+
+            var tapDelete = new TapGestureRecognizer();
+            tapDelete.Tapped += async (s, e) => await RemoveImage(imageUrl.FileId, imageUrls);
+            deleteLabel.GestureRecognizers.Add(tapDelete);
+
+            // Arrange Image & "X" Button inside Grid
+            grid.Children.Add(image);
+            grid.Children.Add(deleteLabel);
+            Grid.SetRow(deleteLabel, 0);
+            Grid.SetColumn(deleteLabel, 1);
+            deleteLabel.HorizontalOptions = LayoutOptions.End;
+            deleteLabel.VerticalOptions = LayoutOptions.Start;
+
+            imageStack.Children.Add(grid);
+        }
+    }
+
+    private async void OpenFullScreenImage(string imageUrl)
+    {
+        await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl, "ExpensePage"));
+    }
+
+    private async Task RemoveImage(string fileId, List<FileList> imageUrls)
+    {
+        bool isConfirmed = await DisplayAlertAsync(
+       "Confirm Delete",
+       "Are you sure you want to delete this image?",
+       "Yes",
+       "No"
+        );
+
+        if (!isConfirmed)
+            return;
+
+        var itemToRemove = imageUrls.FirstOrDefault(img => img.FileId == fileId);
+
+        if (itemToRemove != null)
+        {
+            //var recordToBeDeleted = await _dbConnection.Table<AssetDocuments>().Where(d => d.FileId == fileId).FirstOrDefaultAsync();
+            //AssetDocuments objDocs = new AssetDocuments
+            //{
+            //    AssetDocumentsId = recordToBeDeleted.AssetDocumentsId
+            //};
+            //await _dbConnection.DeleteAsync(objDocs);
+
+            imageUrls.Remove(itemToRemove); // Remove the matching image
+            await LoadImages(imageUrls); // Refresh UI
+        }
+    }
+
     private void pickerExpenseCategory_SelectedIndexChanged(object sender, Syncfusion.Maui.Inputs.SelectionChangedEventArgs e)
     {
         if (!string.IsNullOrEmpty(pickerExpenseCategory.Text))
@@ -986,47 +1174,79 @@ public partial class ExpensePage : ContentPage
 
     private async void OnCardTapped(object sender, EventArgs e)
     {
-        if ((sender as Border)?.BindingContext is IncomeExpenseDTO tappedItem)
+        try
         {
-            // Populate your fields
-            txtTransactionId.Text = tappedItem.TransactionId.ToString();
-            entryExpenseAmount.Text = tappedItem.Amount.ToString();
-            pickerExpenseCategory.Text = tappedItem.CategoryName;
-            dpDateExpense.Date = tappedItem.Date;
-            entryExpenseRemarks.Text = string.IsNullOrEmpty(tappedItem.Remarks) ? string.Empty : tappedItem.Remarks.Trim();
-
-            // Highlight logic using DTO property
-            if (expenseCollectionView.ItemsSource is IEnumerable<IncomeExpenseDTO> items)
+            if ((sender as Border)?.BindingContext is IncomeExpenseDTO tappedItem)
             {
-                foreach (var item in items)
-                    item.IsSelected = false; // reset all
+                // Populate your fields
+                txtTransactionId.Text = tappedItem.TransactionId.ToString();
+                entryExpenseAmount.Text = tappedItem.Amount.ToString();
+                pickerExpenseCategory.Text = tappedItem.CategoryName;
+                dpDateExpense.Date = tappedItem.Date;
+                entryExpenseRemarks.Text = string.IsNullOrEmpty(tappedItem.Remarks) ? string.Empty : tappedItem.Remarks.Trim();
+
+                //string fullPath = Path.Combine(FileSystem.AppDataDirectory, tappedItem.FileName);
+
+                //await Launcher.Default.OpenAsync(new OpenFileRequest
+                //{
+                //    File = new ReadOnlyFile(fullPath)
+                //});
+
+                var getFileList = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionId == tappedItem.TransactionId).ToListAsync();
+                List<FileList> imageUrlList = new List<FileList>();
+                if (getFileList.Count > 0)
+                {
+                    foreach (var item in getFileList)
+                    {
+                        FileList imageUrls = new FileList
+                        {
+                            FileId = "0",
+                            FilePath = item.FileName
+                        };
+
+                        imageUrlList.Add(imageUrls);
+                    }
+                }
+
+                await LoadImages(imageUrlList);
+
+                // Highlight logic using DTO property
+                if (expenseCollectionView.ItemsSource is IEnumerable<IncomeExpenseDTO> items)
+                {
+                    foreach (var item in items)
+                        item.IsSelected = false; // reset all
+                }
+
+                tappedItem.IsSelected = true; // select tapped item
+
+                // Scroll logic stays the same
+                var visibleRect = new Rect(
+                    expenseScrollView.ScrollX,
+                    expenseScrollView.ScrollY,
+                    expenseScrollView.Width,
+                    expenseScrollView.Height);
+
+                // Get position of target element
+                var targetRect = expanderFilterDetails.Bounds;
+
+                // Check if the target is within the visible area
+                bool isVisible =
+                    targetRect.Y >= visibleRect.Y &&
+                    targetRect.Y <= visibleRect.Y + visibleRect.Height;
+
+                // Scroll only if not visible
+                if (!isVisible)
+                {
+                    await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
+                }
+
+
+                //await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
             }
-
-            tappedItem.IsSelected = true; // select tapped item
-
-            // Scroll logic stays the same
-            var visibleRect = new Rect(
-                expenseScrollView.ScrollX,
-                expenseScrollView.ScrollY,
-                expenseScrollView.Width,
-                expenseScrollView.Height);
-
-            // Get position of target element
-            var targetRect = expanderFilterDetails.Bounds;
-
-            // Check if the target is within the visible area
-            bool isVisible =
-                targetRect.Y >= visibleRect.Y &&
-                targetRect.Y <= visibleRect.Y + visibleRect.Height;
-
-            // Scroll only if not visible
-            if (!isVisible)
-            {
-                await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
-            }
-
-
-            //await expenseScrollView.ScrollToAsync(expanderFilterDetails, ScrollToPosition.Start, true);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error", ex.Message, "OK");
         }
     }
 }

@@ -22,6 +22,7 @@ namespace AssetManagement.Models.DataTransferObject
         public string CategoryName { get; set; }
         public string Remarks { get; set; }
         public string Mode { get; set; }
+        public string FileName { get; set; }
         public Color ModeColor => !string.IsNullOrEmpty(Mode) ? (Mode.ToLower() == "file_upload" ? Colors.Red : null) : null;
 
         private bool _isSelected;

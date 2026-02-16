@@ -1377,12 +1377,12 @@ public partial class AssetPage : TabbedPage
             if (image.Source is UriImageSource uriImageSource)
             {
                 string imageUrl = uriImageSource.Uri.ToString();
-                await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl));
+                await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl, "AssetPage"));
             }
             else if (image.Source is FileImageSource fileImageSource)
             {
                 string imageUrl = fileImageSource.File;
-                await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl));
+                await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl, "AssetPage"));
             }
             else
             {
@@ -1567,7 +1567,7 @@ public partial class AssetPage : TabbedPage
 
     private async void OpenFullScreenImage(string imageUrl)
     {
-        await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl));
+        await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl, "AssetPage"));
     }
 
     private async void btnCaptureImage_Clicked(object sender, EventArgs e)
