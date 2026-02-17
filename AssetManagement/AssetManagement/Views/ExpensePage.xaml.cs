@@ -209,9 +209,9 @@ public partial class ExpensePage : ContentPage
             }
             //check if category present in master table
 
-            if (string.IsNullOrEmpty(txtTransactionId.Text))//insert
+            string fileName = "";
+            if (_pendingFiles != null)
             {
-                string fileName = "";
                 foreach (var file in _pendingFiles)
                 {
                     fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
@@ -221,7 +221,10 @@ public partial class ExpensePage : ContentPage
                     using var destStream = File.Create(destPath);
                     await sourceStream.CopyToAsync(destStream);
                 }
+            }
 
+            if (string.IsNullOrEmpty(txtTransactionId.Text))//insert
+            {
                 IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
                 {
                     Amount = Convert.ToDouble(entryExpenseAmount.Text),
@@ -262,13 +265,16 @@ public partial class ExpensePage : ContentPage
                     Date = (DateTime)dpDateExpense.Date != DateTime.Now.Date ? (DateTime)dpDateExpense.Date : DateTime.Now,
                     CategoryName = Convert.ToString(pickerExpenseCategory.Text.Trim()),
                     Mode = incExpResult.Mode,
-                    Remarks = entryExpenseRemarks.Text
+                    Remarks = entryExpenseRemarks.Text,
+                    FileName = fileName
                 };
                 await SetUpDb();
                 int rowsAffected = await _dbConnection.UpdateAsync(objIncomeExpense);
+                _pendingFiles = null;
                 entryExpenseAmount.Text = "";
                 entryExpenseRemarks.Text = "";
                 txtTransactionId.Text = "";
+                imageStack.Children.Clear();
 
                 if (rowsAffected > 0)
                 {
@@ -1051,13 +1057,39 @@ public partial class ExpensePage : ContentPage
                 Aspect = Aspect.AspectFill
             };
         }
+        else if (extension == ".pdf")
+        {
+            #if ANDROID
+                        var bitmap = AssetManagement.Platforms.Android.PdfPreviewService
+                                        .RenderFirstPage(file.FullPath);
+
+                        preview = new Image
+                        {
+                            Aspect = Aspect.AspectFill,
+                            Source = ImageSource.FromStream(() =>
+                            {
+                                var stream = new MemoryStream();
+                                bitmap.Compress(Android.Graphics.Bitmap.CompressFormat.Png, 90, stream);
+                                bitmap.Recycle();
+                                stream.Seek(0, SeekOrigin.Begin);
+                                return stream;
+                            })
+                        };
+            #else
+                    preview = new Image
+                    {
+                        Source = "pdf_icon.png",
+                        Aspect = Aspect.AspectFit
+                    };
+            #endif
+        }
         else
         {
+            // 👇 fallback for safety
             preview = new Image
             {
-                Source = "pdf_icon.png",
-                Aspect = Aspect.AspectFit,
-                BackgroundColor = Colors.LightGray
+                Source = "file_icon.png", // generic file icon
+                Aspect = Aspect.AspectFit
             };
         }
 
@@ -1065,64 +1097,117 @@ public partial class ExpensePage : ContentPage
         imageStack.Children.Add(grid);
     }
 
-    public async Task LoadImages(List<FileList> imageUrls)
+    public async Task LoadImages(List<FileList> files)
     {
         imageStack.Children.Clear();
 
-        foreach (var imageUrl in imageUrls)
+        foreach (var fileItem in files)
         {
             var grid = new Grid
             {
-                BindingContext = imageUrl.FileId
-            };
-
-            // Image
-            //var image = new Image
-            //{
-            //    Source = ImageSource.FromFile(imageUrl), // Load from file path
-            //    HeightRequest = 100,
-            //    WidthRequest = 100,
-            //    Aspect = Aspect.AspectFill
-            //};
-
-            string filePath = Path.Combine(FileSystem.AppDataDirectory, imageUrl.FilePath);
-
-            var image = new Image
-            {
-                Source = ImageSource.FromFile(filePath), // Load from file path
-                HeightRequest = 100,
                 WidthRequest = 100,
-                Aspect = Aspect.AspectFill
+                HeightRequest = 100,
+                BindingContext = fileItem.FileId
             };
 
-            var tapGesture = new TapGestureRecognizer();
-            tapGesture.Tapped += (s, e) => OpenFullScreenImage(filePath);
-            image.GestureRecognizers.Add(tapGesture);
+            string filePath = Path.Combine(FileSystem.AppDataDirectory, fileItem.FilePath);
+            string extension = Path.GetExtension(filePath).ToLower();
 
-            // "X" Button (Label)
+            View preview;
+
+            // =========================
+            // IMAGE FILE
+            // =========================
+            if (extension == ".jpg" || extension == ".jpeg" || extension == ".png")
+            {
+                var image = new Image
+                {
+                    Source = ImageSource.FromFile(filePath),
+                    Aspect = Aspect.AspectFill,
+                    HeightRequest = 100,
+                    WidthRequest = 100
+                };
+
+                var tapGesture = new TapGestureRecognizer();
+                tapGesture.Tapped += (s, e) => OpenFullScreenImage(filePath);
+                image.GestureRecognizers.Add(tapGesture);
+
+                preview = image;
+            }
+
+            // =========================
+            // PDF FILE
+            // =========================
+            else if (extension == ".pdf")
+            {
+                #if ANDROID
+                    var bitmap = AssetManagement.Platforms.Android.PdfPreviewService
+                                    .RenderFirstPage(filePath);
+
+                    var image = new Image
+                    {
+                        HeightRequest = 100,
+                        WidthRequest = 100,
+                        Aspect = Aspect.AspectFill,
+                        Source = ImageSource.FromStream(() =>
+                        {
+                            var stream = new MemoryStream();
+                            bitmap.Compress(Android.Graphics.Bitmap.CompressFormat.Png, 90, stream);
+                            bitmap.Recycle();
+                            stream.Seek(0, SeekOrigin.Begin);
+                            return stream;
+                        })
+                    };
+                #else
+                    var image = new Image
+                    {
+                        Source = "pdf_icon.png",
+                        Aspect = Aspect.AspectFit,
+                        HeightRequest = 100,
+                        WidthRequest = 100
+                    };
+                #endif
+
+                var tapGesture = new TapGestureRecognizer();
+                tapGesture.Tapped += (s, e) => OpenFullScreenPdf(filePath);
+                image.GestureRecognizers.Add(tapGesture);
+
+                preview = image;
+            }
+
+            // =========================
+            // FALLBACK
+            // =========================
+            else
+            {
+                preview = new Image
+                {
+                    Source = "file_icon.png",
+                    Aspect = Aspect.AspectFit,
+                    HeightRequest = 100,
+                    WidthRequest = 100
+                };
+            }
+
+            grid.Children.Add(preview);
+
+            // DELETE BUTTON
             var deleteLabel = new Label
             {
                 Text = "X",
                 TextColor = Colors.Red,
-                FontSize = 20,
+                FontSize = 18,
                 FontAttributes = FontAttributes.Bold,
-                BackgroundColor = Colors.Transparent,
                 Padding = new Thickness(5),
-                HorizontalTextAlignment = TextAlignment.Center,
-                VerticalTextAlignment = TextAlignment.Center
+                HorizontalOptions = LayoutOptions.End,
+                VerticalOptions = LayoutOptions.Start
             };
 
             var tapDelete = new TapGestureRecognizer();
-            tapDelete.Tapped += async (s, e) => await RemoveImage(imageUrl.FileId, imageUrls);
+            tapDelete.Tapped += async (s, e) => await RemoveImage(fileItem.FileId, files);
             deleteLabel.GestureRecognizers.Add(tapDelete);
 
-            // Arrange Image & "X" Button inside Grid
-            grid.Children.Add(image);
             grid.Children.Add(deleteLabel);
-            Grid.SetRow(deleteLabel, 0);
-            Grid.SetColumn(deleteLabel, 1);
-            deleteLabel.HorizontalOptions = LayoutOptions.End;
-            deleteLabel.VerticalOptions = LayoutOptions.Start;
 
             imageStack.Children.Add(grid);
         }
@@ -1132,6 +1217,28 @@ public partial class ExpensePage : ContentPage
     {
         await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl, "ExpensePage"));
     }
+
+    private async void OpenFullScreenPdf(string filePath)
+    {
+        try
+        {
+            if (!File.Exists(filePath))
+            {
+                await DisplayAlertAsync("Error", "File not found.", "OK");
+                return;
+            }
+
+            await Launcher.Default.OpenAsync(new OpenFileRequest
+            {
+                File = new ReadOnlyFile(filePath)
+            });
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error", ex.Message, "OK");
+        }
+    }
+
 
     private async Task RemoveImage(string fileId, List<FileList> imageUrls)
     {
@@ -1185,26 +1292,21 @@ public partial class ExpensePage : ContentPage
                 dpDateExpense.Date = tappedItem.Date;
                 entryExpenseRemarks.Text = string.IsNullOrEmpty(tappedItem.Remarks) ? string.Empty : tappedItem.Remarks.Trim();
 
-                //string fullPath = Path.Combine(FileSystem.AppDataDirectory, tappedItem.FileName);
-
-                //await Launcher.Default.OpenAsync(new OpenFileRequest
-                //{
-                //    File = new ReadOnlyFile(fullPath)
-                //});
-
                 var getFileList = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionId == tappedItem.TransactionId).ToListAsync();
                 List<FileList> imageUrlList = new List<FileList>();
                 if (getFileList.Count > 0)
                 {
                     foreach (var item in getFileList)
                     {
-                        FileList imageUrls = new FileList
+                        if (!string.IsNullOrEmpty(item.FileName))
                         {
-                            FileId = "0",
-                            FilePath = item.FileName
-                        };
-
-                        imageUrlList.Add(imageUrls);
+                            FileList imageUrls = new FileList
+                            {
+                                FileId = "0",
+                                FilePath = item.FileName
+                            };
+                            imageUrlList.Add(imageUrls);
+                        }
                     }
                 }
 
