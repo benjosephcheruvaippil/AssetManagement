@@ -1,5 +1,4 @@
 ﻿//using AndroidX.Lifecycle;
-using Android.AdServices.AppSetIds;
 using AssetManagement.Common;
 using AssetManagement.Models;
 using AssetManagement.Models.Constants;
@@ -213,12 +212,29 @@ public partial class ExpensePage : ContentPage
             {
                 foreach (var file in _pendingFiles)
                 {
+                    string extension = Path.GetExtension(file.FileName).ToLower();
                     fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-                    string destPath = Path.Combine(FileSystem.AppDataDirectory, fileName);
+                    string mediaFolder = Path.Combine(FileSystem.AppDataDirectory, "media");
+                    Directory.CreateDirectory(mediaFolder);
+                    string destPath = Path.Combine(mediaFolder, fileName);
 
                     using var sourceStream = await file.OpenReadAsync();
-                    using var destStream = File.Create(destPath);
-                    await sourceStream.CopyToAsync(destStream);
+                    if (extension == ".jpg" || extension == ".jpeg" || extension == ".png")
+                    {
+                        await CompressAndSaveImage(sourceStream, destPath);
+                    }
+                    else if (extension == ".pdf")
+                    {
+                        // Copy as-is (safe approach)
+                        using var destStream = File.Create(destPath);
+                        await sourceStream.CopyToAsync(destStream);
+                    }
+                    else
+                    {
+                        // Fallback
+                        using var destStream = File.Create(destPath);
+                        await sourceStream.CopyToAsync(destStream);
+                    }
                 }
             }
 
@@ -293,6 +309,116 @@ public partial class ExpensePage : ContentPage
             return;
         }
     }
+
+    private async Task CompressAndSaveImage(Stream sourceStream, string destinationPath)
+    {
+    #if ANDROID
+
+        // 1️⃣ Save temporary file
+        string tempPath = Path.Combine(FileSystem.CacheDirectory, $"{Guid.NewGuid()}.jpg");
+
+        using (var tempFileStream = File.Create(tempPath))
+        {
+            await sourceStream.CopyToAsync(tempFileStream);
+        }
+
+        // 2️⃣ Decode bitmap from file
+        var bitmap = Android.Graphics.BitmapFactory.DecodeFile(tempPath);
+
+        // 3️⃣ Fix orientation using FILE PATH (important!)
+        bitmap = FixBitmapOrientationFromFile(bitmap, tempPath);
+
+        // 4️⃣ Resize
+        int maxWidth = 1024;
+        int maxHeight = 1024;
+
+        float ratioX = (float)maxWidth / bitmap.Width;
+        float ratioY = (float)maxHeight / bitmap.Height;
+        float ratio = Math.Min(ratioX, ratioY);
+
+        if (ratio > 1)
+            ratio = 1;
+
+        int newWidth = (int)(bitmap.Width * ratio);
+        int newHeight = (int)(bitmap.Height * ratio);
+
+        var resizedBitmap = Android.Graphics.Bitmap.CreateScaledBitmap(
+            bitmap,
+            newWidth,
+            newHeight,
+            true);
+
+        // 5️⃣ Save compressed
+        using (var outputStream = File.Create(destinationPath))
+        {
+            resizedBitmap.Compress(
+                Android.Graphics.Bitmap.CompressFormat.Jpeg,
+                60,
+                outputStream);
+        }
+
+        // 6️⃣ Cleanup
+        resizedBitmap.Recycle();
+        bitmap.Recycle();
+        File.Delete(tempPath);
+
+    #else
+
+    using var destStream = File.Create(destinationPath);
+    await sourceStream.CopyToAsync(destStream);
+
+    #endif
+    }
+
+    #if ANDROID
+    private Android.Graphics.Bitmap FixBitmapOrientationFromFile(
+        Android.Graphics.Bitmap bitmap,
+        string filePath)
+    {
+        try
+        {
+            var exif = new Android.Media.ExifInterface(filePath);
+
+            int orientation = exif.GetAttributeInt(
+                Android.Media.ExifInterface.TagOrientation,
+                (int)Android.Media.Orientation.Normal);
+
+            Android.Graphics.Matrix matrix = new Android.Graphics.Matrix();
+
+            switch (orientation)
+            {
+                case (int)Android.Media.Orientation.Rotate90:
+                    matrix.PostRotate(90);
+                    break;
+                case (int)Android.Media.Orientation.Rotate180:
+                    matrix.PostRotate(180);
+                    break;
+                case (int)Android.Media.Orientation.Rotate270:
+                    matrix.PostRotate(270);
+                    break;
+                default:
+                    return bitmap;
+            }
+
+            var rotatedBitmap = Android.Graphics.Bitmap.CreateBitmap(
+                bitmap,
+                0,
+                0,
+                bitmap.Width,
+                bitmap.Height,
+                matrix,
+                true);
+
+            bitmap.Recycle();
+            return rotatedBitmap;
+        }
+        catch
+        {
+            return bitmap;
+        }
+    }
+    #endif
+
 
     private void ObjCell_Tapped(object sender, EventArgs e)
     {
@@ -1132,7 +1258,7 @@ public partial class ExpensePage : ContentPage
                 BindingContext = fileItem.FileId
             };
 
-            string filePath = Path.Combine(FileSystem.AppDataDirectory, fileItem.FilePath);
+            string filePath = Path.Combine(FileSystem.AppDataDirectory, "media", fileItem.FilePath);
             string extension = Path.GetExtension(filePath).ToLower();
 
             View preview;
