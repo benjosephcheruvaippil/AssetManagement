@@ -4,7 +4,6 @@ using AssetManagement.Common;
 using AssetManagement.Models;
 using AssetManagement.Models.Constants;
 using AssetManagement.Models.DataTransferObject;
-using CommunityToolkit.Maui.Storage;
 using ExcelDataReader;
 using SQLite;
 using System.Data;
@@ -237,7 +236,7 @@ public partial class ExpensePage : ContentPage
                 };
                 await SetUpDb();
                 int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpense);
-                _pendingFiles = null;
+                _pendingFiles = new();
                 entryExpenseAmount.Text = "";
                 entryExpenseRemarks.Text = "";
                 imageStack.Children.Clear();
@@ -270,7 +269,7 @@ public partial class ExpensePage : ContentPage
                 };
                 await SetUpDb();
                 int rowsAffected = await _dbConnection.UpdateAsync(objIncomeExpense);
-                _pendingFiles = null;
+                _pendingFiles = new();
                 entryExpenseAmount.Text = "";
                 entryExpenseRemarks.Text = "";
                 txtTransactionId.Text = "";
@@ -1094,6 +1093,29 @@ public partial class ExpensePage : ContentPage
         }
 
         grid.Children.Add(preview);
+
+        // DELETE BUTTON
+        var deleteLabel = new Label
+        {
+            Text = "X",
+            TextColor = Colors.Red,
+            FontSize = 18,
+            FontAttributes = FontAttributes.Bold,
+            Padding = new Thickness(5),
+            HorizontalOptions = LayoutOptions.End,
+            VerticalOptions = LayoutOptions.Start
+        };
+
+        var tapDelete = new TapGestureRecognizer();
+        tapDelete.Tapped += (s, e) =>
+        {
+            _pendingFiles.Remove(file);     // 👈 remove from pending list
+            imageStack.Children.Remove(grid); // 👈 remove from UI
+        };
+        deleteLabel.GestureRecognizers.Add(tapDelete);
+
+        grid.Children.Add(deleteLabel);
+
         imageStack.Children.Add(grid);
     }
 
