@@ -1361,10 +1361,19 @@ public partial class ExpensePage : ContentPage
         }
     }
 
-    private async void OpenFullScreenImage(string imageUrl)
+    private void OpenFullScreenImage(string imageUrl)
     {
-        await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl, "ExpensePage"));
+        #if ANDROID
+                // this tries to open the image in google photos, if the app is not present then it will open in the default image viewer of the device.
+                Platforms.Android.ImageViewer.Open(imageUrl);
+        #else
+            _ = Launcher.Default.OpenAsync(new OpenFileRequest
+            {
+                File = new ReadOnlyFile(imageUrl)
+            });
+        #endif
     }
+
 
     private async void OpenFullScreenPdf(string filePath)
     {

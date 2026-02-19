@@ -86,7 +86,7 @@
 		<PackageReference Include="ExcelDataReader.DataSet" Version="3.6.0" />
 		<PackageReference Include="Microcharts.Maui" Version="1.0.1" />
 		<PackageReference Include="Plugin.Fingerprint" Version="2.1.5" />
-		<PackageReference Include="Plugin.Maui.ZoomView" Version="9.0.3" />
+		<PackageReference Include="Plugin.Maui.ZoomView" Version="9.0.3" /> <!-- This package needs to be removed later and replaced with expense page image opening logic.-->
 		<PackageReference Include="SkiaSharp" Version="3.119.1" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="3.119.1" />
 		<PackageReference Include="SQLite" Version="3.13.0" />
