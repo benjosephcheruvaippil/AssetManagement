@@ -1379,16 +1379,14 @@ public partial class ExpensePage : ContentPage
     {
         try
         {
-            if (!File.Exists(filePath))
-            {
-                await DisplayAlertAsync("Error", "File not found.", "OK");
-                return;
-            }
-
-            await Launcher.Default.OpenAsync(new OpenFileRequest
-            {
-                File = new ReadOnlyFile(filePath)
-            });
+            #if ANDROID
+                  Platforms.Android.PdfPreviewService.OpenPdf(filePath);
+            #else
+                _ = Launcher.Default.OpenAsync(new OpenFileRequest
+                {
+                    File = new ReadOnlyFile(filePath)
+                });
+            #endif
         }
         catch (Exception ex)
         {

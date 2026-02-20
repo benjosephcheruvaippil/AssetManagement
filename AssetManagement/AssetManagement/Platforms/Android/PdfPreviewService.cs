@@ -29,5 +29,35 @@ namespace AssetManagement.Platforms.Android
 
             return bitmap;
         }
+
+        public static void OpenPdf(string filePath)
+        {
+            var context = global::Android.App.Application.Context;
+
+            var file = new Java.IO.File(filePath);
+
+            var uri = FileProvider.GetUriForFile(
+                context,
+                context.PackageName + ".fileprovider",
+                file);
+
+            var intent = new Intent(Intent.ActionView);
+            intent.SetDataAndType(uri, "application/pdf");
+            intent.SetFlags(ActivityFlags.NewTask);
+            intent.AddFlags(ActivityFlags.GrantReadUriPermission);
+
+            // Try Google Drive PDF viewer first
+            intent.SetPackage("com.google.android.apps.docs");
+
+            try
+            {
+                context.StartActivity(intent);
+            }
+            catch
+            {
+                intent.SetPackage(null);
+                context.StartActivity(intent);
+            }
+        }
     }
 }
