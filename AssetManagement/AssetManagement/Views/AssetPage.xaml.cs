@@ -1565,9 +1565,22 @@ public partial class AssetPage : TabbedPage
         }
     }
 
-    private async void OpenFullScreenImage(string imageUrl)
+    //private async void OpenFullScreenImage(string imageUrl)
+    //{
+    //    await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl, "AssetPage"));
+    //}
+
+    private void OpenFullScreenImage(string imageUrl)
     {
-        await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl, "AssetPage"));
+        #if ANDROID
+                // this tries to open the image in google photos, if the app is not present then it will open in the default image viewer of the device.
+                Platforms.Android.ImageViewer.OpenImageUrl(imageUrl);
+        #else
+                _ = Launcher.Default.OpenAsync(new OpenFileRequest
+                {
+                    File = new ReadOnlyFile(imageUrl)
+                });
+        #endif
     }
 
     private async void btnCaptureImage_Clicked(object sender, EventArgs e)

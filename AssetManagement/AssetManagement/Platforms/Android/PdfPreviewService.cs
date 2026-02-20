@@ -46,18 +46,19 @@ namespace AssetManagement.Platforms.Android
             intent.SetFlags(ActivityFlags.NewTask);
             intent.AddFlags(ActivityFlags.GrantReadUriPermission);
 
+            context.StartActivity(intent);
             // Try Google Drive PDF viewer first
-            intent.SetPackage("com.google.android.apps.docs");
+            //intent.SetPackage("com.google.android.apps.docs");
 
-            try
-            {
-                context.StartActivity(intent);
-            }
-            catch
-            {
-                intent.SetPackage(null);
-                context.StartActivity(intent);
-            }
+            //try
+            //{
+            //    context.StartActivity(intent);
+            //}
+            //catch
+            //{
+            //    intent.SetPackage(null);
+            //    context.StartActivity(intent);
+            //}
         }
     }
 }

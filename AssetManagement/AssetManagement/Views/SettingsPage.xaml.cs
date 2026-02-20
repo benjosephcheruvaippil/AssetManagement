@@ -223,7 +223,7 @@ public partial class SettingsPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Error", "There is an error with the file. Please unzip the file and find assets.db3 and restore that file again.", "OK");
+            await DisplayAlertAsync("Error", "There is an error with the file. Please unzip the file and find Assets.db3 and restore that file again.", "OK");
         }
     }
 
