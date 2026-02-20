@@ -1137,6 +1137,50 @@ public partial class ExpensePage : ContentPage
     {
         try
         {
+            string action = await DisplayActionSheetAsync(
+                "Upload File",
+                "Cancel",
+                null,
+                "Take Photo",
+                "Choose Image / PDF");
+
+            if (action == "Take Photo")
+            {
+                await CapturePhoto();
+            }
+            else if (action == "Choose Image / PDF")
+            {
+                await PickFileFromDevice();
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error", ex.Message, "OK");
+        }
+    }
+
+    private async Task CapturePhoto()
+    {
+        try
+        {
+            var photo = await MediaPicker.Default.CapturePhotoAsync();
+
+            if (photo != null)
+            {
+                _pendingFiles.Add(photo);
+                AddPreviewToStack(photo);
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error", ex.Message, "OK");
+        }
+    }
+
+    private async Task PickFileFromDevice()
+    {
+        try
+        {
             var customFileType = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
         {
             { DevicePlatform.Android, new[] { "application/pdf", "image/*" } },
