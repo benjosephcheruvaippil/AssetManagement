@@ -106,23 +106,35 @@ HighlightedTextColor="{AppThemeBinding Light={StaticResource PrimaryBackgroundLi
 
                 <!--<Entry x:Name="entryExpenseRemarks"
            Placeholder="Enter remarks" />-->
-            <Editor
-            x:Name="entryExpenseRemarks"
-            Placeholder="Enter remarks"
-            AutoSize="TextChanges"/>
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-            <ImageButton x:Name="btnUplodFile"
-              Source="upload.png"
-              Clicked="btnUplodFile_Clicked"
-              WidthRequest="40"
-              HeightRequest="40"
-            />
+                <Editor
+                x:Name="entryExpenseRemarks"
+                Grid.Column="0"
+                Placeholder="Enter remarks"
+                AutoSize="TextChanges" />
+
+                <ImageButton
+                x:Name="btnUplodFile"
+                Grid.Column="1"
+                Source="upload.png"
+                BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#4FC3F7}"
+                Clicked="btnUplodFile_Clicked"
+                WidthRequest="40"
+                HeightRequest="40"
+                HorizontalOptions="End"
+                VerticalOptions="Center"/>
+            </Grid>
 
             <ScrollView Orientation="Horizontal">
                 <HorizontalStackLayout x:Name="imageStack" Spacing="10"/>
             </ScrollView>
 
-            <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+            <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Margin="0,5,0,0">
                     <Button
                 x:Name="btnSaveExpense"
                 Text="Save Expense"
