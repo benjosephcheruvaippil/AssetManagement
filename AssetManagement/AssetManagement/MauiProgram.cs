@@ -5,7 +5,7 @@ using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Storage;
 using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
-using Plugin.Maui.ZoomView;
+//using Plugin.Maui.ZoomView;
 using Syncfusion.Maui.Core.Hosting;
 //using Mopups.Hosting;
 //using Mopups.Interfaces;
@@ -21,7 +21,7 @@ public static class MauiProgram
 		builder
 			.UseMauiApp<App>()
 			.UseMauiCommunityToolkit()
-            .UseZoomView()
+            //.UseZoomView()
 			//.ConfigureMopups()
 			.UseMicrocharts()
 			.ConfigureFonts(fonts =>
