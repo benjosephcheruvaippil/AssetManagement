@@ -4,17 +4,17 @@ public partial class FullScreenImagePage : ContentPage
 {
     public FullScreenImagePage(string imageUrl, string fromPage)
     {
-        InitializeComponent();
+        //InitializeComponent();
 
         if (!string.IsNullOrEmpty(imageUrl))
         {
             if (fromPage == "AssetPage")
             {
-                fullScreenImage.Source = ImageSource.FromUri(new Uri(imageUrl));
+                //fullScreenImage.Source = ImageSource.FromUri(new Uri(imageUrl));
             }
             else if (fromPage == "ExpensePage")
             {
-                fullScreenImage.Source = ImageSource.FromFile(imageUrl);
+                //fullScreenImage.Source = ImageSource.FromFile(imageUrl);
             }
         }
         else
