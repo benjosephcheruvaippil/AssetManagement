@@ -353,7 +353,7 @@ public partial class ExpensePage : ContentPage
         {
             resizedBitmap.Compress(
                 Android.Graphics.Bitmap.CompressFormat.Jpeg,
-                60,
+                70,
                 outputStream);
         }
 
