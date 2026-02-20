@@ -172,11 +172,15 @@ public partial class SettingsPage : ContentPage
 
             string basePath = FileSystem.AppDataDirectory;
             string appDataPath = Path.Combine(FileSystem.AppDataDirectory, "media");
+
+            if (Directory.Exists(appDataPath))
+                Directory.Delete(appDataPath, true);
+            Directory.CreateDirectory(appDataPath);
+
             string tempRestoreFolder = Path.Combine(basePath, "TempRestore");
 
             if (Directory.Exists(tempRestoreFolder))
                 Directory.Delete(tempRestoreFolder, true);
-
             Directory.CreateDirectory(tempRestoreFolder);
 
             // 1️⃣ Extract ZIP
@@ -197,7 +201,8 @@ public partial class SettingsPage : ContentPage
             }
 
             // 4️⃣ Restore files into AppDataDirectory
-            foreach (var file in Directory.GetFiles(tempRestoreFolder))
+            string mediaPath = Path.Combine(tempRestoreFolder, "media");
+            foreach (var file in Directory.GetFiles(mediaPath))
             {
                 string fileName = Path.GetFileName(file);
 
@@ -218,7 +223,7 @@ public partial class SettingsPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Error", ex.Message, "OK");
+            await DisplayAlertAsync("Error", "There is an error with the file. Please unzip the file and find assets.db3 and restore that file again.", "OK");
         }
     }
 
