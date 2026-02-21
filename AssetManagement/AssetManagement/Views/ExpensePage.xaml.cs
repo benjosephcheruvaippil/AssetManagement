@@ -272,6 +272,16 @@ public partial class ExpensePage : ContentPage
             {
                 int transId = Convert.ToInt32(txtTransactionId.Text);
                 var incExpResult = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionId == transId).FirstOrDefaultAsync();
+                if (string.IsNullOrEmpty(fileName) && !string.IsNullOrEmpty(incExpResult.FileName))// this means user has removed the uploaded file.
+                {
+                    bool isDeleted = DeleteFile(incExpResult.FileName);
+                    if(!isDeleted)
+                    {
+                        await DisplayAlertAsync("Error", "Something went wrong while deleteing the file. Please try again.", "OK");
+                        return;
+                    }
+                }
+
                 IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
                 {
                     TransactionId = transId,
@@ -307,6 +317,27 @@ public partial class ExpensePage : ContentPage
         {
             await DisplayAlertAsync("Error", ex.ToString(), "OK");
             return;
+        }
+    }
+
+    public bool DeleteFile(string fileName)
+    {
+        try
+        {
+            string filePath = Path.Combine(FileSystem.AppDataDirectory, "media", fileName);
+
+            if (!File.Exists(filePath))
+                return false;
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            File.Delete(filePath);
+            return true;
+        }
+        catch
+        {
+            return false;
         }
     }
 
