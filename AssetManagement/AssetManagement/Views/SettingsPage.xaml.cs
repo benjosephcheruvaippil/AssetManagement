@@ -223,7 +223,7 @@ public partial class SettingsPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Error", "There is an error with the file. Please unzip the file and find Assets.db3 and restore that file again.", "OK");
+            await DisplayAlertAsync("Error", "The database has been partially restored. You might not see the image or PDF files, but everything else should work fine.", "OK");
         }
     }
 
