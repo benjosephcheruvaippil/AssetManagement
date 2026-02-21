@@ -73,7 +73,7 @@ public partial class ExpensePage : ContentPage
         {
             if (_dbConnection == null)
             {
-                string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
+                string dbPath = Path.Combine(FileSystem.AppDataDirectory, "Assets.db3");
                 _dbConnection = new SQLiteAsyncConnection(dbPath);
                 await _dbConnection.CreateTableAsync<Assets>();
                 await _dbConnection.CreateTableAsync<AssetDocuments>();

@@ -48,7 +48,7 @@ public partial class SettingsPage : ContentPage
         {
             if (_dbConnection == null)
             {
-                string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
+                string dbPath = Path.Combine(FileSystem.AppDataDirectory, "Assets.db3");
                 _dbConnection = new SQLiteAsyncConnection(dbPath);
                 await _dbConnection.CreateTableAsync<Assets>();
                 await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
@@ -71,7 +71,7 @@ public partial class SettingsPage : ContentPage
         try
         {
             string dbPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                FileSystem.AppDataDirectory,
                 "Assets.db3");
 
             if (!File.Exists(dbPath))
@@ -192,7 +192,7 @@ public partial class SettingsPage : ContentPage
             // 3️⃣ Restore database
             string restoredDbPath = Path.Combine(tempRestoreFolder, "Assets.db3");
             string originalDbPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                FileSystem.AppDataDirectory,
                 "Assets.db3");
 
             if (File.Exists(restoredDbPath))
