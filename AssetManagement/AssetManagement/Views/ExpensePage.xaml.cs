@@ -78,6 +78,7 @@ public partial class ExpensePage : ContentPage
                 await _dbConnection.CreateTableAsync<Assets>();
                 await _dbConnection.CreateTableAsync<AssetDocuments>();
                 await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
+                await _dbConnection.CreateTableAsync<IncomeExpenseDocuments>();
                 await _dbConnection.CreateTableAsync<IncomeExpenseCategories>();
                 await _dbConnection.CreateTableAsync<DataSyncAudit>();
                 await _dbConnection.CreateTableAsync<AssetAuditLog>();
@@ -207,13 +208,15 @@ public partial class ExpensePage : ContentPage
             }
             //check if category present in master table
 
-            string fileName = "";
+            List<string> fileList = new List<string>();
+            CollectFilesFromStack();
             if (_pendingFiles != null)
             {
                 foreach (var file in _pendingFiles)
                 {
                     string extension = Path.GetExtension(file.FileName).ToLower();
-                    fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                    string fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                    fileList.Add(fileName);
                     string mediaFolder = Path.Combine(FileSystem.AppDataDirectory, "media");
                     Directory.CreateDirectory(mediaFolder);
                     string destPath = Path.Combine(mediaFolder, fileName);
@@ -247,11 +250,26 @@ public partial class ExpensePage : ContentPage
                     Date = (DateTime)dpDateExpense.Date != DateTime.Now.Date ? (DateTime)dpDateExpense.Date : DateTime.Now,
                     CategoryName = Convert.ToString(pickerExpenseCategory.Text.Trim()),
                     Remarks = entryExpenseRemarks.Text,
-                    Mode = "manual",
-                    FileName = fileName
+                    Mode = "manual"
+                    //FileName = fileName
                 };
                 await SetUpDb();
                 int rowsAffected = await _dbConnection.InsertAsync(objIncomeExpense);
+
+                if (fileList.Count > 0)
+                {
+                    foreach (var fileName in fileList)
+                    {
+                        IncomeExpenseDocuments objDocuments = new IncomeExpenseDocuments()
+                        {
+                            TransactionId = objIncomeExpense.TransactionId,
+                            FileName = fileName,
+                            FileFormat = ""
+                        };
+                        rowsAffected = rowsAffected + await _dbConnection.InsertAsync(objDocuments);
+                    }
+                }
+               
                 _pendingFiles = new();
                 entryExpenseAmount.Text = "";
                 entryExpenseRemarks.Text = "";
@@ -272,14 +290,28 @@ public partial class ExpensePage : ContentPage
             {
                 int transId = Convert.ToInt32(txtTransactionId.Text);
                 var incExpResult = await _dbConnection.Table<IncomeExpenseModel>().Where(i => i.TransactionId == transId).FirstOrDefaultAsync();
-                if (string.IsNullOrEmpty(fileName) && !string.IsNullOrEmpty(incExpResult.FileName))// this means user has removed the uploaded file.
+                var incExpDocumentsList = await _dbConnection.Table<IncomeExpenseDocuments>().Where(d => d.TransactionId == transId).ToListAsync();
+                //if (string.IsNullOrEmpty(fileName) && !string.IsNullOrEmpty(incExpResult.FileName))// this means user has removed the uploaded file.
+                //{
+                //    bool isDeleted = DeleteFile(incExpResult.FileName);
+                //    if(!isDeleted)
+                //    {
+                //        await DisplayAlertAsync("Error", "Something went wrong while deleteing the file. Please try again.", "OK");
+                //        return;
+                //    }
+                //}
+                if (incExpDocumentsList.Count > 0)
                 {
-                    bool isDeleted = DeleteFile(incExpResult.FileName);
-                    if(!isDeleted)
+                    foreach(var doc in incExpDocumentsList)
                     {
-                        await DisplayAlertAsync("Error", "Something went wrong while deleteing the file. Please try again.", "OK");
-                        return;
+                        bool isDeleted = DeleteFile(doc.FileName);
+                        if (!isDeleted)
+                        {
+                            await DisplayAlertAsync("Error", "Something went wrong while deleteing the file. Please try again.", "OK");
+                            return;
+                        }
                     }
+                    await _dbConnection.Table<IncomeExpenseDocuments>().Where(d => d.TransactionId == transId).DeleteAsync();
                 }
 
                 IncomeExpenseModel objIncomeExpense = new IncomeExpenseModel()
@@ -290,11 +322,26 @@ public partial class ExpensePage : ContentPage
                     Date = (DateTime)dpDateExpense.Date != DateTime.Now.Date ? (DateTime)dpDateExpense.Date : DateTime.Now,
                     CategoryName = Convert.ToString(pickerExpenseCategory.Text.Trim()),
                     Mode = incExpResult.Mode,
-                    Remarks = entryExpenseRemarks.Text,
-                    FileName = fileName
+                    Remarks = entryExpenseRemarks.Text
+                    //FileName = fileName
                 };
                 await SetUpDb();
                 int rowsAffected = await _dbConnection.UpdateAsync(objIncomeExpense);
+
+                if (fileList.Count > 0)
+                {
+                    foreach (var fileName in fileList)
+                    {
+                        IncomeExpenseDocuments objDocuments = new IncomeExpenseDocuments()
+                        {
+                            TransactionId = objIncomeExpense.TransactionId,
+                            FileName = fileName,
+                            FileFormat = ""
+                        };
+                        rowsAffected = rowsAffected + await _dbConnection.InsertAsync(objDocuments);
+                    }
+                }
+
                 _pendingFiles = new();
                 entryExpenseAmount.Text = "";
                 entryExpenseRemarks.Text = "";
@@ -317,6 +364,24 @@ public partial class ExpensePage : ContentPage
         {
             await DisplayAlertAsync("Error", ex.ToString(), "OK");
             return;
+        }
+    }
+
+    private void CollectFilesFromStack()
+    {
+        _pendingFiles.Clear();
+
+        foreach (var child in imageStack.Children)
+        {
+            if (child is Grid grid && grid.BindingContext is string filePath)
+            {
+                var fileResult = new FileResult(filePath)
+                {
+                    FileName = Path.GetFileName(filePath)
+                };
+
+                _pendingFiles.Add(fileResult);
+            }
         }
     }
 
@@ -525,7 +590,7 @@ public partial class ExpensePage : ContentPage
             //tblscExpenses.Title = "Last 5 Transactions";
             //lblCardBanner.Text= "Last 5 Transactions";
             //lblShowRemainingRecords.IsVisible = true;
-            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode,FileName from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
+            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 5");
 
             int totalExpensesCount = await _dbConnection.ExecuteScalarAsync<int>("select count(*) from IncomeExpenseModel where TransactionType=='Expense'");
 
@@ -557,7 +622,7 @@ public partial class ExpensePage : ContentPage
                 Date = s.Date,
                 Remarks = s.Remarks,
                 Mode = s.Mode,
-                FileName = s.FileName
+                //FileName = s.FileName
             }).ToList();
             expenseCollectionView.ItemsSource = expensesDTO;
         }
@@ -593,7 +658,7 @@ public partial class ExpensePage : ContentPage
 
             //tblscExpenses.Title = "Showing "+ showRecordCount + " of "+ TotalExpenseRecordCount + " records";
             lblCardBanner.Text = "Showing " + showRecordCount + " of " + TotalExpenseRecordCount + " records";
-            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode,FileName from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 30 Offset " + offset);
+            expenses = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense' order by Date desc Limit 30 Offset " + offset);
             expensesDTO = expenses.Select(s => new IncomeExpenseDTO
             {
                 TransactionId = s.TransactionId,
@@ -602,8 +667,8 @@ public partial class ExpensePage : ContentPage
                 CategoryName = s.CategoryName,
                 Date = s.Date,
                 Remarks = s.Remarks,
-                Mode = s.Mode,
-                FileName = s.FileName
+                Mode = s.Mode
+                //FileName = s.FileName
             }).ToList();
 
             expenseCollectionView.ItemsSource = expensesDTO;
@@ -898,7 +963,7 @@ public partial class ExpensePage : ContentPage
         List<IncomeExpenseModel> expenses = new List<IncomeExpenseModel>();
         List<IncomeExpenseDTO> expensesDTO = new List<IncomeExpenseDTO>();
 
-        var query = @"select TransactionId,Amount,CategoryName,Date,Remarks,Mode,FileName from IncomeExpenseModel where TransactionType=='Expense'";
+        var query = @"select TransactionId,Amount,CategoryName,Date,Remarks,Mode from IncomeExpenseModel where TransactionType=='Expense'";
 
         var parameters = new List<object>();
         if (fromDate != null && toDate != null)
@@ -930,8 +995,8 @@ public partial class ExpensePage : ContentPage
             CategoryName = s.CategoryName,
             Date = s.Date,
             Remarks = s.Remarks,
-            Mode = s.Mode,
-            FileName = s.FileName
+            Mode = s.Mode
+            //FileName = s.FileName
         }).ToList();
 
         //pagination
@@ -1198,7 +1263,7 @@ public partial class ExpensePage : ContentPage
 
             if (photo != null)
             {
-                _pendingFiles.Add(photo);
+                //_pendingFiles.Add(photo);
                 AddPreviewToStack(photo);
             }
         }
@@ -1227,7 +1292,7 @@ public partial class ExpensePage : ContentPage
 
             if (result != null)
             {
-                _pendingFiles.Add(result);   // 👈 store temporarily
+                //_pendingFiles.Add(result);   // 👈 store temporarily
                 AddPreviewToStack(result);
             }
         }
@@ -1242,7 +1307,8 @@ public partial class ExpensePage : ContentPage
         var grid = new Grid
         {
             WidthRequest = 100,
-            HeightRequest = 100
+            HeightRequest = 100,
+            BindingContext = file.FullPath
         };
 
         string extension = Path.GetExtension(file.FileName).ToLower();
@@ -1320,21 +1386,21 @@ public partial class ExpensePage : ContentPage
         imageStack.Children.Add(grid);
     }
 
-    public async Task LoadImages(List<FileList> files)
+    public async Task LoadImages(List<FileListDTO> files)
     {
         imageStack.Children.Clear();
 
         foreach (var fileItem in files)
         {
+            string filePath = Path.Combine(FileSystem.AppDataDirectory, "media", fileItem.FileName);
+            string extension = Path.GetExtension(filePath).ToLower();
+
             var grid = new Grid
             {
                 WidthRequest = 100,
                 HeightRequest = 100,
-                BindingContext = fileItem.FileId
+                BindingContext = filePath
             };
-
-            string filePath = Path.Combine(FileSystem.AppDataDirectory, "media", fileItem.FilePath);
-            string extension = Path.GetExtension(filePath).ToLower();
 
             View preview;
 
@@ -1427,7 +1493,7 @@ public partial class ExpensePage : ContentPage
             };
 
             var tapDelete = new TapGestureRecognizer();
-            tapDelete.Tapped += async (s, e) => await RemoveImage(fileItem.FileId, files);
+            tapDelete.Tapped += async (s, e) => await RemoveImage(fileItem.FileName, files);
             deleteLabel.GestureRecognizers.Add(tapDelete);
 
             grid.Children.Add(deleteLabel);
@@ -1470,7 +1536,7 @@ public partial class ExpensePage : ContentPage
     }
 
 
-    private async Task RemoveImage(string fileId, List<FileList> imageUrls)
+    private async Task RemoveImage(string fileName, List<FileListDTO> imageUrls)
     {
         bool isConfirmed = await DisplayAlertAsync(
        "Confirm Delete",
@@ -1482,7 +1548,7 @@ public partial class ExpensePage : ContentPage
         if (!isConfirmed)
             return;
 
-        var itemToRemove = imageUrls.FirstOrDefault(img => img.FileId == fileId);
+        var itemToRemove = imageUrls.FirstOrDefault(img => img.FileName == fileName);
 
         if (itemToRemove != null)
         {
@@ -1522,25 +1588,24 @@ public partial class ExpensePage : ContentPage
                 dpDateExpense.Date = tappedItem.Date;
                 entryExpenseRemarks.Text = string.IsNullOrEmpty(tappedItem.Remarks) ? string.Empty : tappedItem.Remarks.Trim();
 
-                var getFileList = await _dbConnection.Table<IncomeExpenseModel>().Where(d => d.TransactionId == tappedItem.TransactionId).ToListAsync();
-                List<FileList> imageUrlList = new List<FileList>();
+                var getFileList = await _dbConnection.Table<IncomeExpenseDocuments>().Where(d => d.TransactionId == tappedItem.TransactionId).ToListAsync();
+                List<FileListDTO> imageList = new List<FileListDTO>();
                 if (getFileList.Count > 0)
                 {
                     foreach (var item in getFileList)
                     {
                         if (!string.IsNullOrEmpty(item.FileName))
                         {
-                            FileList imageUrls = new FileList
+                            FileListDTO imageName = new FileListDTO
                             {
-                                FileId = "0",
-                                FilePath = item.FileName
+                                FileName = item.FileName
                             };
-                            imageUrlList.Add(imageUrls);
+                            imageList.Add(imageName);
                         }
                     }
                 }
 
-                await LoadImages(imageUrlList);
+                await LoadImages(imageList);
 
                 // Highlight logic using DTO property
                 if (expenseCollectionView.ItemsSource is IEnumerable<IncomeExpenseDTO> items)
