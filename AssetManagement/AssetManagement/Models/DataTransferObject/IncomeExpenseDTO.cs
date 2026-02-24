@@ -35,4 +35,9 @@ namespace AssetManagement.Models.DataTransferObject
         void OnPropertyChanged([CallerMemberName] string name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
+
+    public class FileListDTO
+    {
+        public string FileName { get; set; }
+    }
 }

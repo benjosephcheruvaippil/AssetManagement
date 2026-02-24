@@ -1,9 +1,10 @@
-using AssetManagement.Models;
+﻿using AssetManagement.Models;
 using AssetManagement.Models.Constants;
 using AssetManagement.Services;
 using AssetManagement.ViewModels;
 using CommunityToolkit.Maui.Storage;
 using SQLite;
+using System.IO.Compression;
 
 namespace AssetManagement.Views;
 
@@ -47,7 +48,7 @@ public partial class SettingsPage : ContentPage
         {
             if (_dbConnection == null)
             {
-                string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
+                string dbPath = Path.Combine(FileSystem.AppDataDirectory, "Assets.db3");
                 _dbConnection = new SQLiteAsyncConnection(dbPath);
                 await _dbConnection.CreateTableAsync<Assets>();
                 await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
@@ -69,33 +70,69 @@ public partial class SettingsPage : ContentPage
     {
         try
         {
-            string sourceDatabasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
-            if (!File.Exists(sourceDatabasePath))
+            string dbPath = Path.Combine(
+                FileSystem.AppDataDirectory,
+                "Assets.db3");
+
+            if (!File.Exists(dbPath))
             {
-                await DisplayAlertAsync("Info", "File not found", "OK");
+                await DisplayAlertAsync("Info", "Database not found", "OK");
                 return;
             }
-            //string destinationBackupPath = Path.Combine(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath, "Assets.db3");
 
-            //SetUpDb();
-            //string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
-            //_dbConnection = new SQLiteAsyncConnection(dbPath);
-            //await _dbConnection.BackupAsync(destinationBackupPath);
+            string basePath = FileSystem.AppDataDirectory;
+            string appDataPath = Path.Combine(FileSystem.AppDataDirectory, "media");
 
-            //trying new way of achieving it
-            byte[] fileBytes = File.ReadAllBytes(sourceDatabasePath);
-            var stream = new MemoryStream(fileBytes);
-            CancellationTokenSource Ctoken = new CancellationTokenSource();
-            string fileName = "Assets_" + DateTime.Now.ToString("dd-MM-yyyy hh:mm tt") + ".db3";
+            // Create temporary backup folder
+            string tempBackupFolder = Path.Combine(basePath, "TempBackup");
 
-            var fileSaverResult = await FileSaver.Default.SaveAsync(fileName, stream, Ctoken.Token);
-            if (fileSaverResult.IsSuccessful)
+            if (Directory.Exists(tempBackupFolder))
+                Directory.Delete(tempBackupFolder, true);
+
+            Directory.CreateDirectory(tempBackupFolder);
+
+            // 1️⃣ Copy database
+            File.Copy(dbPath, Path.Combine(tempBackupFolder, "Assets.db3"), true);
+
+            // 2️⃣ Copy ALL files from AppDataDirectory (except db and temp folder)
+            string mediaBackupPath = Path.Combine(tempBackupFolder, "media");
+            Directory.CreateDirectory(mediaBackupPath);
+
+            foreach (var file in Directory.GetFiles(appDataPath))
             {
-                await DisplayAlertAsync("Message", "Backup file saved in " + fileSaverResult.FilePath, "Ok");
-            }
-            //trying new way of achieving it
+                string fileName = Path.GetFileName(file);
 
-            await DisplayAlertAsync("Info", "Backup Successful", "OK");
+                // Skip database and temp files
+                if (fileName == "Assets.db3")
+                    continue;
+
+                File.Copy(file, Path.Combine(mediaBackupPath, fileName), true);
+            }
+
+            // 3️⃣ Create ZIP
+            string zipFileName = "AssetsBackup_" +
+                                 DateTime.Now.ToString("dd-MM-yyyy_HH-mm") +
+                                 ".zip";
+
+            string zipPath = Path.Combine(basePath, zipFileName);
+
+            if (File.Exists(zipPath))
+                File.Delete(zipPath);
+
+            ZipFile.CreateFromDirectory(tempBackupFolder, zipPath);
+
+            // 4️⃣ Save using FileSaver
+            using var stream = new MemoryStream(File.ReadAllBytes(zipPath));
+
+            CancellationTokenSource cts = new CancellationTokenSource();
+
+            var result = await FileSaver.Default.SaveAsync(zipFileName, stream, cts.Token);
+
+            await DisplayAlertAsync("Success", "Backup saved successfully", "OK");
+
+            // Cleanup
+            Directory.Delete(tempBackupFolder, true);
+            File.Delete(zipPath);
         }
         catch (Exception ex)
         {
@@ -107,43 +144,86 @@ public partial class SettingsPage : ContentPage
     {
         try
         {
-            var result = await FilePicker.PickAsync(new PickOptions
+            var result = await FilePicker.Default.PickAsync(new PickOptions
             {
-                PickerTitle = "Pick File Please"
+                PickerTitle = "Select Backup File"
             });
 
             if (result == null)
                 return;
 
-            Stream fileStream = await result.OpenReadAsync();
-
-            //SetUpDb();
-            string destinationFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
-            //if (File.Exists(destinationFilePath))
-            //{
-            //    File.Delete(destinationFilePath);
-            //}
-
-            using (var destinationFileStream = File.Create(destinationFilePath))
+            if (result.FileName.EndsWith(".db3") || result.FileName.EndsWith(".db"))
             {
-                fileStream.Seek(0, SeekOrigin.Begin);
-                fileStream.CopyTo(destinationFileStream);
+                Stream fileStream = await result.OpenReadAsync();
+
+                string destinationFilePath = Path.Combine(FileSystem.AppDataDirectory, "Assets.db3");
+
+                using (var destinationFileStream = File.Create(destinationFilePath))
+                {
+                    fileStream.Seek(0, SeekOrigin.Begin);
+                    fileStream.CopyTo(destinationFileStream);
+                }
+
+                await DisplayAlertAsync("Info", "Database restored successfully. App will get restarted to load the database.", "OK");
+                //this code is android specific for restarting the app programmatically
+                _appRestarter.RestartApp();
+                return;
             }
 
-            //string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
-            //_dbConnection = new SQLiteAsyncConnection(destinationFilePath);
-            //await _dbConnection.CreateTableAsync<Assets>();
-            //await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
-            //await _dbConnection.CreateTableAsync<DataSyncAudit>();
+            string basePath = FileSystem.AppDataDirectory;
+            string appDataPath = Path.Combine(FileSystem.AppDataDirectory, "media");
 
-            await DisplayAlertAsync("Info", "Database restored successfully. App will get restarted to load the database.", "OK");
-            //this code is android specific for restarting the app programmatically
+            if (Directory.Exists(appDataPath))
+                Directory.Delete(appDataPath, true);
+            Directory.CreateDirectory(appDataPath);
+
+            string tempRestoreFolder = Path.Combine(basePath, "TempRestore");
+
+            if (Directory.Exists(tempRestoreFolder))
+                Directory.Delete(tempRestoreFolder, true);
+            Directory.CreateDirectory(tempRestoreFolder);
+
+            // 1️⃣ Extract ZIP
+            ZipFile.ExtractToDirectory(result.FullPath, tempRestoreFolder);
+
+            // 2️⃣ Close DB connection before replacing
+            await _dbConnection.CloseAsync();
+
+            // 3️⃣ Restore database
+            string restoredDbPath = Path.Combine(tempRestoreFolder, "Assets.db3");
+            string originalDbPath = Path.Combine(
+                FileSystem.AppDataDirectory,
+                "Assets.db3");
+
+            if (File.Exists(restoredDbPath))
+            {
+                File.Copy(restoredDbPath, originalDbPath, true);
+            }
+
+            // 4️⃣ Restore files into AppDataDirectory
+            string mediaPath = Path.Combine(tempRestoreFolder, "media");
+            foreach (var file in Directory.GetFiles(mediaPath))
+            {
+                string fileName = Path.GetFileName(file);
+
+                if (fileName == "Assets.db3")
+                    continue;
+
+                string destinationPath = Path.Combine(appDataPath, fileName);
+                File.Copy(file, destinationPath, true);
+            }
+
+            Directory.Delete(tempRestoreFolder, true);
+
+            await DisplayAlertAsync("Success",
+                "Restore completed. App will restart to load the database.",
+                "OK");
+
             _appRestarter.RestartApp();
-            //this code is android specific for restarting the app programmatically
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Error", ex.Message, "OK");
+            await DisplayAlertAsync("Error", "The database has been partially restored. You might not see the image or PDF files, but everything else should work fine.", "OK");
         }
     }
 

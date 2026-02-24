@@ -313,7 +313,7 @@ public partial class AssetPage : TabbedPage
     {
         if (_dbConnection == null)
         {
-            string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
+            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "Assets.db3");
             _dbConnection = new SQLiteAsyncConnection(dbPath);
             await _dbConnection.CreateTableAsync<Assets>();
             await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
@@ -1377,12 +1377,12 @@ public partial class AssetPage : TabbedPage
             if (image.Source is UriImageSource uriImageSource)
             {
                 string imageUrl = uriImageSource.Uri.ToString();
-                await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl));
+                await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl, "AssetPage"));
             }
             else if (image.Source is FileImageSource fileImageSource)
             {
                 string imageUrl = fileImageSource.File;
-                await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl));
+                await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl, "AssetPage"));
             }
             else
             {
@@ -1565,9 +1565,22 @@ public partial class AssetPage : TabbedPage
         }
     }
 
-    private async void OpenFullScreenImage(string imageUrl)
+    //private async void OpenFullScreenImage(string imageUrl)
+    //{
+    //    await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl, "AssetPage"));
+    //}
+
+    private void OpenFullScreenImage(string imageUrl)
     {
-        await Navigation.PushModalAsync(new FullScreenImagePage(imageUrl));
+        #if ANDROID
+                // this tries to open the image in google photos, if the app is not present then it will open in the default image viewer of the device.
+                Platforms.Android.ImageViewer.OpenImageUrl(imageUrl);
+        #else
+                _ = Launcher.Default.OpenAsync(new OpenFileRequest
+                {
+                    File = new ReadOnlyFile(imageUrl)
+                });
+        #endif
     }
 
     private async void btnCaptureImage_Clicked(object sender, EventArgs e)
