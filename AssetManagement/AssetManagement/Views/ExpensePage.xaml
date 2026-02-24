@@ -131,7 +131,7 @@ HighlightedTextColor="{AppThemeBinding Light={StaticResource PrimaryBackgroundLi
             </Grid>
 
             <ScrollView Orientation="Horizontal">
-                <HorizontalStackLayout x:Name="imageStack" Spacing="10"/>
+                <HorizontalStackLayout x:Name="imageStack" Spacing="10" Padding="10,0,10,0"/>
             </ScrollView>
 
             <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Margin="0,5,0,0">
