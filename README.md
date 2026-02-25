@@ -37,7 +37,7 @@ dotnet publish -c Release -f:net10.0-android36.0
 After the build completes, the APK file will be available at:
 
 ```
-bin/Release/net8.0-android34.0/
+bin/Release/net10.0-android36.0
 ```
 
 ---
