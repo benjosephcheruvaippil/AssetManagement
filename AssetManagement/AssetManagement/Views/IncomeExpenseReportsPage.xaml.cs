@@ -47,7 +47,7 @@ public partial class IncomeExpenseReportsPage : ContentPage
     {
         if (_dbConnection == null)
         {
-            string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
+            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "Assets.db3");
             _dbConnection = new SQLiteAsyncConnection(dbPath);
         }
     }
@@ -454,7 +454,8 @@ public partial class IncomeExpenseReportsPage : ContentPage
 
             // Creating an instance
             // of ExcelPackage
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            //ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage.License.SetNonCommercialPersonal("Ben Joseph");
             ExcelPackage excel = new ExcelPackage();
 
             // name of the sheet

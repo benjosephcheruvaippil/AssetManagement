@@ -2,8 +2,9 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net10.0-android36.0</TargetFrameworks>
-		<RuntimeIdentifiers>android-arm;android-arm64</RuntimeIdentifiers>
-
+		<RuntimeIdentifiers>android-arm64</RuntimeIdentifiers>
+		<JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+		
 		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>-->
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net7.0-tizen</TargetFrameworks> -->
@@ -21,10 +22,9 @@
 		<ApplicationIdGuid>e44d9f3a-6397-4876-bf13-6606255cdef8</ApplicationIdGuid>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>5.0.5</ApplicationDisplayVersion>
-		<ApplicationVersion>50</ApplicationVersion>
-		<!--<PublishTrimmed>true</PublishTrimmed>-->
-		<AndroidLinkResources>false</AndroidLinkResources>
+		<ApplicationDisplayVersion>5.0.8</ApplicationDisplayVersion>
+		<ApplicationVersion>53</ApplicationVersion>
+		<AndroidLinkResources>true</AndroidLinkResources>
 
 		<!--<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>-->
@@ -34,13 +34,17 @@
 		<!--<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>-->
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<PublishTrimmed>false</PublishTrimmed>
+	</PropertyGroup>
+	  
 	<ItemGroup>
 		<!-- App Icon -->
 		<!-- ForegroundFile="Resources\AppIcon\appiconfg.svg" -->
 		<MauiIcon Include="Resources\AppIcon\asseticon.svg" Color="#66ffff" ForegroundScale="0.55" />
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\splashimage.png" Color="#512BD4" BaseSize="384,384" />
+		<MauiSplashScreen Include="Resources\AppIcon\asseticon.svg" Color="#000000" BaseSize="384,384" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
@@ -82,6 +86,7 @@
 		<PackageReference Include="ExcelDataReader.DataSet" Version="3.6.0" />
 		<PackageReference Include="Microcharts.Maui" Version="1.0.1" />
 		<PackageReference Include="Plugin.Fingerprint" Version="2.1.5" />
+		<!--<PackageReference Include="Plugin.Maui.ZoomView" Version="9.0.3" />--> <!-- This package can be used to open image in app.-->
 		<PackageReference Include="SkiaSharp" Version="3.119.1" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="3.119.1" />
 		<PackageReference Include="SQLite" Version="3.13.0" />
@@ -151,7 +156,13 @@
 
 	<ItemGroup>
 		<Folder Include="Models\Api\Request\" />
+		<Folder Include="Resources\Splash\" />
 	</ItemGroup>
+	
+	<ItemGroup>
+		<TrimmerRootAssembly Include="Microsoft.Maui.Essentials" RootMode="All" />
+	</ItemGroup>
+
 
 	<PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Release'">
 		<AndroidKeyStore>True</AndroidKeyStore>
@@ -159,9 +170,13 @@
 		<AndroidSigningStorePass>benjoseph</AndroidSigningStorePass>
 		<AndroidSigningKeyAlias>MauiAlias</AndroidSigningKeyAlias>
 		<AndroidSigningKeyPass>benjoseph</AndroidSigningKeyPass>
+		<PublishTrimmed>true</PublishTrimmed>
+		<TrimMode>full</TrimMode>
+		<RunAOTCompilation>true</RunAOTCompilation>
+		<AndroidEnableProfiledAot>true</AndroidEnableProfiledAot>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android35.0|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-android36.0|AnyCPU'">
 		<AndroidLinkTool>r8</AndroidLinkTool>
 	</PropertyGroup>
 

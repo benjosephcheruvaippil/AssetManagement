@@ -42,7 +42,7 @@ public partial class IncomePage : ContentPage
     {
         if (_dbConnection == null)
         {
-            string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Assets.db3");
+            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "Assets.db3");
             _dbConnection = new SQLiteAsyncConnection(dbPath);
             await _dbConnection.CreateTableAsync<Assets>();
             await _dbConnection.CreateTableAsync<IncomeExpenseModel>();
@@ -135,10 +135,18 @@ public partial class IncomePage : ContentPage
             lblShowRemainingRecords.IsVisible = true;
             income = await _dbConnection.QueryAsync<IncomeExpenseModel>("select TransactionId,Amount,TaxAmountCut,CategoryName,OwnerName,Date,Remarks from IncomeExpenseModel where TransactionType=='Income' order by Date desc Limit 5");
 
-            if (income.Count == 0)
+            int totalIncomesCount = await _dbConnection.ExecuteScalarAsync<int>("select count(*) from IncomeExpenseModel where TransactionType=='Income'");
+
+            if (totalIncomesCount == 0)
             {
                 incomeCollectionView.IsVisible = false;
                 lblCardBanner.Text = "";
+                lblShowRemainingRecords.IsVisible = false;
+            }
+            else if (totalIncomesCount <= 5)
+            {
+                incomeCollectionView.IsVisible = true;
+                lblCardBanner.Text = "Last 5 Transactions";
                 lblShowRemainingRecords.IsVisible = false;
             }
             else
@@ -172,10 +180,11 @@ public partial class IncomePage : ContentPage
             }
             PageNumber = PageNumber + 1;
             int offset = (PageNumber - 1) * PageSize;
-            if (TotalIncomeRecordCount == 0)
-            {
-                TotalIncomeRecordCount = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Income").CountAsync();
-            }
+            //if (TotalIncomeRecordCount == 0)
+            //{
+            //    TotalIncomeRecordCount = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Income").CountAsync();
+            //}
+            TotalIncomeRecordCount = await _dbConnection.Table<IncomeExpenseModel>().Where(e => e.TransactionType == "Income").CountAsync();
             int showRecordCount = 0;
             if (offset == 0)
             {
